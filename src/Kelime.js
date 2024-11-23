@@ -79,11 +79,18 @@ const Kelime = () => {
             <View style={styles.cardContent}>
               <Text style={styles.cardText}>
                 {isFrontFlipped ? cards[currentCardIndex].back : cards[currentCardIndex].front}
-              </Text>
-              {/* Speaker Icon */}
-              <TouchableOpacity onPress={() => console.log('Speaker icon pressed')} style={styles.speakerIconWrapper}>
+                </Text>
+              {/* Dynamic Icon */}
+              <TouchableOpacity 
+                onPress={() => console.log(isFrontFlipped ? 'Speaker pressed' : 'Microphone pressed')} 
+                style={styles.speakerIconWrapper}
+              >
                 <Image
-                  source={require('../assets/icons/speaker.png')} // Add your speaker icon path here
+                  source={
+                    isFrontFlipped
+                      ? require('../assets/icons/speaker.png') // Speaker icon
+                      : require('../assets/icons/microphone-black-shape.png') // Microphone icon
+                  }
                   style={styles.speakerIcon}
                 />
               </TouchableOpacity>
