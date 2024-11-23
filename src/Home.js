@@ -20,7 +20,8 @@ const Home = ({ navigation }) => {
       style={styles.imageBackground}
     >
       {/* Welcome Text */}
-      <Text style={styles.welcomeText}>Hoşgeldin Beyza!</Text>
+      <Text style={styles.welcomeText}>Hoşgeldin</Text>
+      <Text style={styles.nameText}>Beyza!</Text>
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>Derslerin</Text>
@@ -127,10 +128,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   welcomeText: {
-    fontSize: 45,
+    fontSize: 50,
     fontWeight: "bold",
     color: "white",
     marginTop: 100,
+    marginLeft: 20,
+  },
+  nameText: {
+    fontSize: 50,
+    fontWeight: "bold",
+    color: "white",
     marginLeft: 20,
   },
   subtitle: {

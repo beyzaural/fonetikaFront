@@ -60,64 +60,58 @@ const Kelime = () => {
     outputRange: ['0deg', '180deg'], // Flip animation degrees
   });
 
-
   return (
-    <ImageBackground
-      source={require('../assets/images/back4.png')}
-      style={styles.imageBackground}
-    >
-      <View style={styles.container}>
-        {/* Flashcard */}
-        <Animated.View
-          style={[
-            styles.flashcard,
-            { transform: [{ rotateY: interpolateRotation }] },
-          ]}
-        >
-         <TouchableOpacity onPress={flipCard}>
-            <LinearGradient
-              colors={['#d6d5b3', '#FFFFFF']}
-              start={{ x: 3.8, y: 0 }}
-              end={{ x: 2.5, y: 1.6 }}
-              style={styles.cardGradient}
-            >
-              <View style={styles.cardContent}>
-        <Text style={styles.cardText}>
-          {isFrontFlipped ? cards[currentCardIndex].back : cards[currentCardIndex].front}
-        </Text>
-        {/* Speaker Icon */}
-        <TouchableOpacity onPress={() => console.log('Speaker icon pressed')} style={styles.speakerIconWrapper}>
-          <Image
-            source={require('../assets/icons/speaker.png')} // Add your speaker icon path here
-            style={styles.speakerIcon}
-          />
-        </TouchableOpacity>
-      </View>
-    </LinearGradient>
-  </TouchableOpacity>
-</Animated.View>
-
-        {/* Navigation Arrows */}
-        <View style={styles.arrowsContainer}>
-          <TouchableOpacity onPress={handlePrevious} disabled={currentCardIndex === 0}>
-            <Text style={[styles.arrow, currentCardIndex === 0 && styles.disabledArrow]}>
-              ←
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={handleNext}
-            disabled={currentCardIndex === cards.length - 1}
+    <View style={styles.container}>
+      {/* Flashcard */}
+      <Animated.View
+        style={[
+          styles.flashcard,
+          { transform: [{ rotateY: interpolateRotation }] },
+        ]}
+      >
+        <TouchableOpacity onPress={flipCard}>
+          <LinearGradient
+            colors={['#FFFFFF', '#FFFFFF']}
+            start={{ x: 3.8, y: 0 }}
+            end={{ x: 2.5, y: 1.6 }}
+            style={styles.cardGradient}
           >
-            <Text
-              style={[
-                styles.arrow,
-                currentCardIndex === cards.length - 1 && styles.disabledArrow,
-              ]}
-            >
-              →
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.cardContent}>
+              <Text style={styles.cardText}>
+                {isFrontFlipped ? cards[currentCardIndex].back : cards[currentCardIndex].front}
+              </Text>
+              {/* Speaker Icon */}
+              <TouchableOpacity onPress={() => console.log('Speaker icon pressed')} style={styles.speakerIconWrapper}>
+                <Image
+                  source={require('../assets/icons/speaker.png')} // Add your speaker icon path here
+                  style={styles.speakerIcon}
+                />
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Navigation Arrows */}
+      <View style={styles.arrowsContainer}>
+        <TouchableOpacity onPress={handlePrevious} disabled={currentCardIndex === 0}>
+          <Text style={[styles.arrow, currentCardIndex === 0 && styles.disabledArrow]}>
+            ←
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={handleNext}
+          disabled={currentCardIndex === cards.length - 1}
+        >
+          <Text
+            style={[
+              styles.arrow,
+              currentCardIndex === cards.length - 1 && styles.disabledArrow,
+            ]}
+          >
+            →
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Navigation Bar */}
@@ -141,9 +135,10 @@ const Kelime = () => {
           />
         </TouchableOpacity>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
+
   
   export default Kelime;
 
@@ -153,16 +148,13 @@ const Kelime = () => {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: '#f8f3f0', 
+       
       },
-      imageBackground: {
-        flex: 1, // Ensures the background image fills the screen
-        resizeMode: 'cover', // Ensures the image scales properly
-      },
-
+  
       flashcard: {
         width: '80%',
-        height: '70%',
-        backgroundColor: '#ffffff',
+        height: '65%',
         borderRadius: 10,
         //justifyContent: 'center',
         //alignItems: 'center',
@@ -178,14 +170,12 @@ const Kelime = () => {
         width: '100%',
         height: '100%',
         borderRadius: 10,
-        //justifyContent: 'center',
-        //alignItems: 'center',
       },
       cardContent: {
         marginTop: 60,
         alignItems: 'center',
         flex: 1,
-        padding: 10,
+        padding: 12,
       },
       cardText: {
         fontSize: 30,
@@ -193,7 +183,6 @@ const Kelime = () => {
         fontWeight: 'bold',
         color: '#333',
       },
-      
       speakerIconWrapper: {
         marginTop:120,
         marginLeft:50,
@@ -204,6 +193,8 @@ const Kelime = () => {
       speakerIcon: {
         width: 90, // Set your desired width
         height: 90, // Set your desired height
+        alignItems: 'center',
+        justifyContent:'center',
         //resizeMode: 'contain', // Keep the icon aspect ratio
       },
       arrowsContainer: {
@@ -220,6 +211,10 @@ const Kelime = () => {
         color: '#aaa', // Disabled arrow color
       },
       navBar: {
+        position: 'absolute', // Pin it to the bottom
+        bottom: 0,
+        left: 0,
+         width: '100%', // Full width
         height: 70,
         backgroundColor: '#FFFFFF',
         flexDirection: 'row',
