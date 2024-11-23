@@ -22,8 +22,8 @@ const Kelime = () => {
   const rotateValue = new Animated.Value(0); // Animation for flip effect
 
   const cards = [
-    { front: 'Word 1', back: 'Definition 1' },
-    { front: 'Word 2', back: 'Definition 2' },
+    { front: 'Ağabey', back: 'A:bi' },
+    { front: 'Ağır', back: 'A:ır' },
     { front: 'Word 3', back: 'Definition 3' },
   ];
 
@@ -77,18 +77,25 @@ const Kelime = () => {
          <TouchableOpacity onPress={flipCard}>
             <LinearGradient
               colors={['#d6d5b3', '#FFFFFF']}
-              start={{ x: 3.5, y: 0 }}
+              start={{ x: 3.8, y: 0 }}
               end={{ x: 2.5, y: 1.6 }}
               style={styles.cardGradient}
             >
               <View style={styles.cardContent}>
-                <Text style={styles.cardText}>
-                  {isFrontFlipped ? cards[currentCardIndex].back : cards[currentCardIndex].front}
-                </Text>
-              </View>
-            </LinearGradient>
-          </TouchableOpacity>
-        </Animated.View>
+        <Text style={styles.cardText}>
+          {isFrontFlipped ? cards[currentCardIndex].back : cards[currentCardIndex].front}
+        </Text>
+        {/* Speaker Icon */}
+        <TouchableOpacity onPress={() => console.log('Speaker icon pressed')} style={styles.speakerIconWrapper}>
+          <Image
+            source={require('../assets/icons/speaker.png')} // Add your speaker icon path here
+            style={styles.speakerIcon}
+          />
+        </TouchableOpacity>
+      </View>
+    </LinearGradient>
+  </TouchableOpacity>
+</Animated.View>
 
         {/* Navigation Arrows */}
         <View style={styles.arrowsContainer}>
@@ -154,7 +161,7 @@ const Kelime = () => {
 
       flashcard: {
         width: '80%',
-        height: '60%',
+        height: '70%',
         backgroundColor: '#ffffff',
         borderRadius: 10,
         //justifyContent: 'center',
@@ -175,18 +182,30 @@ const Kelime = () => {
         //alignItems: 'center',
       },
       cardContent: {
-        justifyContent: 'center',
+        marginTop: 60,
         alignItems: 'center',
         flex: 1,
         padding: 10,
       },
       cardText: {
-        fontSize: 22,
+        fontSize: 30,
+        alignItems: 'center',
         fontWeight: 'bold',
-        textAlign: 'center',
         color: '#333',
       },
       
+      speakerIconWrapper: {
+        marginTop:120,
+        marginLeft:50,
+        alignItems: 'center',
+        justifyContent:'center',
+        transform: [{ translateX: -25 }, { translateY: -25 }], // Adjust based on icon size
+      },
+      speakerIcon: {
+        width: 90, // Set your desired width
+        height: 90, // Set your desired height
+        //resizeMode: 'contain', // Keep the icon aspect ratio
+      },
       arrowsContainer: {
         flexDirection: 'row',
         marginTop: 30,
