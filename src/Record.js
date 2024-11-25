@@ -6,11 +6,20 @@ import {
   TouchableOpacity,
   Image,
 } from 'react-native';
+import { useFonts } from 'expo-font';
 import { useNavigation } from '@react-navigation/native';
 
 const Record = () => {
   const [isRecording, setIsRecording] = useState(false);
   const navigation = useNavigation(); // Use navigation to navigate between pages
+  const [fontsLoaded] = useFonts({
+    'Parkinsans-Medium': require('../assets/fonts/Parkinsans-Medium.ttf'),
+    'NotoSans-Regular': require('../assets/fonts/NotoSans-Regular.ttf'),
+    'SourGummy-Medium': require('../assets/fonts/SourGummy-Medium.ttf'),
+  });
+
+  // Turkish sentence with all 29 letters
+  const turkishSentence = 'Pijamalı hasta yağız şoföre çabucak güvendi.';
 
   const handlePressMicrophone = () => {
     if (isRecording) {
@@ -20,7 +29,7 @@ const Record = () => {
       // Navigate to Home.js after 2 seconds
       setTimeout(() => {
         navigation.navigate('Home');
-      }, 2000);
+      }, 300);
     } else {
       // Start "Recording"
       setIsRecording(true);
@@ -31,21 +40,21 @@ const Record = () => {
     <View style={styles.container}>
       {/* Top Container for Title and Instruction */}
       <View style={styles.topContainer}>
-        <Text style={styles.title}>Ses Analizi</Text>
-        <Text style={styles.instruction}>
-          {isRecording
-            ? 'Kayıt başladı... Durdurmak için tekrar basınız.'
-            : 'Kayıt için mikrofona basınız.'}
-        </Text>
+        <Text style={styles.sentenceText}>
+            {turkishSentence}
+          </Text>
+  
       </View>
+      
 
       {/* Centered Microphone Button */}
       <View style={styles.centerContainer}>
+    
         <TouchableOpacity
           onPress={handlePressMicrophone}
           style={[
             styles.microphoneButton,
-            { backgroundColor: isRecording ? '#D6D5B3' : '#CD83A8' },
+            { backgroundColor: isRecording ? '#D6D5B3' : 'black' },
           ]}
         >
           <Image
@@ -53,12 +62,18 @@ const Record = () => {
             style={styles.microphoneIcon}
           />
         </TouchableOpacity>
+        <Text style={styles.instruction}>
+          {isRecording
+            ? 'Kayıt başladı... Durdurmak için tekrar basınız.'
+            : 'Kayıt için mikrofona basınız.'}
+        </Text>
+
       </View>
 
       {/* Footer Disclaimer */}
       <View style={styles.footerContainer}>
         <Text style={styles.disclaimer}>
-          Uygulamamız KVKK yasalarına uygun şekilde tasarlanmıştır. Kişisel verilerininizi korur, paylaşmaz
+          Uygulamamız KVKK yasalarına uygun şekilde tasarlanmıştır. Kişisel verilerininizi korur, paylaşmaz.
         </Text>
       </View>
     </View>
@@ -71,27 +86,40 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f8f3f0',
-    paddingVertical: 60, // Add some padding at the top and bottom
+    paddingVertical: 20, // Add some padding at the top and bottom
   },
   topContainer: {
     alignItems: 'center',
+  },
+  sentenceText: {
+    fontSize: 26,
+    color: 'black',
+    textAlign: 'center',
+    marginTop:50,
+    fontFamily: 'Parkinsans-Medium',
+    fontWeight:'200',
+    //position: 'absolute',
   },
   title: {
     fontSize: 30,
     fontWeight: 'bold',
     color: '#333',
   },
+
+  centerContainer: {
+    //justifyContent: 'center',
+    top:'15%',
+    alignItems: 'center',
+    flex: 1, // Ensure the button is properly centered
+    //marginTop:40,
+  },
   instruction: {
-    marginTop: 20,
+    marginTop: 30,
     fontSize: 16,
     color: '#555',
     textAlign: 'center',
   },
-  centerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flex: 1, // Ensure the button is properly centered
-  },
+
   microphoneButton: {
     width: 180,
     height: 180,
