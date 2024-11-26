@@ -146,7 +146,7 @@ const Kelime = () => {
   );
 };
 
-  
+ 
   export default Kelime;
 
 

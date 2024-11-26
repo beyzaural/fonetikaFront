@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
     marginTop:50,
     fontFamily: 'Parkinsans-Medium',
     fontWeight:'200',
+    paddingHorizontal:'20'
     //position: 'absolute',
   },
   title: {
