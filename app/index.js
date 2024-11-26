@@ -8,13 +8,14 @@ import Kelime from "../src/Kelime";
 import Record from "../src/Record";
 import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
+import Merhaba from "../src/Merhaba";
 
 const Stack = createStackNavigator();
 
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Fonetika">
+      <Stack.Navigator initialRouteName="Merhaba">
         <Stack.Screen 
           name="Login" 
           component={Login} 
@@ -38,6 +39,11 @@ export default function Index() {
         <Stack.Screen 
           name="Fonetika" 
           component={Fonetika} 
+          options={{ headerShown: false }} // Hide header for Fonetika
+        />
+         <Stack.Screen 
+          name="Merhaba" 
+          component={Merhaba} 
           options={{ headerShown: false }} // Hide header for Fonetika
         />
       </Stack.Navigator>

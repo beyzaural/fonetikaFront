@@ -31,7 +31,7 @@ import {
     // Fade-in animation
     Animated.timing(fadeAnim, {
       toValue: 1, // Fully visible
-      duration: 2000, // 1 second fade-in duration
+      duration: 1500, // 1 second fade-in duration
       useNativeDriver: true, // Optimize animation
     }).start();
 

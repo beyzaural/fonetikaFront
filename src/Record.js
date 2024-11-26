@@ -43,7 +43,6 @@ const Record = () => {
         <Text style={styles.sentenceText}>
             {turkishSentence}
           </Text>
-  
       </View>
       
 
