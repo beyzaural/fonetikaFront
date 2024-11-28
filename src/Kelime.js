@@ -1,241 +1,174 @@
-import { 
-    StyleSheet, 
-    Text, 
-    View, // Add View here
-    TextInput,
-    ImageBackground,
-    Image,
-    Pressable, 
-    ScrollView,
-    TouchableOpacity,
-    Animated,
-  } from 'react-native';
-  
-  import React, { useState } from 'react';
-  import { LinearGradient } from 'expo-linear-gradient';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  Animated,
+  Modal,
+} from "react-native";
+import React, { useState } from "react";
+import { FontAwesome } from '@expo/vector-icons';
 
-    
-const Kelime = () => {
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isFrontFlipped, setIsFrontFlipped] = useState(false);
-  const [isBackFlipped, setIsBackFlipped] = useState(false);
-  const rotateValue = new Animated.Value(0); // Animation for flip effect
+const PracticeWords = () => {
+  const [isSpeaking, setIsSpeaking] = useState(false); // Speaking state
+  const [showFeedback, setShowFeedback] = useState(false); // Feedback visibility
+  const [definition, setDefinition] = useState(""); // Word definition
 
-  const cards = [
-    { front: 'Ağabey', back: 'A:bi' },
-    { front: 'Ağır', back: 'A:ır' },
-    { front: 'Word 3', back: 'Definition 3' },
-  ];
+  const word = "Ağabey"; // Example word
+  const wordDefinition = "A:bi"; // Example definition
 
-  const flipCard = () => {
-    Animated.timing(rotateValue, {
-      toValue: isFrontFlipped ? 0 : 1, // Flip to back or front
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-      setIsFrontFlipped(!isFrontFlipped);
-    });
-  };
-
-  const handleNext = () => {
-    if (currentCardIndex < cards.length - 1) {
-      setCurrentCardIndex(currentCardIndex + 1);
-     resetFlip() // Reset flip state
+  const handleMicrophonePress = () => {
+    if (isSpeaking) {
+      // When speaking ends
+      setShowFeedback(true);
+      setDefinition(wordDefinition); // Show the word's definition
+    } else {
+      // When speaking starts
+      setShowFeedback(false);
     }
+    setIsSpeaking(!isSpeaking);
   };
-
-  const handlePrevious = () => {
-    if (currentCardIndex > 0) {
-      setCurrentCardIndex(currentCardIndex - 1);
-      resetFlip() // Reset flip state
-    }
-  };
-  const resetFlip = () => {
-    setIsFrontFlipped(false); // Reset flip state
-    rotateValue.setValue(0); // Reset animation to initial value
-  };
-
-  const interpolateRotation = rotateValue.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'], // Flip animation degrees
-  });
 
   return (
     <View style={styles.container}>
-      {/* Flashcard */}
-      <Animated.View
-        style={[
-          styles.flashcard,
-          { transform: [{ rotateY: interpolateRotation }] },
-        ]}
-      >
-        <TouchableOpacity onPress={flipCard}>
-          <LinearGradient
-            colors={['#FFFFFF', '#FFFFFF']}
-            start={{ x: 3.8, y: 0 }}
-            end={{ x: 2.5, y: 1.6 }}
-            style={styles.cardGradient}
-          >
-            <View style={styles.cardContent}>
-              <Text style={styles.cardText}>
-                {isFrontFlipped ? cards[currentCardIndex].back : cards[currentCardIndex].front}
-                </Text>
-              {/* Dynamic Icon */}
-              <TouchableOpacity 
-                onPress={() => console.log(isFrontFlipped ? 'Speaker pressed' : 'Microphone pressed')} 
-                style={styles.speakerIconWrapper}
-              >
-                <Image
-                  source={
-                    isFrontFlipped
-                      ? require('../assets/icons/speaker.png') // Speaker icon
-                      : require('../assets/icons/microphone-black-shape.png') // Microphone icon
-                  }
-                  style={styles.speakerIcon}
-                />
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        </TouchableOpacity>
-      </Animated.View>
+      {/* Top Container */}
+      <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
+      <View style={styles.topContainer}>
+        <Text style={styles.wordText}>{word}</Text>
+      </View>
 
-      {/* Navigation Arrows */}
-      <View style={styles.arrowsContainer}>
-        <TouchableOpacity onPress={handlePrevious} disabled={currentCardIndex === 0}>
-          <Text style={[styles.arrow, currentCardIndex === 0 && styles.disabledArrow]}>
-            ←
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={handleNext}
-          disabled={currentCardIndex === cards.length - 1}
-        >
-          <Text
+      <View style={styles.microphoneContainer}>
+        <TouchableOpacity onPress={handleMicrophonePress}>
+          <View
             style={[
-              styles.arrow,
-              currentCardIndex === cards.length - 1 && styles.disabledArrow,
+              styles.microphoneWrapper,
+              isSpeaking && styles.speakingMicrophoneWrapper,
             ]}
           >
-            →
-          </Text>
+            <FontAwesome
+              name="microphone"
+              size={90}
+              color="white" // Dynamic color
+            />
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* Navigation Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={require('../assets/icons/profile.png')} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={require('../assets/icons/settings.png')} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image 
-            source={require('../assets/icons/fitness.png')} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-      </View>
+      {/* Feedback Popup */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showFeedback}
+        onRequestClose={() => setShowFeedback(false)}
+      >
+        <View style={styles.feedbackContainer}>
+          <View style={styles.feedbackContent}>
+            <Text style={styles.feedbackTitle}>Kelime Okunuşu</Text>
+            <Text style={styles.feedbackText}>{definition}</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowFeedback(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
 
- 
-  export default Kelime;
+export default PracticeWords;
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  okuText: {
+    marginTop:35,
+    marginBottom: 10,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#555",
+  },
+  topContainer: {
+    margin:20,
+    backgroundColor: "#ececec", // Light gray background
+    height: "25%", // Adjust height as needed
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius:25,
+  },
+  wordText: {
+    fontSize: 40,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  microphoneWrapper: {
+    backgroundColor: "black",
+    width: 150,
+    height: 150,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 10, // Shadow for Android
+  },
+  speakingMicrophoneWrapper: {
+    backgroundColor: "#c91923",
+  },
+  microphoneContainer: {
+    //flex: 1,
+    //justifyContent: "center",
+    marginTop:100,
+    alignItems: "center",
+  },
+  microphoneIcon: {
+    width: 100, // Adjust size as needed
+    height: 100,
+    tintColor: "white", // Icon color
 
-    const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8f3f0', 
-       
-      },
-  
-      flashcard: {
-        width: '80%',
-        height: '65%',
-        borderRadius: 10,
-        //justifyContent: 'center',
-        //alignItems: 'center',
-        backfaceVisibility: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2},
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 8, // Shadow for Android
-        
-      },
-      cardGradient: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 10,
-      },
-      cardContent: {
-        marginTop: 60,
-        alignItems: 'center',
-        flex: 1,
-        padding: 12,
-      },
-      cardText: {
-        fontSize: 30,
-        alignItems: 'center',
-        fontWeight: 'bold',
-        color: '#333',
-      },
-      speakerIconWrapper: {
-        marginTop:120,
-        marginLeft:50,
-        alignItems: 'center',
-        justifyContent:'center',
-        transform: [{ translateX: -25 }, { translateY: -25 }], // Adjust based on icon size
-      },
-      speakerIcon: {
-        width: 90, // Set your desired width
-        height: 90, // Set your desired height
-        alignItems: 'center',
-        justifyContent:'center',
-        //resizeMode: 'contain', // Keep the icon aspect ratio
-      },
-      arrowsContainer: {
-        flexDirection: 'row',
-        marginTop: 30,
-        justifyContent: 'space-between',
-        width: '80%',
-      },
-      arrow: {
-        fontSize: 50,
-        color: '#333',
-      },
-      disabledArrow: {
-        color: '#aaa', // Disabled arrow color
-      },
-      navBar: {
-        position: 'absolute', // Pin it to the bottom
-        bottom: 0,
-        left: 0,
-         width: '100%', // Full width
-        height: 70,
-        backgroundColor: '#FFFFFF',
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-      },
-      navItem: {
-        alignItems: 'center',
-      },
-      navIcon: {
-        width: 30,
-        height: 30,
-        marginBottom: 5,
-      },
-
-    });
-    
+  },
+  feedbackContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+  },
+  feedbackContent: {
+    height: "50%", // Half of the screen
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  feedbackText: {
+    fontSize: 18,
+    color: "black",
+    textAlign: "center",
+  },
+  closeButton: {
+    marginTop: 20,
+    backgroundColor: "black",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});

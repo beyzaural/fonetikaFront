@@ -53,7 +53,7 @@ const Record = () => {
           onPress={handlePressMicrophone}
           style={[
             styles.microphoneButton,
-            { backgroundColor: isRecording ? '#D6D5B3' : 'black' },
+            { backgroundColor: isRecording ? '#C91923' : 'black' },
           ]}
         >
           <Image
@@ -84,7 +84,7 @@ export default Record;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f3f0',
+    backgroundColor: 'white',
     paddingVertical: 20, // Add some padding at the top and bottom
   },
   topContainer: {

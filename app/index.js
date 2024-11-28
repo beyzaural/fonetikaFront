@@ -9,16 +9,22 @@ import Record from "../src/Record";
 import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
 import Merhaba from "../src/Merhaba";
+import Register from "../src/Register";
 
 const Stack = createStackNavigator();
 
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Merhaba">
+      <Stack.Navigator initialRouteName="Fonetika">
         <Stack.Screen 
           name="Login" 
           component={Login} 
+          options={{ headerShown: false }} // Hide header for Login
+        />
+        <Stack.Screen 
+          name="Register" 
+          component={Register} 
           options={{ headerShown: false }} // Hide header for Login
         />
         <Stack.Screen 

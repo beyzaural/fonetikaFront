@@ -37,7 +37,7 @@ import {
 
     // Navigate to Record.js after 1 second
     const timer = setTimeout(() => {
-      navigation.navigate('Record');
+      navigation.navigate('Register');
     }, 2000);
 
     // Cleanup timer on component unmount

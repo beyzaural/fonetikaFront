@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
       },
       topImage: {
         marginTop:50,
-        width: 580, // Adjust the image width
-        height: 400, // Adjust the image height
+        width: 700, // Adjust the image width
+        height: 500, // Adjust the image height
         //resizeMode: 'contain', // Ensure the image scales properly
       },
     bottomContainer: {
@@ -63,17 +63,13 @@ const styles = StyleSheet.create({
         //paddingVertical: 20, // Add some padding at the top and bottom
       },
       whiteBox: {
-        width: '100%', // Width of the white box
+        width: '99%', // Width of the white box
         height: 350, // Height of the white box
         backgroundColor: '#ffffff', // White color for the box
-        borderRadius: 17, // Rounded corners for the box
+        borderRadius: 40, // Rounded corners for the box
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#000', // Shadow for the box
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 4,
-        elevation: 5, // Elevation for Android shadow
+      
       },
 
 

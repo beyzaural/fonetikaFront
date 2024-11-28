@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 const Home = ({ navigation }) => {
   return (
     <ImageBackground
-      source={require("../assets/images/back4.png")} // Reference your image here
+      source={require("../assets/images/red.png")} // Reference your image here
       style={styles.imageBackground}
     >
       {/* Welcome Text */}
