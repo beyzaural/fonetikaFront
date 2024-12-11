@@ -3,145 +3,181 @@ import {
   Text,
   View,
   Image,
+  ImageBackground,
   TouchableOpacity,
-  Animated,
   Modal,
 } from "react-native";
 import React, { useState } from "react";
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome } from "@expo/vector-icons";
 
-const PracticeWords = () => {
-  const [isSpeaking, setIsSpeaking] = useState(false); // Speaking state
-  const [showFeedback, setShowFeedback] = useState(false); // Feedback visibility
-  const [definition, setDefinition] = useState(""); // Word definition
+const Kelime = ({ navigation }) => {
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [definition, setDefinition] = useState("");
 
-  const word = "Ağabey"; // Example word
-  const wordDefinition = "A:bi"; // Example definition
+  const word = "Ağabey";
+  const wordDefinition = "A:bi";
 
   const handleMicrophonePress = () => {
     if (isSpeaking) {
-      // When speaking ends
       setShowFeedback(true);
-      setDefinition(wordDefinition); // Show the word's definition
+      setDefinition(wordDefinition);
     } else {
-      // When speaking starts
       setShowFeedback(false);
     }
     setIsSpeaking(!isSpeaking);
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top Container */}
-      <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
-      <View style={styles.topContainer}>
-        <Text style={styles.wordText}>{word}</Text>
-      </View>
-
-      <View style={styles.microphoneContainer}>
-        <TouchableOpacity onPress={handleMicrophonePress}>
-          <View
-            style={[
-              styles.microphoneWrapper,
-              isSpeaking && styles.speakingMicrophoneWrapper,
-            ]}
-          >
-            <FontAwesome
-              name="microphone"
-              size={90}
-              color="white" // Dynamic color
-            />
-          </View>
+    <ImageBackground
+      source={require("../assets/images/kelime_back.png")} // Replace with your background image path
+      style={styles.imageBackground}
+    >
+      <View style={styles.container}>
+        {/* Back Arrow */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-      </View>
 
-      {/* Feedback Popup */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showFeedback}
-        onRequestClose={() => setShowFeedback(false)}
-      >
-        <View style={styles.feedbackContainer}>
-          <View style={styles.feedbackContent}>
-            <Text style={styles.feedbackTitle}>Kelime Okunuşu</Text>
-            <Text style={styles.feedbackText}>{definition}</Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowFeedback(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
+        {/* Top Container */}
+        <View style={styles.topContainer}>
+          <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
+
+          <View style={styles.wordContainer}>
+            <Text style={styles.wordText}>{word}</Text>
+            <Text style={styles.phoneticText}>{wordDefinition}</Text>
           </View>
         </View>
-      </Modal>
-    </View>
+
+        {/* Bottom Container */}
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity onPress={handleMicrophonePress}>
+            <FontAwesome name="microphone" size={90} color="#880000" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Feedback Popup */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showFeedback}
+          onRequestClose={() => setShowFeedback(false)}
+        >
+          <View style={styles.feedbackContainer}>
+            <View style={styles.feedbackContent}>
+              <Text style={styles.feedbackTitle}>Kelime Okunuşu</Text>
+              <Text style={styles.feedbackText}>{definition}</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowFeedback(false)}
+              >
+                <Text style={styles.closeButtonText}>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Navigation Bar */}
+        <View style={styles.navBar}>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/profile.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/settings.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/fitness.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
   );
 };
 
-export default PracticeWords;
+export default Kelime;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+  },
+  imageBackground: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  backButton: {
+    position: "absolute",
+    top: 20,
+    left: 10,
+    zIndex: 10,
+  },
+  backIcon: {
+    width: 50,
+    height: 50,
+  },
+  topContainer: {
+    backgroundColor: "transparent",
+    height: "70%",
+    justifyContent: "center",
+    alignItems: "center",
   },
   okuText: {
-    marginTop:35,
+    marginTop: 40,
     marginBottom: 10,
     textAlign: "center",
     fontSize: 18,
     fontWeight: "bold",
-    color: "#555",
+    color: "black",
   },
-  topContainer: {
-    margin:20,
-    backgroundColor: "#ececec", // Light gray background
-    height: "25%", // Adjust height as needed
+  wordContainer: {
+    backgroundColor: "#880000",
+    width: "80%",
+    height: "75%",
     justifyContent: "center",
     alignItems: "center",
-    borderRadius:25,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 6,
   },
   wordText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "#333",
+    color: "white",
   },
-  microphoneWrapper: {
-    backgroundColor: "black",
-    width: 150,
-    height: 150,
-    borderRadius: 100,
+  phoneticText: {
+    fontSize: 20,
+    color: "white",
+    marginTop: 10,
+  },
+  bottomContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 10, // Shadow for Android
-  },
-  speakingMicrophoneWrapper: {
-    backgroundColor: "#c91923",
-  },
-  microphoneContainer: {
-    //flex: 1,
-    //justifyContent: "center",
-    marginTop:100,
-    alignItems: "center",
-  },
-  microphoneIcon: {
-    width: 100, // Adjust size as needed
-    height: 100,
-    tintColor: "white", // Icon color
-
   },
   feedbackContainer: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.5)", // Semi-transparent background
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   feedbackContent: {
-    height: "50%", // Half of the screen
+    height: "45%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -170,5 +206,19 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  navBar: {
+    height: 70,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  navItem: {
+    alignItems: "center",
+  },
+  navIcon: {
+    width: 30,
+    height: 30,
   },
 });

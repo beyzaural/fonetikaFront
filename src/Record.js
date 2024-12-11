@@ -53,7 +53,7 @@ const Record = () => {
           onPress={handlePressMicrophone}
           style={[
             styles.microphoneButton,
-            { backgroundColor: isRecording ? '#C91923' : 'black' },
+            { backgroundColor: isRecording ? '#880000' : 'black' },
           ]}
         >
           <Image

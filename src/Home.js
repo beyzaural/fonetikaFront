@@ -79,7 +79,9 @@ const Home = ({ navigation }) => {
               <Text style={styles.cardSubText}>%60 tamamlandı</Text>
             </LinearGradient>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.card}>
+          <TouchableOpacity style={styles.card}
+          onPress={() => navigation.navigate("Paragraf")} // Navigate to Paragraf.js
+          >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
               start={{ x: 4, y: 0 }}
@@ -111,12 +113,13 @@ const Home = ({ navigation }) => {
             style={styles.navIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image
-            source={require("../assets/icons/fitness.png")} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
+  <Image
+    source={require("../assets/icons/fitness.png")} // Your fitness icon
+    style={styles.navIcon}
+  />
+</TouchableOpacity>
+
       </View>
     </ImageBackground>
   );

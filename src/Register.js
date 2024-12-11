@@ -23,7 +23,7 @@ import {
         {/* Input Fields */}
         <View style={styles.formContainer}>
           <View style={styles.inputContainer}>
-            <Text style={styles.labelText}>Ad</Text>
+            <Text style={styles.labelText}>  Ad   </Text>
             <TextInput
               placeholder="Adınızı giriniz"
               style={styles.textInputStyle}
@@ -34,7 +34,7 @@ import {
           </View>
   
           <View style={styles.inputContainer}>
-            <Text style={styles.labelText}>Soyad</Text>
+            <Text style={styles.labelText}>  Soyad   </Text>
             <TextInput
               placeholder="Soyadınızı giriniz"
               style={styles.textInputStyle}
@@ -45,7 +45,7 @@ import {
           </View>
   
           <View style={styles.inputContainer}>
-            <Text style={styles.labelText}>Email</Text>
+            <Text style={styles.labelText}>  Email   </Text>
             <TextInput
               placeholder="Email adresinizi giriniz"
               style={styles.textInputStyle}
@@ -56,7 +56,7 @@ import {
           </View>
   
           <View style={styles.inputContainer}>
-            <Text style={styles.labelText}>Şifre</Text>
+            <Text style={styles.labelText}>  Şifre   </Text>
             <TextInput
               placeholder="Şifrenizi giriniz"
               style={styles.textInputStyle}
@@ -68,7 +68,7 @@ import {
           </View>
   
           <View style={styles.genderContainer}>
-            <Text style={styles.labelText}>Cinsiyet</Text>
+            <Text style={styles.labelText}>  Cinsiyet</Text>
             <View style={styles.genderButtons}>
               {/* Erkek Button */}
               <TouchableOpacity
@@ -92,9 +92,9 @@ import {
               <TouchableOpacity
                 style={[
                   styles.genderButton,
-                  gender === "Kız" && styles.selectedGenderButton,
+                  gender === "Kadın" && styles.selectedGenderButton,
                 ]}
-                onPress={() => setGender("Kız")}
+                onPress={() => setGender("Kadın")}
               >
                 <Text
                   style={[
@@ -102,7 +102,7 @@ import {
                     gender === "Kadın" && styles.selectedGenderButtonText,
                   ]}
                 >
-                  Kız
+                  Kadın
                 </Text>
               </TouchableOpacity>
             </View>

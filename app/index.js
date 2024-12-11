@@ -10,6 +10,8 @@ import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
 import Merhaba from "../src/Merhaba";
 import Register from "../src/Register";
+import Paragraf from "../src/Paragraf";
+import Dersler from "../src/Dersler";
 
 const Stack = createStackNavigator();
 
@@ -51,6 +53,16 @@ export default function Index() {
           name="Merhaba" 
           component={Merhaba} 
           options={{ headerShown: false }} // Hide header for Fonetika
+        />
+         <Stack.Screen 
+          name="Paragraf" 
+          component={Paragraf} 
+          options={{ headerShown: false }} // Hide header for Fonetika
+        />
+         <Stack.Screen 
+          name="Dersler" 
+          component={Dersler} 
+          options={{ headerShown: false }} // Hide header for Home
         />
       </Stack.Navigator>
     </NavigationContainer>
