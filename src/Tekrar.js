@@ -3,26 +3,21 @@ import {
   StyleSheet,
   Text,
   View,
-  ImageBackground,
   TouchableOpacity,
   ScrollView,
   Image,
 } from "react-native";
 
-const Dersler = ({ navigation }) => {
+const Tekrar = ({ navigation }) => {
   const vowelModules = [
-    { title: "A Harfi", difficulty: "Kolay", image: require("../assets/images/1.png") },
-    { title: "E Harfi", difficulty: "Orta", image: require("../assets/images/2.png") },
-    { title: "I Harfi", difficulty: "Zor", image: require("../assets/images/3.png") },
-    { title: "İ Harfi", difficulty: "Kolay", image: require("../assets/images/4.png") },
-    { title: "O/Ö Harfi", difficulty: "Orta", image: require("../assets/images/5.png") },
+    { title: "A Harfi", difficulty: "Tekrar Et", image: require("../assets/images/1.png"), navigateTo: "Atekrar" },
+    { title: "E Harfi", difficulty: "Tekrar Et", image: require("../assets/images/2.png") },
+    { title: "I Harfi", difficulty: "Tekrar Et", image: require("../assets/images/3.png") },
+    { title: "İ Harfi", difficulty: "Tekrar Et", image: require("../assets/images/4.png") },
   ];
 
   return (
-    <ImageBackground
-      source={require("../assets/images/ders_back.png")}
-      style={styles.imageBackground}
-    >
+    <View style={styles.container}>
       {/* Back Arrow */}
       <TouchableOpacity
         style={styles.backButton}
@@ -35,11 +30,19 @@ const Dersler = ({ navigation }) => {
       </TouchableOpacity>
 
       <View style={styles.bottomContainer}>
-        <Text style={styles.title}>Dersler</Text>
+        <Text style={styles.title}>Hataların:</Text>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {vowelModules.map((module, index) => (
-            <TouchableOpacity key={index} style={styles.card}>
+            <TouchableOpacity
+              key={index}
+              style={styles.card}
+              onPress={() => {
+                if (module.navigateTo) {
+                  navigation.navigate(module.navigateTo);
+                }
+              }}
+            >
               <View style={styles.cardContent}>
                 <Image source={module.image} style={styles.cardImage} />
                 <View>
@@ -51,18 +54,30 @@ const Dersler = ({ navigation }) => {
           ))}
         </ScrollView>
       </View>
-    </ImageBackground>
+
+      {/* Navigation Bar */}
+      <View style={styles.navBar}>
+        <TouchableOpacity style={styles.navItem}>
+          <Image source={require("../assets/icons/profile.png")} style={styles.navIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.navItem}>
+          <Image source={require("../assets/icons/settings.png")} style={styles.navIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
+          <Image source={require("../assets/icons/fitness.png")} style={styles.navIcon} />
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
-export default Dersler;
+export default Tekrar;
 
 const styles = StyleSheet.create({
-  imageBackground: {
+  container: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "flex-end",
-    paddingTop: 50, // For safe area padding
+    backgroundColor: "white", // Set background color to white
+    //paddingTop: 50, // Add padding for safe area (status bar)
   },
   backButton: {
     position: "absolute",
@@ -78,18 +93,18 @@ const styles = StyleSheet.create({
     height: 40,
   },
   bottomContainer: {
-    height: "70%",
+    height: "100%",
     backgroundColor: "white",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
-    paddingVertical: 20,
+    //paddingVertical: 20,
     paddingHorizontal: 15,
   },
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    marginTop: 20,
-    marginLeft: 20,
+    marginTop: 30,
+    marginLeft: 60,
     color: "#333",
   },
   scrollContainer: {
@@ -130,5 +145,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#555",
     marginTop: 5,
+  },
+  navBar: {
+    height: 70,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+  },
+  navItem: {
+    alignItems: "center",
+  },
+  navIcon: {
+    width: 30,
+    height: 30,
   },
 });

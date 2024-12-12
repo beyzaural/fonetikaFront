@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
       flex: 1,
       //7justifyContent: 'center', // Centers vertically
       alignItems: 'center',    // Centers horizontally
-      backgroundColor: '#f8f3f0', // Sets the background color to white
+      backgroundColor: 'white', // Sets the background color to white
     },
     title: {
         top: '44%',

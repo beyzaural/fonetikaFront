@@ -10,17 +10,16 @@ import {
 import React, { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
 
-const Kelime = ({ navigation }) => {
+const Atekrar = ({ navigation }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [definition, setDefinition] = useState("");
 
   // List of words and definitions
   const words = [
-    { word: "Kamuflaj", definition: "Kamuflâj" },
     { word: "Ağabey", definition: "A:bi" },
-    { word: "Sahi", definition: "sa:hi" },
-    { word: "Şiir", definition: "şi:r" },
+    { word: "Alet", definition: "a:lét" },
+    { word: "Ameliyathane", definition: "améliyatha:né" },
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -56,7 +55,7 @@ const Kelime = ({ navigation }) => {
         {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => navigation.navigate("Tekrar")}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -137,7 +136,7 @@ const Kelime = ({ navigation }) => {
   );
 };
 
-export default Kelime;
+export default Atekrar;
 
 const styles = StyleSheet.create({
   container: {
@@ -267,4 +266,5 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+
 });

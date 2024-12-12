@@ -64,21 +64,24 @@ const Home = ({ navigation }) => {
             </LinearGradient>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.card}>
-            <LinearGradient
-              colors={["#d6d5b3", "#FFFFFF"]}
-              start={{ x: 4, y: 0 }}
-              end={{ x: 0, y: 0.2 }}
-              style={styles.cardGradient}
-            >
-              <Image
-                source={require("../assets/icons/update-arrow.png")} // Reference the chat icon here
-                style={styles.chatIcon}
-              />
-              <Text style={styles.cardText}>Geçmiş</Text>
-              <Text style={styles.cardSubText}>%60 tamamlandı</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <TouchableOpacity
+  style={styles.card}
+  onPress={() => navigation.navigate("Tekrar")} // Navigate to Tekrar.js
+>
+  <LinearGradient
+    colors={["#d6d5b3", "#FFFFFF"]}
+    start={{ x: 4, y: 0 }}
+    end={{ x: 0, y: 0.2 }}
+    style={styles.cardGradient}
+  >
+    <Image
+      source={require("../assets/icons/update-arrow.png")}
+      style={styles.chatIcon}
+    />
+    <Text style={styles.cardText}>Geçmiş</Text>
+    <Text style={styles.cardSubText}>%60 tamamlandı</Text>
+  </LinearGradient>
+</TouchableOpacity>
           <TouchableOpacity style={styles.card}
           onPress={() => navigation.navigate("Paragraf")} // Navigate to Paragraf.js
           >

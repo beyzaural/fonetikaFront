@@ -12,6 +12,8 @@ import Merhaba from "../src/Merhaba";
 import Register from "../src/Register";
 import Paragraf from "../src/Paragraf";
 import Dersler from "../src/Dersler";
+import Tekrar from "../src/Tekrar";
+import Atekrar from "../src/Atekrar";
 
 const Stack = createStackNavigator();
 
@@ -62,6 +64,16 @@ export default function Index() {
          <Stack.Screen 
           name="Dersler" 
           component={Dersler} 
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen 
+          name="Tekrar" 
+          component={Tekrar} 
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen 
+          name="Atekrar" 
+          component={Atekrar} 
           options={{ headerShown: false }} // Hide header for Home
         />
       </Stack.Navigator>
