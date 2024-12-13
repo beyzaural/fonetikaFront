@@ -9,11 +9,14 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
+import { Audio } from "expo-av"; // Import Audio from expo-av
 
 const Kelime = ({ navigation }) => {
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [definition, setDefinition] = useState("");
+  const [isRecording, setIsRecording] = useState(false); // Track if recording is in progress
+  const [recording, setRecording] = useState(null); // Store the Recording object
+  const [audioUri, setAudioUri] = useState(null); // Store the URI of the saved audio file
+  const [showFeedback, setShowFeedback] = useState(false); // Show feedback modal
+  const [definition, setDefinition] = useState(""); // Phonetic feedback
 
   // List of words and definitions
   const words = [
@@ -25,26 +28,72 @@ const Kelime = ({ navigation }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const handleMicrophonePress = () => {
-    if (isSpeaking) {
-      setShowFeedback(true);
-      setDefinition(words[currentIndex].definition);
+  // Handle microphone press (start/stop recording)
+  const handleMicrophonePress = async () => {
+    if (recording) {
+      // Stop recording
+      try {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI(); // Get URI of the recorded audio
+        console.log("Recording saved at:", uri);
+        setAudioUri(uri); // Save URI for further processing or playback
+        setRecording(null); // Clear the recording object
+        setIsRecording(false);
+        setShowFeedback(true); // Show feedback after recording stops
+        setDefinition(words[currentIndex].definition); // Show phonetic definition
+      } catch (error) {
+        console.error("Error stopping recording:", error);
+      }
     } else {
-      setShowFeedback(false);
+      // Start recording
+      try {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+          alert("Microphone permission is required to record audio.");
+          return;
+        }
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY // Use high-quality audio settings
+        );
+        setRecording(recording); // Save the recording object
+        setIsRecording(true); // Indicate that recording is in progress
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+      }
     }
-    setIsSpeaking(!isSpeaking);
+  };
+
+  // Play the recorded audio
+  const playAudio = async () => {
+    if (!audioUri) {
+      alert("Henüz bir kayıt yapılmadı!");
+      return;
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
   };
 
   const handleNextWord = () => {
     setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
     setShowFeedback(false);
-    setIsSpeaking(false);
+    setIsRecording(false);
   };
 
   const handlePreviousWord = () => {
     setCurrentIndex((prevIndex) => (prevIndex - 1 + words.length) % words.length);
     setShowFeedback(false);
-    setIsSpeaking(false);
+    setIsRecording(false);
   };
 
   return (
@@ -77,7 +126,14 @@ const Kelime = ({ navigation }) => {
         {/* Bottom Container */}
         <View style={styles.bottomContainer}>
           <TouchableOpacity onPress={handleMicrophonePress}>
-            <FontAwesome name="microphone" size={90} color="#880000" />
+            <FontAwesome
+              name="microphone"
+              size={90}
+              color={isRecording ? "red" : "#880000"} // Change color based on recording state
+            />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+            <Text style={styles.listenButtonText}>Dinle</Text>
           </TouchableOpacity>
         </View>
 
@@ -198,6 +254,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  listenButton: {
+    marginTop: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: "#880000",
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  listenButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   prevButton: {
     position: "absolute",
