@@ -29,7 +29,8 @@ const Home = ({ navigation }) => {
       {/* Cards Container */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.cardsContainer}>
-          <TouchableOpacity style={styles.card}>
+          <TouchableOpacity style={styles.card}
+          onPress={() => navigation.navigate("Sohbet")}>
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
               start={{ x: 4, y: 0 }}

@@ -14,7 +14,7 @@ import Paragraf from "../src/Paragraf";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import Atekrar from "../src/Atekrar";
-
+import Sohbet from "../src/Sohbet";
 const Stack = createStackNavigator();
 
 export default function Index() {
@@ -74,6 +74,11 @@ export default function Index() {
         <Stack.Screen 
           name="Atekrar" 
           component={Atekrar} 
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen 
+          name="Sohbet" 
+          component={Sohbet} 
           options={{ headerShown: false }} // Hide header for Home
         />
       </Stack.Navigator>
