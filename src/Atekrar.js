@@ -112,6 +112,12 @@ const Atekrar = ({ navigation }) => {
 
         {/* Navigation Bar */}
         <View style={styles.navBar}>
+        <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navItem}>
+    <Image
+      source={require("../assets/icons/home.png")} // Your home icon
+      style={styles.navIcon}
+    />
+  </TouchableOpacity>
           <TouchableOpacity style={styles.navItem}>
             <Image
               source={require("../assets/icons/profile.png")}
@@ -124,12 +130,14 @@ const Atekrar = ({ navigation }) => {
               style={styles.navIcon}
             />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/fitness.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
+        
+        <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
+  <Image
+    source={require("../assets/icons/fitness.png")} // Your fitness icon
+    style={styles.navIcon}
+  />
+</TouchableOpacity>
+
         </View>
       </View>
     </ImageBackground>

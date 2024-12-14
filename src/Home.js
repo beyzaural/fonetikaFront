@@ -105,6 +105,12 @@ const Home = ({ navigation }) => {
 
       {/* Navigation Bar */}
       <View style={styles.navBar}>
+      <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navItem}>
+    <Image
+      source={require("../assets/icons/home.png")} // Your home icon
+      style={styles.navIcon}
+    />
+  </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <Image
             source={require("../assets/icons/profile.png")} // Replace with your icon

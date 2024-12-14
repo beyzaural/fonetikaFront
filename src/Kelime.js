@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,45 +8,66 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import React, { useState } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { Audio } from "expo-av"; // Import Audio from expo-av
+import { Audio } from "expo-av";
 
 const Kelime = ({ navigation }) => {
-  const [isRecording, setIsRecording] = useState(false); // Track if recording is in progress
-  const [recording, setRecording] = useState(null); // Store the Recording object
-  const [audioUri, setAudioUri] = useState(null); // Store the URI of the saved audio file
-  const [showFeedback, setShowFeedback] = useState(false); // Show feedback modal
-  const [definition, setDefinition] = useState(""); // Phonetic feedback
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState(null);
+  const [audioUri, setAudioUri] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-  // List of words and definitions
+  // List of words with feedback
   const words = [
-    { word: "Kamuflaj", definition: "Kamuflâj" },
-    { word: "Ağabey", definition: "A:bi" },
-    { word: "Sahi", definition: "sa:hi" },
-    { word: "Şiir", definition: "şi:r" },
+    {
+      word: "Kamuflaj",
+      definition: "Kamuflâj",
+      tahmin: "Sanırım “kamoflâj” dediniz.",
+      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      ipucu: "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
+    },
+    {
+      word: "Ağabey",
+      definition: "A:bi",
+      tahmin: "Sanırım “a:abey” dediniz.",
+      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      ipucu: "Türkçe artikülasyonda \"bey\" geniş ve diftong bir yapı içerirken, \"i\" dar ve düz bir ünlüdür.",
+    },
+    {
+      word: "Sahi",
+      definition: "sa:hi",
+      tahmin: "Sanırım “sahi” dediniz.",
+      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      ipucu: "“:” harfin fazla uzatıldığını gösterir.",
+    },
+    {
+      word: "Şiir",
+      definition: "şi:r",
+      tahmin: "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
+      instruction: "",
+      ipucu: "",
+    },
   ];
+  
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Handle microphone press (start/stop recording)
   const handleMicrophonePress = async () => {
     if (recording) {
-      // Stop recording
       try {
         await recording.stopAndUnloadAsync();
-        const uri = recording.getURI(); // Get URI of the recorded audio
+        const uri = recording.getURI();
         console.log("Recording saved at:", uri);
-        setAudioUri(uri); // Save URI for further processing or playback
-        setRecording(null); // Clear the recording object
+        setAudioUri(uri);
+        setRecording(null);
         setIsRecording(false);
-        setShowFeedback(true); // Show feedback after recording stops
-        setDefinition(words[currentIndex].definition); // Show phonetic definition
+        setShowFeedback(true);
+        setFeedback(words[currentIndex].feedback);
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
     } else {
-      // Start recording
       try {
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
@@ -57,17 +79,16 @@ const Kelime = ({ navigation }) => {
           playsInSilentModeIOS: true,
         });
         const { recording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY // Use high-quality audio settings
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-        setRecording(recording); // Save the recording object
-        setIsRecording(true); // Indicate that recording is in progress
+        setRecording(recording);
+        setIsRecording(true);
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
     }
   };
 
-  // Play the recorded audio
   const playAudio = async () => {
     if (!audioUri) {
       alert("Henüz bir kayıt yapılmadı!");
@@ -103,14 +124,8 @@ const Kelime = ({ navigation }) => {
     >
       <View style={styles.container}>
         {/* Back Arrow */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
+        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
+          <Image source={require("../assets/images/backspace.png")} style={styles.backIcon} />
         </TouchableOpacity>
 
         {/* Top Container */}
@@ -126,11 +141,7 @@ const Kelime = ({ navigation }) => {
         {/* Bottom Container */}
         <View style={styles.bottomContainer}>
           <TouchableOpacity onPress={handleMicrophonePress}>
-            <FontAwesome
-              name="microphone"
-              size={90}
-              color={isRecording ? "red" : "#880000"} // Change color based on recording state
-            />
+            <FontAwesome name="microphone" size={90} color={isRecording ? "red" : "#880000"} />
           </TouchableOpacity>
           <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
             <Text style={styles.listenButtonText}>Dinle</Text>
@@ -146,48 +157,53 @@ const Kelime = ({ navigation }) => {
           <FontAwesome name="arrow-right" size={50} color="#880000" />
         </TouchableOpacity>
 
-        {/* Feedback Popup */}
         <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showFeedback}
-          onRequestClose={() => setShowFeedback(false)}
-        >
-          <View style={styles.feedbackContainer}>
-            <View style={styles.feedbackContent}>
-              <Text style={styles.feedbackTitle}>Kelime Okunuşu</Text>
-              <Text style={styles.feedbackText}>{definition}</Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowFeedback(false)}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+  animationType="slide"
+  transparent={true}
+  visible={showFeedback}
+  onRequestClose={() => setShowFeedback(false)}
+>
+  <View style={styles.feedbackContainer}>
+    <View style={styles.feedbackContent}>
+      <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+      <Text style={styles.tahminText}>{words[currentIndex].tahmin}</Text>
+      <Text style={styles.instructionText}>{words[currentIndex].instruction}</Text>
+      {words[currentIndex].ipucu !== "" && (
+        <Text style={styles.ipucuText}>
+          <Text style={styles.ipucuBold}>İpucu: </Text>
+          {words[currentIndex].ipucu}
+        </Text>
+      )}
+      <TouchableOpacity style={styles.closeButton} onPress={() => setShowFeedback(false)}>
+        <Text style={styles.closeButtonText}>Kapat</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+</Modal>
 
-        {/* Navigation Bar */}
-        <View style={styles.navBar}>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/profile.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/settings.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/fitness.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-        </View>
+ {/* Navigation Bar */}
+ <View style={styles.navBar}>
+            <TouchableOpacity style={styles.navItem}>
+              <Image
+                source={require("../assets/icons/profile.png")}
+                style={styles.navIcon}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.navItem}>
+              <Image
+                source={require("../assets/icons/settings.png")}
+                style={styles.navIcon}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
+  <Image
+    source={require("../assets/icons/fitness.png")} // Your fitness icon
+    style={styles.navIcon}
+  />
+</TouchableOpacity>
+          </View>
+
+
       </View>
     </ImageBackground>
   );
@@ -214,18 +230,15 @@ const styles = StyleSheet.create({
     height: 50,
   },
   topContainer: {
-    backgroundColor: "transparent",
     height: "70%",
     justifyContent: "center",
     alignItems: "center",
   },
   okuText: {
-    marginTop: 40,
-    marginBottom: 10,
-    textAlign: "center",
     fontSize: 18,
     fontWeight: "bold",
     color: "black",
+    marginBottom: 10,
   },
   wordContainer: {
     backgroundColor: "#880000",
@@ -234,11 +247,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
   },
   wordText: {
     fontSize: 40,
@@ -251,17 +259,14 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   bottomContainer: {
-    flex: 1,
-    justifyContent: "center",
     alignItems: "center",
   },
   listenButton: {
     marginTop: 20,
+    backgroundColor: "#880000",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#880000",
     borderRadius: 10,
-    alignItems: "center",
   },
   listenButtonText: {
     color: "white",
@@ -275,7 +280,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 50,
     padding: 10,
-    elevation: 5,
   },
   nextButton: {
     position: "absolute",
@@ -284,44 +288,67 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 50,
     padding: 10,
-    elevation: 5,
   },
   feedbackContainer: {
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-  feedbackContent: {
-    height: "45%",
-    backgroundColor: "white",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 20,
-    justifyContent: "center",
+    feedbackContent: {
+      height: "50%",
+      backgroundColor: "white",
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      paddingHorizontal: 20,
+      paddingVertical: 30,
+      justifyContent: "space-between",
+    },
+    feedbackTitle: {
+      fontSize: 24,
+      fontWeight: "bold",
+      marginBottom: 15,
+      textAlign: "center",
+    },
+    tahminText: {
+      fontSize: 18,
+      color: "#880000",
+      //marginBottom: 10,
+      textAlign: "left", // Align text to the left
+    },
+    instructionText: {
+      fontSize: 18,
+      //marginBottom: 10,
+      textAlign: "left", // Align text to the left
+    },
+    ipucuText: {
+      fontSize: 18,
+      marginBottom: 20,
+      textAlign: "left", // Align text to the left
+    },
+    ipucuBold: {
+      fontWeight: "bold",
+    },
+
+  closeButtonContainer: {
+    width: "50%",
     alignItems: "center",
-  },
-  feedbackTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  feedbackText: {
-    fontSize: 18,
-    color: "black",
-    textAlign: "center",
+    marginBottom: 20, // Provide spacing at the bottom
   },
   closeButton: {
-    marginTop: 20,
-    backgroundColor: "black",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+    backgroundColor: "#880000",
+    paddingVertical: 12,
+    paddingHorizontal: 39,
+    borderRadius: 20,
+    alignSelf: "center",
+    marginBottom: 10, // Ensures some spacing at the bottom
   },
+  
   closeButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "bold",
   },
+
   navBar: {
     height: 70,
     backgroundColor: "#FFFFFF",
@@ -336,4 +363,5 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+  
 });

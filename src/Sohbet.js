@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   endButton: {
-    backgroundColor: "#880000",
+    backgroundColor: "black",
     paddingVertical: 12,
     paddingHorizontal: 20,
     borderRadius: 20,

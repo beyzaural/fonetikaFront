@@ -65,6 +65,12 @@ const Acourse = ({ navigation }) => {
 
       {/* Navigation Bar */}
       <View style={styles.navBar}>
+      <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navItem}>
+    <Image
+      source={require("../assets/icons/home.png")} // Your home icon
+      style={styles.navIcon}
+    />
+  </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <Image
             source={require("../assets/icons/profile.png")} // Replace with your icon
@@ -78,11 +84,12 @@ const Acourse = ({ navigation }) => {
           />
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-          <Image
-            source={require("../assets/icons/fitness.png")} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
+  <Image
+    source={require("../assets/icons/fitness.png")} // Your fitness icon
+    style={styles.navIcon}
+  />
+</TouchableOpacity>
+
       </View>
     </ImageBackground>
   );
