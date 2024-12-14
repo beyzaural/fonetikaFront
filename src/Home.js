@@ -67,7 +67,7 @@ const Home = ({ navigation }) => {
 
           <TouchableOpacity
   style={styles.card}
-  onPress={() => navigation.navigate("Tekrar")} // Navigate to Tekrar.js
+  onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
 >
   <LinearGradient
     colors={["#d6d5b3", "#FFFFFF"]}
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "white",
-    marginTop: 100,
+    marginTop: 90,
     marginLeft: 20,
   },
   nameText: {

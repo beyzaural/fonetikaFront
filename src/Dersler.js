@@ -18,6 +18,14 @@ const Dersler = ({ navigation }) => {
     { title: "O/Ö Harfi", difficulty: "Orta", image: require("../assets/images/5.png") },
   ];
 
+  // Handle navigation based on the selected card
+  const handleCardPress = (moduleTitle) => {
+    if (moduleTitle === "A Harfi") {
+      navigation.navigate("Acourse"); // Navigate to Acourse.js for "A Harfi"
+    }
+    // You can add more conditions for other cards if needed
+  };
+
   return (
     <ImageBackground
       source={require("../assets/images/ders_back.png")}
@@ -39,7 +47,7 @@ const Dersler = ({ navigation }) => {
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {vowelModules.map((module, index) => (
-            <TouchableOpacity key={index} style={styles.card}>
+            <TouchableOpacity key={index} style={styles.card} onPress={() => handleCardPress(module.title)}>
               <View style={styles.cardContent}>
                 <Image source={module.image} style={styles.cardImage} />
                 <View>
@@ -68,8 +76,8 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 20,
     left: 20,
-    zIndex: 100, // Ensure the back button is on top of other elements
-    backgroundColor: "rgba(255, 255, 255, 0.6)", // Semi-transparent background for visibility
+    zIndex: 100,
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: 25,
     padding: 5,
   },

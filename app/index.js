@@ -15,6 +15,9 @@ import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import Atekrar from "../src/Atekrar";
 import Sohbet from "../src/Sohbet";
+import Acourse from "../src/Acourse";
+import Akelime from "../src/Akelime";
+import Geneltekrar from "../src/Geneltekrar";
 const Stack = createStackNavigator();
 
 export default function Index() {
@@ -79,6 +82,21 @@ export default function Index() {
         <Stack.Screen 
           name="Sohbet" 
           component={Sohbet} 
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen 
+          name="Acourse" 
+          component={Acourse} 
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen 
+          name="Akelime" 
+          component={Akelime} 
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen 
+          name="Geneltekrar" 
+          component={Geneltekrar} 
           options={{ headerShown: false }} // Hide header for Home
         />
       </Stack.Navigator>
