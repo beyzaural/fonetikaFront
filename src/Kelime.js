@@ -25,26 +25,30 @@ const Kelime = ({ navigation }) => {
       definition: "Kamuflâj",
       tahmin: "Sanırım “kamoflâj” dediniz.",
       instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      kelime: "kamuflâj",
       ipucu: "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
     },
     {
       word: "Ağabey",
       definition: "A:bi",
-      tahmin: "Sanırım “a:abey” dediniz.",
+      tahmin: "Sanırım “a:bey” dediniz.",
       instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      ipucu: "Türkçe artikülasyonda \"bey\" geniş ve diftong bir yapı içerirken, \"i\" dar ve düz bir ünlüdür.",
+      kelime: "a:bi",
+      ipucu: "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
     },
     {
       word: "Sahi",
       definition: "sa:hi",
       tahmin: "Sanırım “sahi” dediniz.",
       instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      kelime: "sa:hi",
       ipucu: "“:” harfin fazla uzatıldığını gösterir.",
     },
     {
       word: "Şiir",
       definition: "şi:r",
       tahmin: "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
+      kelime:"",
       instruction: "",
       ipucu: "",
     },
@@ -168,6 +172,18 @@ const Kelime = ({ navigation }) => {
       <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
       <Text style={styles.tahminText}>{words[currentIndex].tahmin}</Text>
       <Text style={styles.instructionText}>{words[currentIndex].instruction}</Text>
+      <Text style={styles.kelimeText}>
+        {words[currentIndex].kelime.split("").map((char, index) => {
+          const isRed = (words[currentIndex].word === "Kamuflaj" && char === "u") ||
+                        (words[currentIndex].word === "Ağabey" && char === "i") ||
+                        (words[currentIndex].word === "Sahi" && char === ":");
+          return (
+            <Text key={index} style={isRed ? styles.redText : styles.blackText}>
+              {char}
+            </Text>
+          );
+        })}
+      </Text>
       {words[currentIndex].ipucu !== "" && (
         <Text style={styles.ipucuText}>
           <Text style={styles.ipucuBold}>İpucu: </Text>
@@ -311,7 +327,6 @@ const styles = StyleSheet.create({
     },
     tahminText: {
       fontSize: 18,
-      color: "#880000",
       //marginBottom: 10,
       textAlign: "left", // Align text to the left
     },
@@ -319,6 +334,11 @@ const styles = StyleSheet.create({
       fontSize: 18,
       //marginBottom: 10,
       textAlign: "left", // Align text to the left
+    },
+    kelimeText: {
+      fontSize: 18,
+     fontWeight: "bold",
+      textAlign: "center", // Align text to the left
     },
     ipucuText: {
       fontSize: 18,
@@ -362,6 +382,16 @@ const styles = StyleSheet.create({
   navIcon: {
     width: 30,
     height: 30,
+  },
+  redText: {
+    color: "red",
+    fontSize: 23,  // Updated fontSize
+    fontWeight: "bold",
+  },
+  blackText: {
+    color: "black",
+    fontSize: 23,  // Updated fontSize
+    fontWeight: "bold",
   },
   
 });
