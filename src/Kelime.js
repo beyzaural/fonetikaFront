@@ -64,12 +64,37 @@ const Kelime = ({ navigation }) => {
         const uri = recording.getURI();
         console.log("Recording saved at:", uri);
         setAudioUri(uri);
+  
+        const expectedWord = words[currentIndex].word; // Current word to compare
+  
+        // Prepare FormData
+        const formData = new FormData();
+        formData.append("file", {
+          uri, // File URI from recording
+          name: "recording.m4a", // Name of the file
+          type: "audio/m4a", // File type
+        });
+  
+        // Send the request to the backend
+        const backendUrl = `http://192.168.31.95:8000/check-word?expected_word=${encodeURIComponent(
+          expectedWord
+        )}`;
+  
+        const response = await fetch(backendUrl, {
+          method: "POST",
+          body: formData,
+        });
+  
+        const result = await response.json();
+        console.log("Backend response:", result);
+  
+        setFeedback(result.feedback);
+        setShowFeedback(true);
+      } catch (error) {
+        console.error("Error during recording or upload:", error);
+      } finally {
         setRecording(null);
         setIsRecording(false);
-        setShowFeedback(true);
-        setFeedback(words[currentIndex].feedback);
-      } catch (error) {
-        console.error("Error stopping recording:", error);
       }
     } else {
       try {
@@ -78,13 +103,16 @@ const Kelime = ({ navigation }) => {
           alert("Microphone permission is required to record audio.");
           return;
         }
+  
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
+  
         const { recording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
+  
         setRecording(recording);
         setIsRecording(true);
       } catch (error) {
@@ -92,6 +120,7 @@ const Kelime = ({ navigation }) => {
       }
     }
   };
+  
 
   const playAudio = async () => {
     if (!audioUri) {
