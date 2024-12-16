@@ -7,6 +7,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Modal,
+  Alert,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
@@ -16,44 +17,16 @@ const Kelime = ({ navigation }) => {
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
-  const [feedback, setFeedback] = useState("");
+  const [feedback, setFeedback] = useState(""); // Backend feedback
+  const [transcribedText, setTranscribedText] = useState(""); // Transcribed text
+  const [isCorrect, setIsCorrect] = useState(null); // Whether the word was pronounced correctly
 
-  // List of words with feedback
   const words = [
-    {
-      word: "Kamuflaj",
-      definition: "Kamuflâj",
-      tahmin: "Sanırım “kamoflâj” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "kamuflâj",
-      ipucu: "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
-    },
-    {
-      word: "Ağabey",
-      definition: "A:bi",
-      tahmin: "Sanırım “a:bey” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "a:bi",
-      ipucu: "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
-    },
-    {
-      word: "Sahi",
-      definition: "sa:hi",
-      tahmin: "Sanırım “sahi” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "sa:hi",
-      ipucu: "“:” harfin fazla uzatıldığını gösterir.",
-    },
-    {
-      word: "Şiir",
-      definition: "şi:r",
-      tahmin: "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
-      kelime:"",
-      instruction: "",
-      ipucu: "",
-    },
+    { word: "Kamuflaj", definition: "Kamuflâj" },
+    { word: "Ağabey", definition: "A:bi" },
+    { word: "Sahi", definition: "sa:hi" },
+    { word: "Şiir", definition: "şi:r" },
   ];
-  
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -64,34 +37,38 @@ const Kelime = ({ navigation }) => {
         const uri = recording.getURI();
         console.log("Recording saved at:", uri);
         setAudioUri(uri);
-  
-        const expectedWord = words[currentIndex].word; // Current word to compare
-  
+
+        const expectedWord = words[currentIndex].word;
+
         // Prepare FormData
         const formData = new FormData();
         formData.append("file", {
-          uri, // File URI from recording
-          name: "recording.m4a", // Name of the file
-          type: "audio/m4a", // File type
+          uri,
+          name: "recording.m4a",
+          type: "audio/m4a",
         });
-  
-        // Send the request to the backend
-        const backendUrl = `http://192.168.31.95:8000/check-word?expected_word=${encodeURIComponent(
+
+        const backendUrl = `http://192.168.1.103:8000/check-word?expected_word=${encodeURIComponent(
           expectedWord
         )}`;
-  
+
+        // Send to backend
         const response = await fetch(backendUrl, {
           method: "POST",
           body: formData,
         });
-  
+
         const result = await response.json();
         console.log("Backend response:", result);
-  
+
+        // Update feedback state based on response
         setFeedback(result.feedback);
+        setTranscribedText(result.transcribed_text);
+        setIsCorrect(result.is_correct);
         setShowFeedback(true);
       } catch (error) {
         console.error("Error during recording or upload:", error);
+        Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
       } finally {
         setRecording(null);
         setIsRecording(false);
@@ -100,19 +77,22 @@ const Kelime = ({ navigation }) => {
       try {
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
-          alert("Microphone permission is required to record audio.");
+          Alert.alert(
+            "İzin Gerekli",
+            "Mikrofon izni ses kaydı için gereklidir."
+          );
           return;
         }
-  
+
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-  
+
         const { recording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-  
+
         setRecording(recording);
         setIsRecording(true);
       } catch (error) {
@@ -120,11 +100,10 @@ const Kelime = ({ navigation }) => {
       }
     }
   };
-  
 
   const playAudio = async () => {
     if (!audioUri) {
-      alert("Henüz bir kayıt yapılmadı!");
+      Alert.alert("Kayıt Bulunamadı", "Lütfen önce bir kayıt yapın.");
       return;
     }
 
@@ -133,6 +112,12 @@ const Kelime = ({ navigation }) => {
         { uri: audioUri },
         { shouldPlay: true }
       );
+
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.didJustFinish) {
+          sound.unloadAsync();
+        }
+      });
     } catch (error) {
       console.error("Error playing audio:", error);
     }
@@ -156,22 +141,24 @@ const Kelime = ({ navigation }) => {
       style={styles.imageBackground}
     >
       <View style={styles.container}>
-        {/* Back Arrow */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
+        {/* Back Button */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
+        >
           <Image source={require("../assets/images/backspace.png")} style={styles.backIcon} />
         </TouchableOpacity>
 
-        {/* Top Container */}
+        {/* Word Display */}
         <View style={styles.topContainer}>
           <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
-
           <View style={styles.wordContainer}>
             <Text style={styles.wordText}>{words[currentIndex].word}</Text>
             <Text style={styles.phoneticText}>{words[currentIndex].definition}</Text>
           </View>
         </View>
 
-        {/* Bottom Container */}
+        {/* Recording and Playback Controls */}
         <View style={styles.bottomContainer}>
           <TouchableOpacity onPress={handleMicrophonePress}>
             <FontAwesome name="microphone" size={90} color={isRecording ? "red" : "#880000"} />
@@ -190,65 +177,39 @@ const Kelime = ({ navigation }) => {
           <FontAwesome name="arrow-right" size={50} color="#880000" />
         </TouchableOpacity>
 
+        {/* Feedback Modal */}
         <Modal
-  animationType="slide"
-  transparent={true}
-  visible={showFeedback}
-  onRequestClose={() => setShowFeedback(false)}
->
-  <View style={styles.feedbackContainer}>
-    <View style={styles.feedbackContent}>
-      <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-      <Text style={styles.tahminText}>{words[currentIndex].tahmin}</Text>
-      <Text style={styles.instructionText}>{words[currentIndex].instruction}</Text>
-      <Text style={styles.kelimeText}>
-        {words[currentIndex].kelime.split("").map((char, index) => {
-          const isRed = (words[currentIndex].word === "Kamuflaj" && char === "u") ||
-                        (words[currentIndex].word === "Ağabey" && char === "i") ||
-                        (words[currentIndex].word === "Sahi" && char === ":");
-          return (
-            <Text key={index} style={isRed ? styles.redText : styles.blackText}>
-              {char}
-            </Text>
-          );
-        })}
-      </Text>
-      {words[currentIndex].ipucu !== "" && (
-        <Text style={styles.ipucuText}>
-          <Text style={styles.ipucuBold}>İpucu: </Text>
-          {words[currentIndex].ipucu}
-        </Text>
-      )}
-      <TouchableOpacity style={styles.closeButton} onPress={() => setShowFeedback(false)}>
-        <Text style={styles.closeButtonText}>Kapat</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
-
- {/* Navigation Bar */}
- <View style={styles.navBar}>
-            <TouchableOpacity style={styles.navItem}>
-              <Image
-                source={require("../assets/icons/profile.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.navItem}>
-              <Image
-                source={require("../assets/icons/settings.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-  <Image
-    source={require("../assets/icons/fitness.png")} // Your fitness icon
-    style={styles.navIcon}
-  />
-</TouchableOpacity>
+          animationType="slide"
+          transparent={true}
+          visible={showFeedback}
+          onRequestClose={() => setShowFeedback(false)}
+        >
+          <View style={styles.feedbackContainer}>
+            <View style={styles.feedbackContent}>
+              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+              <Text
+                style={[
+                  styles.feedbackText,
+                  isCorrect ? styles.correctFeedback : styles.incorrectFeedback,
+                ]}
+              >
+                {feedback}
+              </Text>
+              {transcribedText ? (
+                <Text style={styles.transcriptionText}>
+                  {"Transkripsiyon: "}
+                  <Text style={{ fontWeight: "bold" }}>{transcribedText}</Text>
+                </Text>
+              ) : null}
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowFeedback(false)}
+              >
+                <Text style={styles.closeButtonText}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-
+        </Modal>
       </View>
     </ImageBackground>
   );
@@ -339,88 +300,46 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-    feedbackContent: {
-      height: "50%",
-      backgroundColor: "white",
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      paddingHorizontal: 20,
-      paddingVertical: 30,
-      justifyContent: "space-between",
-    },
-    feedbackTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 15,
-      textAlign: "center",
-    },
-    tahminText: {
-      fontSize: 18,
-      //marginBottom: 10,
-      textAlign: "left", // Align text to the left
-    },
-    instructionText: {
-      fontSize: 18,
-      //marginBottom: 10,
-      textAlign: "left", // Align text to the left
-    },
-    kelimeText: {
-      fontSize: 18,
-     fontWeight: "bold",
-      textAlign: "center", // Align text to the left
-    },
-    ipucuText: {
-      fontSize: 18,
-      marginBottom: 20,
-      textAlign: "left", // Align text to the left
-    },
-    ipucuBold: {
-      fontWeight: "bold",
-    },
-
-  closeButtonContainer: {
-    width: "50%",
-    alignItems: "center",
-    marginBottom: 20, // Provide spacing at the bottom
+  feedbackContent: {
+    height: "50%",
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    justifyContent: "space-between",
+  },
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 15,
+    textAlign: "center",
+  },
+  feedbackText: {
+    fontSize: 18,
+    textAlign: "center",
+  },
+  correctFeedback: {
+    color: "green",
+  },
+  incorrectFeedback: {
+    color: "red",
+  },
+  transcriptionText: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 10,
   },
   closeButton: {
     backgroundColor: "#880000",
-    paddingVertical: 12,
-    paddingHorizontal: 39,
-    borderRadius: 20,
-    alignSelf: "center",
-    marginBottom: 10, // Ensures some spacing at the bottom
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 20,
   },
-  
   closeButtonText: {
     color: "white",
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: "bold",
   },
-
-  navBar: {
-    height: 70,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 30,
-    height: 30,
-  },
-  redText: {
-    color: "red",
-    fontSize: 23,  // Updated fontSize
-    fontWeight: "bold",
-  },
-  blackText: {
-    color: "black",
-    fontSize: 23,  // Updated fontSize
-    fontWeight: "bold",
-  },
-  
 });
