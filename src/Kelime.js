@@ -76,7 +76,7 @@ const Kelime = ({ navigation }) => {
         });
   
         // Send the request to the backend
-        const backendUrl = `http://192.168.31.95:8000/check-word?expected_word=${encodeURIComponent(
+        const backendUrl = `http://192.168.1.103:8000/check-word?expected_word=${encodeURIComponent(
           expectedWord
         )}`;
   
