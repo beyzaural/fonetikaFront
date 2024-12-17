@@ -56,7 +56,7 @@ const Kelime = ({ navigation }) => {
           type: "audio/m4a",
         });
 
-        const backendUrl = `http://192.168.1.103:8000/check-word?expected_word=${encodeURIComponent(
+        const backendUrl = `http://172.20.10.14:8000/check-word?expected_word=${encodeURIComponent(
           expectedWord
         )}`;
 
