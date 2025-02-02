@@ -27,71 +27,44 @@ const Kelime = ({ navigation }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Handle microphone press (start/stop recording)
   const handleMicrophonePress = async () => {
     if (recording) {
+      // Stop recording
       try {
         await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
+        const uri = recording.getURI(); // Get URI of the recorded audio
         console.log("Recording saved at:", uri);
-        setDefinition(words[currentIndex].definition);
-        setAudioUri(uri);
-  
-        const expectedWord = words[currentIndex].word; // Current word to compare
-  
-        // Prepare FormData
-        const formData = new FormData();
-        formData.append("file", {
-          uri, // File URI from recording
-          name: "recording.m4a", // Name of the file
-          type: "audio/m4a", // File type
-        });
-  
-        // Send the request to the backend
-        const backendUrl = `http://192.168.31.95:8000/check-word?expected_word=${encodeURIComponent(
-          expectedWord
-        )}`;
-  
-        const response = await fetch(backendUrl, {
-          method: "POST",
-          body: formData,
-        });
-  
-        const result = await response.json();
-        console.log("Backend response:", result);
-  
-        setFeedback(result.feedback);
-        setShowFeedback(true);
-      } catch (error) {
-        console.error("Error during recording or upload:", error);
-      } finally {
-        setRecording(null);
+        setAudioUri(uri); // Save URI for further processing or playback
+        setRecording(null); // Clear the recording object
         setIsRecording(false);
+        setShowFeedback(true); // Show feedback after recording stops
+        setDefinition(words[currentIndex].definition); // Show phonetic definition
+      } catch (error) {
+        console.error("Error stopping recording:", error);
       }
     } else {
+      // Start recording
       try {
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
           alert("Microphone permission is required to record audio.");
           return;
         }
-  
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-  
         const { recording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY
+          Audio.RecordingOptionsPresets.HIGH_QUALITY // Use high-quality audio settings
         );
-  
-        setRecording(recording);
-        setIsRecording(true);
+        setRecording(recording); // Save the recording object
+        setIsRecording(true); // Indicate that recording is in progress
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
     }
   };
-  
 
   // Play the recorded audio
   const playAudio = async () => {
