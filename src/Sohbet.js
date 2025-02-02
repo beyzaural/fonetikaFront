@@ -40,7 +40,9 @@ const Sohbet = ({ navigation }) => {
         if (status === "granted") {
           setIsRecording(true);
           const newRecording = new Audio.Recording();
-          await newRecording.prepareToRecordAsync(Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY);
+          await newRecording.prepareToRecordAsync(
+            Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+          );
           await newRecording.startAsync();
           setRecording(newRecording);
         }
@@ -54,82 +56,106 @@ const Sohbet = ({ navigation }) => {
     setShowFeedback(true);
   };
 
+  const handleRestartConversation = () => {
+    setMessages([{ id: 1, sender: "bot", text: "Merhaba! Bugün nasılsın?" }]);
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        {/* Go Back Button */}
+      <View style={styles.topContainer}>
+        {/* Back Button */}
         <TouchableOpacity
-          style={styles.backButton}
           onPress={() => navigation.goBack()}
+          style={styles.backButton}
         >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
+          <FontAwesome name="chevron-left" size={24} color="black" />
         </TouchableOpacity>
+        <Text style={styles.headerText}>Sohbet</Text>
+      </View>
 
-        <Text style={styles.header}>Sohbet</Text>
-
-        {/* Chat Container with ScrollView */}
-        <View style={styles.chatContainer}>
-          <ScrollView>
-            {messages.map((message) => (
-              <View
-                key={message.id}
-                style={[
-                  styles.message,
-                  message.sender === "user" ? styles.userMessage : styles.botMessage,
-                ]}
+      {/* Chat Container with ScrollView */}
+      <View style={styles.chatContainer}>
+        <ScrollView>
+          {messages.map((message) => (
+            <View
+              key={message.id}
+              style={[
+                styles.message,
+                message.sender === "user"
+                  ? styles.userMessage
+                  : styles.botMessage,
+              ]}
+            >
+              <Text
+                style={
+                  message.sender === "user" ? styles.userText : styles.botText
+                }
               >
-                <Text style={message.sender === "user" ? styles.userText : styles.botText}>
-                  {message.text}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+                {message.text}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
 
-        {/* Microphone Button */}
-        <View style={styles.microphoneContainer}>
-          <TouchableOpacity onPress={handleMicrophonePress}>
+      {/* Microphone and Icons */}
+      <View style={styles.microphoneContainer}>
+        <View style={styles.iconButtonWithText}>
+          <TouchableOpacity onPress={handleRestartConversation}>
             <FontAwesome
-              name="microphone"
-              size={90}
-              color={isRecording ? "black" : "#880000"}
+              name="refresh"
+              size={50}
+              style={{ paddingTop: 30 }}
+              color="#FF3B30"
             />
           </TouchableOpacity>
+          <Text style={styles.iconText}>Yenile</Text>
         </View>
-
-        {/* End Conversation Button */}
-        <View style={styles.endConversationContainer}>
-          <TouchableOpacity onPress={handleEndConversation} style={styles.endButton}>
-            <Text style={styles.endButtonText}>End Conversation</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Feedback Modal */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showFeedback}
-          onRequestClose={() => setShowFeedback(false)}
+        <TouchableOpacity
+          onPress={handleMicrophonePress}
+          style={{ paddingTop: 30 }}
         >
-          <View style={styles.feedbackContainer}>
-            <View style={styles.feedbackContent}>
-              <Text style={styles.feedbackTitle}>Conversation Feedback</Text>
-              <Text style={styles.feedbackText}>
-                Great job practicing your conversation skills!
-              </Text>
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowFeedback(false)}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </Modal>
+          <FontAwesome
+            name="microphone"
+            size={100}
+            color={isRecording ? "black" : "#FF3B30"}
+          />
+        </TouchableOpacity>
+        <View style={styles.iconButtonWithText}>
+          <TouchableOpacity onPress={handleEndConversation}>
+            <FontAwesome
+              name="times"
+              size={60}
+              style={{ paddingTop: 30 }}
+              color="#FF3B30"
+            />
+          </TouchableOpacity>
+          <Text style={styles.iconText}>Bitir</Text>
+        </View>
       </View>
+
+      {/* Feedback Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showFeedback}
+        onRequestClose={() => setShowFeedback(false)}
+      >
+        <View style={styles.feedbackContainer}>
+          <View style={styles.feedbackContent}>
+            <Text style={styles.feedbackTitle}>Conversation Feedback</Text>
+            <Text style={styles.feedbackText}>
+              Great job practicing your conversation skills!
+            </Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowFeedback(false)}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -139,32 +165,40 @@ export default Sohbet;
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f0f0f5",
+    backgroundColor: "white",
   },
-  container: {
-    flex: 1,
-    paddingTop: 30,
+  topContainer: {
+    backgroundColor: "#E3EFF0",
+    paddingVertical: 30,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    //paddingHorizontal: 15,
   },
   backButton: {
     position: "absolute",
-    top: 20,
-    left: 10,
-    zIndex: 10,
+    left: 20,
   },
-  backIcon: {
-    width: 50,
-    height: 50,
-  },
-  header: {
+  headerText: {
     fontSize: 24,
-    fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: 8,
+    color: "#333",
+    fontWeight: "bold", // Added bold styling
   },
   chatContainer: {
     flex: 1,
-    padding: 10,
-    marginTop: 60, // Added margin to avoid overlap with the back button
+    //marginTop: 10,
+    backgroundColor: "#E3EFF0",
+    //borderTopLeftRadius: 35,
+    //borderTopRightRadius: 35,
+    padding: 12,
+    // Add shadow
+    /*shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4, // For Android*/
   },
   message: {
     padding: 12,
@@ -173,11 +207,11 @@ const styles = StyleSheet.create({
     maxWidth: "70%",
   },
   userMessage: {
-    backgroundColor: "#D4D4D4",
+    backgroundColor: "#F9F4F1",
     alignSelf: "flex-end",
   },
   botMessage: {
-    backgroundColor: "#880000",
+    backgroundColor: "#6CA3AD",
     alignSelf: "flex-start",
   },
   userText: {
@@ -189,24 +223,32 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   microphoneContainer: {
-    padding: 10,
+    position: "absolute",
+    bottom: 0,
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    paddingHorizontal: 10,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    zIndex: 10,
+    paddingBottom: 50, // Prevent overlap with SafeArea
+    borderTopLeftRadius: 35, // Added rounded top-left corner
+    borderTopRightRadius: 35, // Added rounded top-right corner
+    shadowColor: "#000", // Optional: Shadow for better aesthetics
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4, // For Android
+  },
+
+  iconButtonWithText: {
     alignItems: "center",
   },
-  endConversationContainer: {
-    paddingVertical: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  endButton: {
-    backgroundColor: "black",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 20,
-  },
-  endButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
+  iconText: {
+    fontSize: 14,
+    color: "#FF3B30",
+    marginTop: 5,
   },
   feedbackContainer: {
     flex: 1,

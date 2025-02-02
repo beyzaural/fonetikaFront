@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 const Home = ({ navigation }) => {
   return (
     <ImageBackground
-      source={require("../assets/images/red.png")} // Reference your image here
+      source={require("../assets/images/green.png")} // Reference your image here
       style={styles.imageBackground}
     >
       {/* Welcome Text */}
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1, // Ensures ScrollView content stretches properly
-    paddingVertical: 40, // Adds vertical padding
+    paddingVertical: 40, // Adds vertical paddingi
   },
   cardsContainer: {
     flexDirection: "row",

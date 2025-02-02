@@ -18,7 +18,6 @@ const Kelime = ({ navigation }) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  // List of words with feedback
   const words = [
     {
       word: "Kamuflaj",
@@ -26,7 +25,8 @@ const Kelime = ({ navigation }) => {
       tahmin: "Sanırım “kamoflâj” dediniz.",
       instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
       kelime: "kamuflâj",
-      ipucu: "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
+      ipucu:
+        "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
     },
     {
       word: "Ağabey",
@@ -34,7 +34,8 @@ const Kelime = ({ navigation }) => {
       tahmin: "Sanırım “a:bey” dediniz.",
       instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
       kelime: "a:bi",
-      ipucu: "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
+      ipucu:
+        "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
     },
     {
       word: "Sahi",
@@ -47,13 +48,13 @@ const Kelime = ({ navigation }) => {
     {
       word: "Şiir",
       definition: "şi:r",
-      tahmin: "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
-      kelime:"",
+      tahmin:
+        "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
+      kelime: "",
       instruction: "",
       ipucu: "",
     },
   ];
-  
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -116,110 +117,141 @@ const Kelime = ({ navigation }) => {
   };
 
   const handlePreviousWord = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + words.length) % words.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + words.length) % words.length
+    );
     setShowFeedback(false);
     setIsRecording(false);
   };
 
   return (
     <ImageBackground
-      source={require("../assets/images/kelime_back.png")}
+      source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
       <View style={styles.container}>
         {/* Back Arrow */}
-        <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate("Home")}>
-          <Image source={require("../assets/images/backspace.png")} style={styles.backIcon} />
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
 
         {/* Top Container */}
         <View style={styles.topContainer}>
-          <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
-
           <View style={styles.wordContainer}>
             <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-            <Text style={styles.phoneticText}>{words[currentIndex].definition}</Text>
+            <Text style={styles.phoneticText}>
+              {words[currentIndex].definition}
+            </Text>
+          </View>
+
+          {/* Navigation Arrows and Microphone Button in a Row */}
+          <View style={styles.navigationContainer}>
+            <TouchableOpacity
+              style={styles.prevButton}
+              onPress={handlePreviousWord}
+            >
+              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleMicrophonePress}>
+              <FontAwesome
+                name="microphone"
+                size={100}
+                color={isRecording ? "red" : "#FF3B30"}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNextWord}
+            >
+              <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
+            </TouchableOpacity>
           </View>
         </View>
-
-        {/* Bottom Container */}
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity onPress={handleMicrophonePress}>
-            <FontAwesome name="microphone" size={90} color={isRecording ? "red" : "#880000"} />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-            <Text style={styles.listenButtonText}>Dinle</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Navigation Arrows */}
-        <TouchableOpacity style={styles.prevButton} onPress={handlePreviousWord}>
-          <FontAwesome name="arrow-left" size={50} color="#880000" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.nextButton} onPress={handleNextWord}>
-          <FontAwesome name="arrow-right" size={50} color="#880000" />
-        </TouchableOpacity>
 
         <Modal
-  animationType="slide"
-  transparent={true}
-  visible={showFeedback}
-  onRequestClose={() => setShowFeedback(false)}
->
-  <View style={styles.feedbackContainer}>
-    <View style={styles.feedbackContent}>
-      <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-      <Text style={styles.tahminText}>{words[currentIndex].tahmin}</Text>
-      <Text style={styles.instructionText}>{words[currentIndex].instruction}</Text>
-      <Text style={styles.kelimeText}>
-        {words[currentIndex].kelime.split("").map((char, index) => {
-          const isRed = (words[currentIndex].word === "Kamuflaj" && char === "u") ||
-                        (words[currentIndex].word === "Ağabey" && char === "i") ||
-                        (words[currentIndex].word === "Sahi" && char === ":");
-          return (
-            <Text key={index} style={isRed ? styles.redText : styles.blackText}>
-              {char}
-            </Text>
-          );
-        })}
-      </Text>
-      {words[currentIndex].ipucu !== "" && (
-        <Text style={styles.ipucuText}>
-          <Text style={styles.ipucuBold}>İpucu: </Text>
-          {words[currentIndex].ipucu}
-        </Text>
-      )}
-      <TouchableOpacity style={styles.closeButton} onPress={() => setShowFeedback(false)}>
-        <Text style={styles.closeButtonText}>Kapat</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-</Modal>
+          animationType="slide"
+          transparent={true}
+          visible={showFeedback}
+          onRequestClose={() => setShowFeedback(false)}
+        >
+          <View style={styles.feedbackContainer}>
+            <View style={styles.feedbackContent}>
+              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+              <Text style={styles.tahminText}>
+                {words[currentIndex].tahmin}
+              </Text>
+              <Text style={styles.instructionText}>
+                {words[currentIndex].instruction}
+              </Text>
+              <Text style={styles.kelimeText}>
+                {words[currentIndex].kelime.split("").map((char, index) => {
+                  const isRed =
+                    (words[currentIndex].word === "Kamuflaj" && char === "u") ||
+                    (words[currentIndex].word === "Ağabey" && char === "i") ||
+                    (words[currentIndex].word === "Sahi" && char === ":");
+                  return (
+                    <Text
+                      key={index}
+                      style={isRed ? styles.redText : styles.blackText}
+                    >
+                      {char}
+                    </Text>
+                  );
+                })}
+              </Text>
 
- {/* Navigation Bar */}
- <View style={styles.navBar}>
-            <TouchableOpacity style={styles.navItem}>
-              <Image
-                source={require("../assets/icons/profile.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.navItem}>
-              <Image
-                source={require("../assets/icons/settings.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-  <Image
-    source={require("../assets/icons/fitness.png")} // Your fitness icon
-    style={styles.navIcon}
-  />
-</TouchableOpacity>
+              {words[currentIndex].ipucu !== "" && (
+                <Text style={styles.ipucuText}>
+                  <Text style={styles.ipucuBold}>İpucu: </Text>
+                  {words[currentIndex].ipucu}
+                </Text>
+              )}
+
+              {/* Add Listen Button inside Feedback Container */}
+              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+                <Text style={styles.listenButtonText}>Dinle</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowFeedback(false)}
+              >
+                <Text style={styles.closeButtonText}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
           </View>
+        </Modal>
 
-
+        {/* Navigation Bar */}
+        <View style={styles.navBar}>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/profile.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/settings.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Dersler")}
+            style={styles.navItem}
+          >
+            <Image
+              source={require("../assets/icons/fitness.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </ImageBackground>
   );
@@ -246,40 +278,48 @@ const styles = StyleSheet.create({
     height: 50,
   },
   topContainer: {
-    height: "70%",
-    justifyContent: "center",
+    marginTop: 30,
+    height: "100%",
     alignItems: "center",
   },
-  okuText: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-    marginBottom: 10,
-  },
   wordContainer: {
-    backgroundColor: "#880000",
+    backgroundColor: "#F9F4F1",
     width: "80%",
-    height: "75%",
+    height: "52%",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
+    marginTop: 40,
+    marginBottom: 40, // Add margin to create space
   },
+  navigationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "80%", // Adjust to your design needs
+    marginTop: 20, // Optional spacing
+    marginBottom: 20, // Optional spacing for further alignment
+  },
+  prevButton: {
+    padding: 10,
+  },
+  nextButton: {
+    padding: 10,
+  },
+
   wordText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "white",
+    color: "#FF3B30",
   },
   phoneticText: {
     fontSize: 20,
-    color: "white",
+    color: "#FF8754",
     marginTop: 10,
   },
-  bottomContainer: {
-    alignItems: "center",
-  },
+
   listenButton: {
-    marginTop: 20,
-    backgroundColor: "#880000",
+    backgroundColor: "#FF3B30",
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
@@ -289,92 +329,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  prevButton: {
-    position: "absolute",
-    bottom: 100,
-    left: 30,
-    backgroundColor: "white",
-    borderRadius: 50,
-    padding: 10,
-  },
-  nextButton: {
-    position: "absolute",
-    bottom: 100,
-    right: 30,
-    backgroundColor: "white",
-    borderRadius: 50,
-    padding: 10,
-  },
   feedbackContainer: {
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
-    feedbackContent: {
-      height: "50%",
-      backgroundColor: "white",
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      paddingHorizontal: 20,
-      paddingVertical: 30,
-      justifyContent: "space-between",
-    },
-    feedbackTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 15,
-      textAlign: "center",
-    },
-    tahminText: {
-      fontSize: 18,
-      //marginBottom: 10,
-      textAlign: "left", // Align text to the left
-    },
-    instructionText: {
-      fontSize: 18,
-      //marginBottom: 10,
-      textAlign: "left", // Align text to the left
-    },
-    kelimeText: {
-      fontSize: 18,
-     fontWeight: "bold",
-      textAlign: "center", // Align text to the left
-    },
-    ipucuText: {
-      fontSize: 18,
-      marginBottom: 20,
-      textAlign: "left", // Align text to the left
-    },
-    ipucuBold: {
-      fontWeight: "bold",
-    },
-
-  closeButtonContainer: {
-    width: "50%",
-    alignItems: "center",
-    marginBottom: 20, // Provide spacing at the bottom
+  feedbackContent: {
+    height: "50%",
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    justifyContent: "space-between",
   },
-  closeButton: {
-    backgroundColor: "#880000",
-    paddingVertical: 12,
-    paddingHorizontal: 39,
-    borderRadius: 20,
-    alignSelf: "center",
-    marginBottom: 10, // Ensures some spacing at the bottom
-  },
-  
-  closeButtonText: {
-    color: "white",
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-
   navBar: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
     height: 70,
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
   },
   navItem: {
     alignItems: "center",
@@ -385,13 +364,12 @@ const styles = StyleSheet.create({
   },
   redText: {
     color: "red",
-    fontSize: 23,  // Updated fontSize
+    fontSize: 23,
     fontWeight: "bold",
   },
   blackText: {
     color: "black",
-    fontSize: 23,  // Updated fontSize
+    fontSize: 23,
     fontWeight: "bold",
   },
-  
 });
