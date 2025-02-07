@@ -22,8 +22,6 @@ import OTPVerification from "../src/OTPVerification";
 import EmailVerification from "../src/EmailVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 
-
-
 const Stack = createStackNavigator();
 
 export default function Index() {
@@ -99,26 +97,6 @@ export default function Index() {
         <Stack.Screen
           name="Atekrar"
           component={Atekrar}
-          options={{ headerShown: false }} // Hide header for Home
-        />
-        <Stack.Screen 
-          name="Sohbet" 
-          component={Sohbet} 
-          options={{ headerShown: false }} // Hide header for Home
-        />
-        <Stack.Screen 
-          name="Acourse" 
-          component={Acourse} 
-          options={{ headerShown: false }} // Hide header for Home
-        />
-        <Stack.Screen 
-          name="Akelime" 
-          component={Akelime} 
-          options={{ headerShown: false }} // Hide header for Home
-        />
-        <Stack.Screen 
-          name="Geneltekrar" 
-          component={Geneltekrar} 
           options={{ headerShown: false }} // Hide header for Home
         />
       </Stack.Navigator>
