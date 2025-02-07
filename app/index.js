@@ -18,65 +18,85 @@ import Sohbet from "../src/Sohbet";
 import Acourse from "../src/Acourse";
 import Akelime from "../src/Akelime";
 import Geneltekrar from "../src/Geneltekrar";
+import OTPVerification from "../src/OTPVerification";
+import EmailVerification from "../src/EmailVerification";
+import LoginOTPVerification from "../src/LoginOTPVerification";
+
 const Stack = createStackNavigator();
 
 export default function Index() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Fonetika">
-        <Stack.Screen 
-          name="Login" 
-          component={Login} 
+        <Stack.Screen
+          name="Login"
+          component={Login}
           options={{ headerShown: false }} // Hide header for Login
         />
-        <Stack.Screen 
-          name="Register" 
-          component={Register} 
+        <Stack.Screen
+          name="LoginOTPVerification"
+          component={LoginOTPVerification}
+          options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="Register"
+          component={Register}
           options={{ headerShown: false }} // Hide header for Login
         />
-        <Stack.Screen 
-          name="Home" 
-          component={Home} 
+        <Stack.Screen
+          name="OTPVerification"
+          component={OTPVerification} // Add OTPVerification screen
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="EmailVerification"
+          component={EmailVerification}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={Home}
           options={{ headerShown: false }} // Hide header for Home
         />
-        <Stack.Screen 
-          name="Kelime" 
-          component={Kelime} 
+        <Stack.Screen
+          name="Kelime"
+          component={Kelime}
           options={{ headerShown: false }} // Hide header for Kelime
         />
-        <Stack.Screen 
-          name="Record" 
-          component={Record} 
+        <Stack.Screen
+          name="Record"
+          component={Record}
           options={{ headerShown: false }} // Hide header for Record
         />
-        <Stack.Screen 
-          name="Fonetika" 
-          component={Fonetika} 
+        <Stack.Screen
+          name="Fonetika"
+          component={Fonetika}
           options={{ headerShown: false }} // Hide header for Fonetika
         />
-         <Stack.Screen 
-          name="Merhaba" 
-          component={Merhaba} 
+        <Stack.Screen
+          name="Merhaba"
+          component={Merhaba}
           options={{ headerShown: false }} // Hide header for Fonetika
         />
-         <Stack.Screen 
-          name="Paragraf" 
-          component={Paragraf} 
+        <Stack.Screen
+          name="Paragraf"
+          component={Paragraf}
           options={{ headerShown: false }} // Hide header for Fonetika
         />
-         <Stack.Screen 
-          name="Dersler" 
-          component={Dersler} 
+        <Stack.Screen
+          name="Dersler"
+          component={Dersler}
           options={{ headerShown: false }} // Hide header for Home
         />
-        <Stack.Screen 
-          name="Tekrar" 
-          component={Tekrar} 
+        <Stack.Screen
+          name="Tekrar"
+          component={Tekrar}
           options={{ headerShown: false }} // Hide header for Home
         />
-        <Stack.Screen 
-          name="Atekrar" 
-          component={Atekrar} 
+        <Stack.Screen
+          name="Atekrar"
+          component={Atekrar}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen 
