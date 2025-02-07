@@ -14,6 +14,13 @@ import Paragraf from "../src/Paragraf";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import Atekrar from "../src/Atekrar";
+import Sohbet from "../src/Sohbet";
+import Acourse from "../src/Acourse";
+import Akelime from "../src/Akelime";
+import Geneltekrar from "../src/Geneltekrar";
+import OTPVerification from "../src/OTPVerification";
+import EmailVerification from "../src/EmailVerification";
+import LoginOTPVerification from "../src/LoginOTPVerification";
 
 const Stack = createStackNavigator();
 
