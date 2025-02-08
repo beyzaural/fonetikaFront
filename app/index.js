@@ -21,13 +21,14 @@ import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
 import EmailVerification from "../src/EmailVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
+import GoalSelection from "../src/GoalSelection";
 
 const Stack = createStackNavigator();
 
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Fonetika">
+      <Stack.Navigator initialRouteName="GoalSelection">
         <Stack.Screen
           name="Login"
           component={Login}
@@ -44,11 +45,19 @@ export default function Index() {
           component={Register}
           options={{ headerShown: false }} // Hide header for Login
         />
+
+        <Stack.Screen
+          name="GoalSelection"
+          component={GoalSelection}
+          options={{ headerShown: false }}
+        />
+
         <Stack.Screen
           name="OTPVerification"
           component={OTPVerification} // Add OTPVerification screen
           options={{ headerShown: false }}
         />
+
         <Stack.Screen
           name="EmailVerification"
           component={EmailVerification}

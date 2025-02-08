@@ -1,19 +1,18 @@
+import React from "react";
 import {
   StyleSheet,
   Text,
-  View, // Add View here
-  TextInput,
+  View,
   ImageBackground,
   Image,
-  Pressable,
-  ScrollView,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
-
-import React, { useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 
-const Home = ({ navigation }) => {
+const Home = ({ navigation, route }) => {
+  const dailyGoal = route.params?.dailyGoal; // Get dailyGoal from route.params
+
   return (
     <ImageBackground
       source={require("../assets/images/green.png")} // Reference your image here
@@ -29,8 +28,10 @@ const Home = ({ navigation }) => {
       {/* Cards Container */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.cardsContainer}>
-          <TouchableOpacity style={styles.card}
-          onPress={() => navigation.navigate("Sohbet")}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("Sohbet")}
+          >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
               start={{ x: 4, y: 0 }}
@@ -66,25 +67,26 @@ const Home = ({ navigation }) => {
           </TouchableOpacity>
 
           <TouchableOpacity
-  style={styles.card}
-  onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
->
-  <LinearGradient
-    colors={["#d6d5b3", "#FFFFFF"]}
-    start={{ x: 4, y: 0 }}
-    end={{ x: 0, y: 0.2 }}
-    style={styles.cardGradient}
-  >
-    <Image
-      source={require("../assets/icons/update-arrow.png")}
-      style={styles.chatIcon}
-    />
-    <Text style={styles.cardText}>Geçmiş</Text>
-    <Text style={styles.cardSubText}>%60 tamamlandı</Text>
-  </LinearGradient>
-</TouchableOpacity>
-          <TouchableOpacity style={styles.card}
-          onPress={() => navigation.navigate("Paragraf")} // Navigate to Paragraf.js
+            style={styles.card}
+            onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
+          >
+            <LinearGradient
+              colors={["#d6d5b3", "#FFFFFF"]}
+              start={{ x: 4, y: 0 }}
+              end={{ x: 0, y: 0.2 }}
+              style={styles.cardGradient}
+            >
+              <Image
+                source={require("../assets/icons/update-arrow.png")}
+                style={styles.chatIcon}
+              />
+              <Text style={styles.cardText}>Geçmiş</Text>
+              <Text style={styles.cardSubText}>%60 tamamlandı</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("Paragraf")} // Navigate to Paragraf.js
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -105,12 +107,15 @@ const Home = ({ navigation }) => {
 
       {/* Navigation Bar */}
       <View style={styles.navBar}>
-      <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navItem}>
-    <Image
-      source={require("../assets/icons/home.png")} // Your home icon
-      style={styles.navIcon}
-    />
-  </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Home")}
+          style={styles.navItem}
+        >
+          <Image
+            source={require("../assets/icons/home.png")} // Your home icon
+            style={styles.navIcon}
+          />
+        </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <Image
             source={require("../assets/icons/profile.png")} // Replace with your icon
@@ -123,19 +128,22 @@ const Home = ({ navigation }) => {
             style={styles.navIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-  <Image
-    source={require("../assets/icons/fitness.png")} // Your fitness icon
-    style={styles.navIcon}
-  />
-</TouchableOpacity>
-
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Dersler")}
+          style={styles.navItem}
+        >
+          <Image
+            source={require("../assets/icons/fitness.png")} // Your fitness icon
+            style={styles.navIcon}
+          />
+        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
 };
 
 export default Home;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -153,6 +161,12 @@ const styles = StyleSheet.create({
     color: "white",
     marginLeft: 20,
   },
+  dailyGoalText: {
+    fontSize: 20,
+    color: "white",
+    marginTop: 20,
+    marginLeft: 20,
+  },
   subtitle: {
     fontSize: 20,
     color: "white",
@@ -162,7 +176,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1, // Ensures ScrollView content stretches properly
-    paddingVertical: 40, // Adds vertical paddingi
+    paddingVertical: 40, // Adds vertical padding
   },
   cardsContainer: {
     flexDirection: "row",
@@ -173,23 +187,17 @@ const styles = StyleSheet.create({
   card: {
     width: "48%", // Half width with spacing
     height: 220,
-    backgroundColor: "FFFFFF",
-    //justifyContent: 'center',
     borderRadius: 35,
     marginBottom: 15,
-    //overflow: 'hidden',
-
-    // Shadow for iOS
   },
   cardGradient: {
-    flex: 1, // Ensure the gradient fills the parent TouchableOpacity
+    flex: 1,
     borderRadius: 35,
-    overflow: "hidden", // Prevent content from overflowing the rounded corners
-    justifyContent: "center", // Center content
-    alignItems: "center", // Center content horizontally
-    // Shadow for iOS
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: { width: -3, height: -3 }, // Top-left inset
+    shadowOffset: { width: -3, height: -3 },
     shadowRadius: 4,
     shadowOpacity: 0.5,
     elevation: 6,
@@ -197,16 +205,15 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "black", // Purple shade for text
+    color: "black",
     marginTop: 30,
     marginBottom: 5,
     textAlign: "center",
   },
   chatIcon: {
     marginTop: 60,
-    width: 60, // Set the width of the icon
-    height: 60, // Set the height of the icon
-    // Add some space below the icon
+    width: 60,
+    height: 60,
   },
   cardSubText: {
     fontSize: 14,
@@ -214,8 +221,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   imageBackground: {
-    flex: 1, // Ensures the background image fills the screen
-    resizeMode: "cover", // Ensures the image scales properly
+    flex: 1,
+    resizeMode: "cover",
   },
   navBar: {
     height: 70,
