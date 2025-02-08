@@ -22,6 +22,7 @@ import OTPVerification from "../src/OTPVerification";
 import EmailVerification from "../src/EmailVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
+import Profile from "../src/Profile";
 
 const Stack = createStackNavigator();
 
@@ -39,7 +40,6 @@ export default function Index() {
           component={LoginOTPVerification}
           options={{ headerShown: false }}
         />
-
         <Stack.Screen
           name="Register"
           component={Register}
@@ -67,6 +67,11 @@ export default function Index() {
           name="Home"
           component={Home}
           options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen
+          name="Profile"
+          component={Profile}
+          options={{ headerShown: false }} // Hide header for Login
         />
         <Stack.Screen
           name="Kelime"

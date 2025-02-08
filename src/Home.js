@@ -116,13 +116,20 @@ const Home = ({ navigation, route }) => {
             style={styles.navIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Profile")}
+          style={styles.navItem}
+        >
           <Image
             source={require("../assets/icons/profile.png")} // Replace with your icon
             style={styles.navIcon}
           />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
+
+        <TouchableOpacity
+          style={styles.navItem}
+          onPress={() => navigation.navigate("Profile")}
+        >
           <Image
             source={require("../assets/icons/settings.png")} // Replace with your icon
             style={styles.navIcon}

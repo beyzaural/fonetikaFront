@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   backIcon: {
-    width: 50,
-    height: 50,
+    width: 45,
+    height: 45,
   },
   topContainer: {
     // flex: 1,
