@@ -10,6 +10,7 @@ import {
 
 import Constants from "expo-constants";
 import React, { useState } from "react";
+import { Alert } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -21,7 +22,7 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password.");
+      Alert.alert("Hata", "Lütfen mail ve şifrenizi giriniz.");
       return;
     }
 
@@ -33,33 +34,21 @@ const Login = ({ navigation }) => {
       });
 
       const data = await response.json();
-      console.log("Login Response:", data);
-
-      if (!data.data || !data.data.otpSessionToken || !data.data.identifier) {
-        console.error(
-          "ERROR: Missing otpSessionToken or identifier from backend response!",
-          data
-        );
-        Alert.alert(
-          "Error",
-          "OTP token or identifier is missing. Please try again."
-        );
-        return;
-      }
-
       const otpSessionToken = data.data.otpSessionToken;
-      const identifier = data.data.identifier; // ✅ Extract identifier (phone or email)
-      console.log("Extracted OTP Session Token:", otpSessionToken);
-      console.log("Identifier:", identifier);
+      const identifier = data.data.identifier;
 
       navigation.navigate("LoginOTPVerification", {
         otpSessionToken: otpSessionToken,
-        identifier: identifier, // ✅ Send correct identifier
+        identifier: identifier,
         deliveryMethod: deliveryMethod,
+        email: email,
+        password: password,
       });
     } catch (error) {
-      Alert.alert("Error", "An error occurred. Please try again.");
-      console.error("Login Error:", error);
+      Alert.alert(
+        "Giriş Başarısız!",
+        "Yanlış mail ya da şifre, lütfen tekrar deneyiniz."
+      );
     }
   };
 
@@ -68,7 +57,7 @@ const Login = ({ navigation }) => {
       {/* Top Container */}
       <View style={styles.topContainer}>
         <Image
-          source={require("../assets/images/login2.png")} // Adjust the path to your hello.png
+          source={require("../assets/images/login2.png")}
           style={styles.topImage}
           resizeMode="contain"
         />
@@ -81,7 +70,7 @@ const Login = ({ navigation }) => {
         <View style={styles.inputContainer}>
           <Text style={styles.labelText}> Email </Text>
           <TextInput
-            placeholder="Enter your email"
+            placeholder="Mail adresinizi girin."
             style={styles.textInputStyle}
             placeholderTextColor="#888"
             autoCapitalize="none"
@@ -93,7 +82,7 @@ const Login = ({ navigation }) => {
         <View style={styles.inputContainer}>
           <Text style={styles.labelText}> Password </Text>
           <TextInput
-            placeholder="Enter your password"
+            placeholder="Şifrenizi girin."
             style={styles.textInputStyle}
             placeholderTextColor="#888"
             secureTextEntry
@@ -103,7 +92,17 @@ const Login = ({ navigation }) => {
         </View>
 
         {/* Delivery Method Selection */}
-        <Text style={styles.labelText}>Choose Delivery Method:</Text>
+        <View style={{ marginBottom: 10 }}>
+          <Text
+            style={[
+              styles.labelText,
+              { textAlign: "center", marginBottom: 10 },
+            ]}
+          >
+            Tek seferlik giriş kodunu almak istediğiniz yolu seçin.
+          </Text>
+        </View>
+
         <View style={styles.radioContainer}>
           <Pressable
             onPress={() => setDeliveryMethod("email")}
@@ -112,7 +111,7 @@ const Login = ({ navigation }) => {
               deliveryMethod === "email" && styles.radioSelected,
             ]}
           >
-            <Text>Email</Text>
+            <Text>Mail</Text>
           </Pressable>
           <Pressable
             onPress={() => setDeliveryMethod("phone")}
@@ -121,7 +120,7 @@ const Login = ({ navigation }) => {
               deliveryMethod === "phone" && styles.radioSelected,
             ]}
           >
-            <Text>Phone</Text>
+            <Text>Telefon</Text>
           </Pressable>
         </View>
 
@@ -132,12 +131,15 @@ const Login = ({ navigation }) => {
           <Text style={styles.kaydolText}>Giriş Yap</Text>
         </Pressable>
 
-        {/* Link to Register */}
-        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-          <Text style={styles.registerLink}>
-            Hesabınız yoksa <Text style={styles.highlightText}>kaydolun</Text>
-          </Text>
-        </TouchableOpacity>
+        <Pressable
+          onPress={() => navigation.navigate("Register")}
+          style={({ pressed }) => [
+            styles.registerButton,
+            pressed && { opacity: 0.8 },
+          ]}
+        >
+          <Text style={styles.registerText}>Kaydol</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -228,6 +230,23 @@ const styles = StyleSheet.create({
   kaydolText: {
     fontWeight: "bold",
     color: "white",
+    fontSize: 16,
+  },
+  registerButton: {
+    width: "100%",
+    height: 50,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white", // Different background color
+    borderWidth: 2, // Add a border for differentiation
+    borderColor: "black", // Matching border color
+    marginTop: 10, // Add spacing between buttons
+  },
+
+  registerText: {
+    fontWeight: "bold",
+    color: "black", // Make text black to contrast with white button
     fontSize: 16,
   },
 });

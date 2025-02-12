@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Alert } from "react-native";
-
+import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import React, { useState } from "react";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,8 +6,8 @@ import {
   TextInput,
   Pressable,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 
@@ -15,76 +15,102 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const LoginOTPVerification = ({ navigation, route }) => {
-  const [otp, setOtp] = useState("");
-  const { otpSessionToken, identifier, deliveryMethod } = route.params;
+  const { otpSessionToken, identifier, deliveryMethod, email, password } =
+    route.params;
 
-  console.log("OTP Session Token Received:", otpSessionToken); // ✅ Debugging
-  console.log("Identifier:", identifier, "Delivery Method:", deliveryMethod);
+  const [currentIdentifier, setCurrentIdentifier] = useState(identifier);
+  const [currentOtpSessionToken, setCurrentOtpSessionToken] =
+    useState(otpSessionToken);
+  const [otp, setOtp] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resendEnabled, setResendEnabled] = useState(false);
+  const [currentDeliveryMethod, setCurrentDeliveryMethod] =
+    useState(deliveryMethod);
+
+  const deliveryMethodMapping = {
+    phone: "telefon",
+    email: "e-posta",
+  };
+
+  const otherMethod = currentDeliveryMethod === "phone" ? "email" : "phone";
+
+  useEffect(() => {
+    const timer = setTimeout(() => setResendEnabled(true), 120000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
-      Alert.alert("Error", "Please enter a 6-digit OTP.");
+      Alert.alert("Hata", "Lütfen 6 haneli tek seferlik kodu girin.");
       return;
     }
-
-    console.log("Sending OTP Verification Request with:", {
-      otpSessionToken,
-      otp,
-      identifier,
-    });
 
     try {
       const response = await fetch(`${API_URL}/auth/validate-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          otpSessionToken,
-          otp,
-          identifier,
-        }),
+        body: JSON.stringify({ identifier: currentIdentifier, otp }),
       });
 
       const data = await response.json();
-      console.log("OTP Verification Response:", data);
-
-      // ✅ Ensure `data` and `data.data` exist before accessing tokens
       if (
         !data.success ||
-        !data.data ||
-        !data.data.accessToken ||
-        !data.data.refreshToken
+        !data.data?.accessToken ||
+        !data.data?.refreshToken
       ) {
-        console.error("ERROR: Invalid response from backend!", data);
-        Alert.alert("Error", "Invalid server response. Please try again.");
+        Alert.alert("Hata", "Yanlış kod. Lütfen tekrar girin.");
         return;
       }
 
-      const accessToken = data.data.accessToken;
-      const refreshToken = data.data.refreshToken;
+      await AsyncStorage.setItem("accessToken", data.data.accessToken);
+      await AsyncStorage.setItem("refreshToken", data.data.refreshToken);
 
-      console.log("Storing Tokens:", { accessToken, refreshToken });
-
-      // ✅ Ensure tokens are not undefined before storing
-      if (!accessToken || !refreshToken) {
-        throw new Error("Received undefined tokens from server.");
-      }
-
-      await AsyncStorage.setItem("accessToken", accessToken);
-      await AsyncStorage.setItem("refreshToken", refreshToken);
-
-      Alert.alert("Success", "Login successful!");
+      Alert.alert("Başarı", "Giriş Başarılı!");
       navigation.navigate("Home");
     } catch (error) {
-      console.error("OTP Verification Request Error:", error);
-      Alert.alert("Error", "An error occurred. Please try again.");
+      Alert.alert("Hata", "Bir hata oluştu lütfen tekrar deneyiniz.");
     }
+  };
+
+  const handleResendOTP = async (newMethod = currentDeliveryMethod) => {
+    if (!resendEnabled) return;
+    setLoading(true);
+    setResendEnabled(false);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, deliveryMethod: newMethod }),
+      });
+
+      const data = await response.json();
+      if (
+        data.success &&
+        data.data &&
+        data.data.otpSessionToken &&
+        data.data.identifier
+      ) {
+        setCurrentOtpSessionToken(data.data.otpSessionToken);
+        setCurrentIdentifier(data.data.identifier);
+        setCurrentDeliveryMethod(newMethod);
+
+        Alert.alert("Başarı", `Tek seferlik kod ${newMethod} ile gönderildi`);
+        setTimeout(() => setResendEnabled(true), 120000);
+      } else {
+        Alert.alert("Hata", data.message || "Kod gönderilemedi.");
+      }
+    } catch (error) {
+      Alert.alert("Hata", "Bir hata oluştu. Lütfen tekrar deneyiniz.");
+    }
+    setLoading(false);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.titleText}>Two-Factor Authentication</Text>
       <Text style={styles.subtitleText}>
-        Please enter the 6-digit OTP sent to your {deliveryMethod}.
+        Please enter the 6-digit OTP sent to your {currentDeliveryMethod}.
       </Text>
 
       <TextInput
@@ -99,6 +125,41 @@ const LoginOTPVerification = ({ navigation, route }) => {
 
       <Pressable onPress={handleVerifyOTP} style={styles.button}>
         <Text style={styles.buttonText}>Verify OTP</Text>
+      </Pressable>
+
+      <Pressable
+        onPress={() => handleResendOTP(currentDeliveryMethod)}
+        style={[
+          styles.secondaryButton,
+          (!resendEnabled || loading) && styles.disabledButton,
+        ]}
+        disabled={!resendEnabled || loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.buttonText}>
+            Tek seferlik kod {deliveryMethodMapping[currentDeliveryMethod]} ile
+            gönder
+          </Text>
+        )}
+      </Pressable>
+
+      <Pressable
+        onPress={() => handleResendOTP(otherMethod)}
+        style={[
+          styles.secondaryButton,
+          (!resendEnabled || loading) && styles.disabledButton,
+        ]}
+        disabled={!resendEnabled || loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="white" />
+        ) : (
+          <Text style={styles.buttonText}>
+            Tek seferlik kod {deliveryMethodMapping[otherMethod]} ile gönder
+          </Text>
+        )}
       </Pressable>
     </View>
   );
@@ -142,6 +203,17 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: "center",
+    marginBottom: 15,
+  },
+  secondaryButton: {
+    backgroundColor: "gray",
+    borderRadius: 10,
+    paddingVertical: 15,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  disabledButton: {
+    backgroundColor: "#ccc",
   },
   buttonText: {
     color: "white",
