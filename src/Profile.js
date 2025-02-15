@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getUserInfo } from "./utils/auth";
+import { getUserProfile } from "./utils/auth"; // Adjust the path as needed
 
 const Profile = ({ navigation }) => {
   const [avatar, setAvatar] = useState("");
@@ -17,20 +17,16 @@ const Profile = ({ navigation }) => {
   const [email, setEmail] = useState("");
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const userInfo = await getUserInfo();
-      console.log("Decoded user info:", userInfo);
-      if (userInfo?.username) {
-        setUserName(userInfo.username);
-        // Set avatar to the first letter of the username (capitalized)
-        setAvatar(userInfo.username.charAt(0).toUpperCase());
-      }
-      // If your token doesn't include an email, you can leave this as a default or fetch it separately.
-      if (userInfo?.email) {
-        setEmail(userInfo.email);
+    const fetchProfile = async () => {
+      const profile = await getUserProfile();
+      console.log("Fetched profile:", profile);
+      if (profile) {
+        setUserName(profile.username);
+        setEmail(profile.email);
+        setAvatar(profile.username.charAt(0).toUpperCase());
       }
     };
-    fetchUserData();
+    fetchProfile();
   }, []);
 
   const handleSave = () => {
@@ -70,7 +66,7 @@ const Profile = ({ navigation }) => {
         <TextInput
           style={styles.fieldInput}
           value={userName}
-          editable={false} // Not editable since it comes from the token
+          editable={false}
         />
 
         <Text style={styles.fieldLabel}>Parola</Text>

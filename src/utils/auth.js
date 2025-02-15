@@ -1,5 +1,9 @@
 const jwtDecodeLib = require("jwt-decode");
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
+
 
 // Check if the module has a default export; otherwise, use the imported object directly.
 const decodeFunction =
@@ -15,6 +19,38 @@ export const getUserInfo = async () => {
     return decoded;
   } catch (error) {
     console.error("Error decoding token:", error);
+    return null;
+  }
+};
+
+// New function to fetch user profile
+export const getUserProfile = async () => {
+  try {
+    const token = await AsyncStorage.getItem("accessToken");
+    if (!token) return null;
+
+    const decoded = decodeFunction(token);
+    const userId = decoded.userId;
+    console.log("Extracted userId:", userId);
+
+    // Fetch the profile from the backend using the userId
+    const response = await fetch(`${API_URL}/users/profile?userId=${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("Error fetching profile:", response.status);
+      return null;
+    }
+
+    const profile = await response.json();
+    return profile;
+  } catch (error) {
+    console.error("Error in getUserProfile:", error);
     return null;
   }
 };
