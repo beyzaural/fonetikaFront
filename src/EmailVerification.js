@@ -11,6 +11,7 @@ import {
 import Constants from "expo-constants";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
+import jwtDecode from "jwt-decode";
 
 const EmailVerification = ({ navigation, route }) => {
   const { tempToken, email } = route.params;
@@ -54,10 +55,9 @@ const EmailVerification = ({ navigation, route }) => {
 
   const decodeToken = (token) => {
     try {
-      const base64Url = token.split(".")[1]; // Get payload part
-      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/"); // Fix encoding
-      const decoded = JSON.parse(atob(base64)); // Decode
-      console.log("Decoded Token:", decoded); // Add this
+      console.log("Token to decode:", token); // Log the token for debugging
+      const decoded = jwtDecode(token);
+      console.log("Decoded Token:", decoded);
       return decoded;
     } catch (error) {
       console.error("Error decoding token:", error);

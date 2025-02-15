@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,9 +9,22 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { getUserInfo } from "./utils/auth";
 
 const Home = ({ navigation, route }) => {
+  const [userName, setUserName] = useState("");
   const dailyGoal = route.params?.dailyGoal; // Get dailyGoal from route.params
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userInfo = await getUserInfo(); // Fetch user info from token
+      console.log("Decoded user info:", userInfo);
+      if (userInfo?.username) {
+        setUserName(userInfo.username); // Use 'username' instead of 'name'
+      }
+    };
+    fetchUserData();
+  }, []);
 
   return (
     <ImageBackground
@@ -20,7 +33,7 @@ const Home = ({ navigation, route }) => {
     >
       {/* Welcome Text */}
       <Text style={styles.welcomeText}>Hoşgeldin</Text>
-      <Text style={styles.nameText}>Beyza!</Text>
+      <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>Derslerin</Text>

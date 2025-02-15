@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,13 +8,30 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
+import { getUserInfo } from "./utils/auth";
 
 const Profile = ({ navigation }) => {
-  const [avatar, setAvatar] = useState("E"); // Placeholder for avatar
-  const [ad, setAd] = useState("Elif");
-  const [soyad, setSoyad] = useState("Sorguç");
+  const [avatar, setAvatar] = useState("");
+  const [userName, setUserName] = useState("");
   const [parola, setParola] = useState("");
-  const [email, setEmail] = useState("turtlekassiopeia@gmail.com");
+  const [email, setEmail] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userInfo = await getUserInfo();
+      console.log("Decoded user info:", userInfo);
+      if (userInfo?.username) {
+        setUserName(userInfo.username);
+        // Set avatar to the first letter of the username (capitalized)
+        setAvatar(userInfo.username.charAt(0).toUpperCase());
+      }
+      // If your token doesn't include an email, you can leave this as a default or fetch it separately.
+      if (userInfo?.email) {
+        setEmail(userInfo.email);
+      }
+    };
+    fetchUserData();
+  }, []);
 
   const handleSave = () => {
     Alert.alert("Bilgi", "Bilgileriniz başarıyla güncellendi!");
@@ -52,15 +69,8 @@ const Profile = ({ navigation }) => {
         <Text style={styles.fieldLabel}>Ad</Text>
         <TextInput
           style={styles.fieldInput}
-          value={ad}
-          editable={false} // Not editable
-        />
-
-        <Text style={styles.fieldLabel}>Soyad</Text>
-        <TextInput
-          style={styles.fieldInput}
-          value={soyad}
-          editable={false} // Not editable
+          value={userName}
+          editable={false} // Not editable since it comes from the token
         />
 
         <Text style={styles.fieldLabel}>Parola</Text>
@@ -105,7 +115,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    //top: 20,
     zIndex: 10,
   },
   backIcon: {
@@ -116,7 +125,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
-    flex: 1, // Centers the title horizontally
+    flex: 1,
     color: "#333",
   },
   avatarContainer: {
