@@ -26,8 +26,6 @@ import Profile from "../src/Profile";
 import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
 import ResetPasswordScreen from "../src/ResetPasswordScreen";
 import Ayarlar from "../src/Ayarlar";
-import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
-import ResetPasswordScreen from "../src/ResetPasswordScreen";
 
 const Stack = createStackNavigator();
 
