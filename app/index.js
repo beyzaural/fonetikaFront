@@ -10,6 +10,7 @@ import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
 import Merhaba from "../src/Merhaba";
 import Register from "../src/Register";
+import Paragraph from "../src/Paragraph";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import Atekrar from "../src/Atekrar";
@@ -24,6 +25,8 @@ import GoalSelection from "../src/GoalSelection";
 import Profile from "../src/Profile";
 
 import Ayarlar from "../src/Ayarlar";
+import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
+import ResetPasswordScreen from "../src/ResetPasswordScreen";
 
 const Stack = createStackNavigator();
 
@@ -39,6 +42,16 @@ export default function Index() {
         <Stack.Screen
           name="LoginOTPVerification"
           component={LoginOTPVerification}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ForgotPasswordScreen"
+          component={ForgotPasswordScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ResetPasswordScreen"
+          component={ResetPasswordScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen
@@ -98,6 +111,8 @@ export default function Index() {
           options={{ headerShown: false }} // Hide header for Fonetika
         />
         <Stack.Screen
+          name="Paragraph"
+          component={Paragraph}
           options={{ headerShown: false }} // Hide header for Fonetika
         />
         <Stack.Screen
