@@ -23,6 +23,8 @@ import EmailVerification from "../src/EmailVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
 import Profile from "../src/Profile";
+import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
+import ResetPasswordScreen from "../src/ResetPasswordScreen";
 import Ayarlar from "../src/Ayarlar";
 import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
 import ResetPasswordScreen from "../src/ResetPasswordScreen";
