@@ -141,7 +141,7 @@ const Home = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={styles.navItem}
-          onPress={() => navigation.navigate("Profile")}
+          onPress={() => navigation.navigate("Ayarlar")}
         >
           <Image
             source={require("../assets/icons/settings.png")} // Replace with your icon

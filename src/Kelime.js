@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -274,8 +274,8 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   backIcon: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
   },
   topContainer: {
     marginTop: 30,

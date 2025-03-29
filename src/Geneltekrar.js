@@ -1,347 +1,375 @@
+import React, { useState } from "react";
 import {
-    StyleSheet,
-    Text,
-    View,
-    Image,
-    ImageBackground,
-    TouchableOpacity,
-    Modal,
-  } from "react-native";
-  import React, { useState } from "react";
-  import { FontAwesome } from "@expo/vector-icons";
-  import { Audio } from "expo-av"; // Import Audio from expo-av
-  
-  const Geneltekrar = ({ navigation }) => {
-    const [isRecording, setIsRecording] = useState(false); // Track if recording is in progress
-    const [recording, setRecording] = useState(null); // Store the Recording object
-    const [audioUri, setAudioUri] = useState(null); // Store the URI of the saved audio file
-    const [showFeedback, setShowFeedback] = useState(false); // Show feedback modal
-    const [definition, setDefinition] = useState(""); // Phonetic feedback
-  
-    // List of words and definitions
-    const words = [
-        { word: "Kamuflaj", definition: "Kamuflâj" },
-        { word: "Ağabey", definition: "A:bi" },
-        { word: "Sahi", definition: "sa:hi" },
-        { word: "Şiir", definition: "şi:r" },
-      ];
-    
-  
-    const [currentIndex, setCurrentIndex] = useState(0);
-  
-    // Handle microphone press (start/stop recording)
-    const handleMicrophonePress = async () => {
-      if (recording) {
-        // Stop recording
-        try {
-          await recording.stopAndUnloadAsync();
-          const uri = recording.getURI(); // Get URI of the recorded audio
-          console.log("Recording saved at:", uri);
-          setAudioUri(uri); // Save URI for further processing or playback
-          setRecording(null); // Clear the recording object
-          setIsRecording(false);
-          setShowFeedback(true); // Show feedback after recording stops
-          setDefinition(words[currentIndex].definition); // Show phonetic definition
-        } catch (error) {
-          console.error("Error stopping recording:", error);
-        }
-      } else {
-        // Start recording
-        try {
-          const { granted } = await Audio.requestPermissionsAsync();
-          if (!granted) {
-            alert("Microphone permission is required to record audio.");
-            return;
-          }
-          await Audio.setAudioModeAsync({
-            allowsRecordingIOS: true,
-            playsInSilentModeIOS: true,
-          });
-          const { recording } = await Audio.Recording.createAsync(
-            Audio.RecordingOptionsPresets.HIGH_QUALITY // Use high-quality audio settings
-          );
-          setRecording(recording); // Save the recording object
-          setIsRecording(true); // Indicate that recording is in progress
-        } catch (error) {
-          console.error("Failed to start recording:", error);
-        }
-      }
-    };
-  
-    // Play the recorded audio
-    const playAudio = async () => {
-      if (!audioUri) {
-        alert("Henüz bir kayıt yapılmadı!");
-        return;
-      }
-  
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ImageBackground,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
+import { FontAwesome } from "@expo/vector-icons";
+import { Audio } from "expo-av";
+
+const Geneltekrar = ({ navigation }) => {
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState(null);
+  const [audioUri, setAudioUri] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
+  const words = [
+    {
+      word: "Kamuflaj",
+      definition: "Kamuflâj",
+      tahmin: "Sanırım “kamoflâj” dediniz.",
+      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      kelime: "kamuflâj",
+      ipucu:
+        "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
+    },
+    {
+      word: "Ağabey",
+      definition: "A:bi",
+      tahmin: "Sanırım “a:bey” dediniz.",
+      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      kelime: "a:bi",
+      ipucu:
+        "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
+    },
+    {
+      word: "Sahi",
+      definition: "sa:hi",
+      tahmin: "Sanırım “sahi” dediniz.",
+      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+      kelime: "sa:hi",
+      ipucu: "“:” harfin fazla uzatıldığını gösterir.",
+    },
+    {
+      word: "Şiir",
+      definition: "şi:r",
+      tahmin:
+        "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
+      kelime: "",
+      instruction: "",
+      ipucu: "",
+    },
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleMicrophonePress = async () => {
+    if (recording) {
       try {
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: audioUri },
-          { shouldPlay: true }
-        );
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        console.log("Recording saved at:", uri);
+        setAudioUri(uri);
+        setRecording(null);
+        setIsRecording(false);
+        setShowFeedback(true);
+        setFeedback(words[currentIndex].feedback);
       } catch (error) {
-        console.error("Error playing audio:", error);
+        console.error("Error stopping recording:", error);
       }
-    };
-  
-    const handleNextWord = () => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
-      setShowFeedback(false);
-      setIsRecording(false);
-    };
-  
-    const handlePreviousWord = () => {
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + words.length) % words.length);
-      setShowFeedback(false);
-      setIsRecording(false);
-    };
-  
-    return (
-      <ImageBackground
-        source={require("../assets/images/kelime_back.png")}
-        style={styles.imageBackground}
-      >
-        <View style={styles.container}>
-          {/* Back Arrow */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.navigate("Home")}
-          >
-            <Image
-              source={require("../assets/images/backspace.png")}
-              style={styles.backIcon}
-            />
-          </TouchableOpacity>
-  
-          {/* Top Container */}
-          <View style={styles.topContainer}>
-            <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
-  
-            <View style={styles.wordContainer}>
-              <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-              <Text style={styles.phoneticText}>{words[currentIndex].definition}</Text>
-            </View>
+    } else {
+      try {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+          alert("Microphone permission is required to record audio.");
+          return;
+        }
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+        setRecording(recording);
+        setIsRecording(true);
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+      }
+    }
+  };
+
+  const playAudio = async () => {
+    if (!audioUri) {
+      alert("Henüz bir kayıt yapılmadı!");
+      return;
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
+  };
+
+  const handleNextWord = () => {
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
+    setShowFeedback(false);
+    setIsRecording(false);
+  };
+
+  const handlePreviousWord = () => {
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + words.length) % words.length
+    );
+    setShowFeedback(false);
+    setIsRecording(false);
+  };
+
+  return (
+    <ImageBackground
+      source={require("../assets/images/bluedalga.png")}
+      style={styles.imageBackground}
+    >
+      <View style={styles.container}>
+        {/* Back Arrow */}
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
+        >
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
+        </TouchableOpacity>
+
+        {/* Top Container */}
+        <View style={styles.topContainer}>
+          <View style={styles.wordContainer}>
+            <Text style={styles.wordText}>{words[currentIndex].word}</Text>
+            <Text style={styles.phoneticText}>
+              {words[currentIndex].definition}
+            </Text>
           </View>
-  
-          {/* Bottom Container */}
-          <View style={styles.bottomContainer}>
+
+          {/* Navigation Arrows and Microphone Button in a Row */}
+          <View style={styles.navigationContainer}>
+            <TouchableOpacity
+              style={styles.prevButton}
+              onPress={handlePreviousWord}
+            >
+              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
+            </TouchableOpacity>
             <TouchableOpacity onPress={handleMicrophonePress}>
               <FontAwesome
                 name="microphone"
-                size={90}
-                color={isRecording ? "red" : "#880000"} // Change color based on recording state
+                size={100}
+                color={isRecording ? "red" : "#FF3B30"}
               />
             </TouchableOpacity>
-            <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-              <Text style={styles.listenButtonText}>Dinle</Text>
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNextWord}
+            >
+              <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
             </TouchableOpacity>
-          </View>
-  
-          {/* Navigation Arrows */}
-          <TouchableOpacity style={styles.prevButton} onPress={handlePreviousWord}>
-            <FontAwesome name="arrow-left" size={50} color="#880000" />
-          </TouchableOpacity>
-  
-          <TouchableOpacity style={styles.nextButton} onPress={handleNextWord}>
-            <FontAwesome name="arrow-right" size={50} color="#880000" />
-          </TouchableOpacity>
-  
-          {/* Feedback Popup */}
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={showFeedback}
-            onRequestClose={() => setShowFeedback(false)}
-          >
-            <View style={styles.feedbackContainer}>
-              <View style={styles.feedbackContent}>
-                <Text style={styles.feedbackTitle}>Kelime Okunuşu</Text>
-                <Text style={styles.feedbackText}>{definition}</Text>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setShowFeedback(false)}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </Modal>
-  
-          {/* Navigation Bar */}
-          <View style={styles.navBar}>
-          <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navItem}>
-    <Image
-      source={require("../assets/icons/home.png")} // Your home icon
-      style={styles.navIcon}
-    />
-  </TouchableOpacity>
-            <TouchableOpacity style={styles.navItem}>
-              <Image
-                source={require("../assets/icons/profile.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.navItem}>
-              <Image
-                source={require("../assets/icons/settings.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-  <Image
-    source={require("../assets/icons/fitness.png")} // Your fitness icon
-    style={styles.navIcon}
-  />
-</TouchableOpacity>
           </View>
         </View>
-      </ImageBackground>
-    );
-  };
-  
-  export default Geneltekrar;
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    imageBackground: {
-      flex: 1,
-      resizeMode: "cover",
-    },
-    backButton: {
-      position: "absolute",
-      top: 20,
-      left: 10,
-      zIndex: 10,
-    },
-    backIcon: {
-      width: 50,
-      height: 50,
-    },
-    topContainer: {
-      backgroundColor: "transparent",
-      height: "70%",
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    okuText: {
-      marginTop: 40,
-      marginBottom: 10,
-      textAlign: "center",
-      fontSize: 18,
-      fontWeight: "bold",
-      color: "black",
-    },
-    wordContainer: {
-      backgroundColor: "#880000",
-      width: "80%",
-      height: "75%",
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 10,
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 5 },
-      shadowOpacity: 0.1,
-      shadowRadius: 8,
-      elevation: 6,
-    },
-    wordText: {
-      fontSize: 40,
-      fontWeight: "bold",
-      color: "white",
-    },
-    phoneticText: {
-      fontSize: 20,
-      color: "white",
-      marginTop: 10,
-    },
-    bottomContainer: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    listenButton: {
-      marginTop: 20,
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      backgroundColor: "#880000",
-      borderRadius: 10,
-      alignItems: "center",
-    },
-    listenButtonText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    prevButton: {
-      position: "absolute",
-      bottom: 100,
-      left: 30,
-      backgroundColor: "white",
-      borderRadius: 50,
-      padding: 10,
-      elevation: 5,
-    },
-    nextButton: {
-      position: "absolute",
-      bottom: 100,
-      right: 30,
-      backgroundColor: "white",
-      borderRadius: 50,
-      padding: 10,
-      elevation: 5,
-    },
-    feedbackContainer: {
-      flex: 1,
-      justifyContent: "flex-end",
-      backgroundColor: "rgba(0, 0, 0, 0.5)",
-    },
-    feedbackContent: {
-      height: "45%",
-      backgroundColor: "white",
-      borderTopLeftRadius: 20,
-      borderTopRightRadius: 20,
-      padding: 20,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    feedbackTitle: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 10,
-    },
-    feedbackText: {
-      fontSize: 18,
-      color: "black",
-      textAlign: "center",
-    },
-    closeButton: {
-      marginTop: 20,
-      backgroundColor: "black",
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderRadius: 10,
-    },
-    closeButtonText: {
-      color: "white",
-      fontSize: 16,
-      fontWeight: "bold",
-    },
-    navBar: {
-      height: 70,
-      backgroundColor: "#FFFFFF",
-      flexDirection: "row",
-      justifyContent: "space-around",
-      alignItems: "center",
-    },
-    navItem: {
-      alignItems: "center",
-    },
-    navIcon: {
-      width: 30,
-      height: 30,
-    },
-  });
-  
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showFeedback}
+          onRequestClose={() => setShowFeedback(false)}
+        >
+          <View style={styles.feedbackContainer}>
+            <View style={styles.feedbackContent}>
+              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+              <Text style={styles.tahminText}>
+                {words[currentIndex].tahmin}
+              </Text>
+              <Text style={styles.instructionText}>
+                {words[currentIndex].instruction}
+              </Text>
+              <Text style={styles.kelimeText}>
+                {words[currentIndex].kelime.split("").map((char, index) => {
+                  const isRed =
+                    (words[currentIndex].word === "Kamuflaj" && char === "u") ||
+                    (words[currentIndex].word === "Ağabey" && char === "i") ||
+                    (words[currentIndex].word === "Sahi" && char === ":");
+                  return (
+                    <Text
+                      key={index}
+                      style={isRed ? styles.redText : styles.blackText}
+                    >
+                      {char}
+                    </Text>
+                  );
+                })}
+              </Text>
+
+              {words[currentIndex].ipucu !== "" && (
+                <Text style={styles.ipucuText}>
+                  <Text style={styles.ipucuBold}>İpucu: </Text>
+                  {words[currentIndex].ipucu}
+                </Text>
+              )}
+
+              {/* Add Listen Button inside Feedback Container */}
+              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+                <Text style={styles.listenButtonText}>Dinle</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowFeedback(false)}
+              >
+                <Text style={styles.closeButtonText}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        {/* Navigation Bar */}
+        <View style={styles.navBar}>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/profile.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.navItem}>
+            <Image
+              source={require("../assets/icons/settings.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Dersler")}
+            style={styles.navItem}
+          >
+            <Image
+              source={require("../assets/icons/fitness.png")}
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+};
+
+export default Geneltekrar;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  imageBackground: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  backButton: {
+    position: "absolute",
+    top: 20,
+    left: 10,
+    zIndex: 10,
+  },
+  backIcon: {
+    width: 40,
+    height: 40,
+  },
+  topContainer: {
+    marginTop: 30,
+    height: "100%",
+    alignItems: "center",
+  },
+  wordContainer: {
+    backgroundColor: "#F9F4F1",
+    width: "80%",
+    height: "52%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 40,
+    marginBottom: 40, // Add margin to create space
+  },
+  navigationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "80%", // Adjust to your design needs
+    marginTop: 20, // Optional spacing
+    marginBottom: 20, // Optional spacing for further alignment
+  },
+  prevButton: {
+    padding: 10,
+  },
+  nextButton: {
+    padding: 10,
+  },
+
+  wordText: {
+    fontSize: 40,
+    fontWeight: "bold",
+    color: "#FF3B30",
+  },
+  phoneticText: {
+    fontSize: 20,
+    color: "#FF8754",
+    marginTop: 10,
+  },
+
+  listenButton: {
+    backgroundColor: "#FF3B30",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  listenButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  feedbackContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  feedbackContent: {
+    height: "50%",
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    justifyContent: "space-between",
+  },
+  navBar: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: 70,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+  },
+  navItem: {
+    alignItems: "center",
+  },
+  navIcon: {
+    width: 30,
+    height: 30,
+  },
+  redText: {
+    color: "red",
+    fontSize: 23,
+    fontWeight: "bold",
+  },
+  blackText: {
+    color: "black",
+    fontSize: 23,
+    fontWeight: "bold",
+  },
+});

@@ -143,13 +143,13 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 20,
+    top: 25,
     left: 10,
     zIndex: 10,
   },
   backIcon: {
-    width: 45,
-    height: 45,
+    width: 40,
+    height: 40,
   },
   topContainer: {
     // flex: 1,
