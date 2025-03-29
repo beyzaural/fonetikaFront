@@ -7,7 +7,7 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import React, { useState } from "react";
 import { Alert } from "react-native";
@@ -34,6 +34,21 @@ const Login = ({ navigation }) => {
       });
 
       const data = await response.json();
+      if (data.token) {
+        await AsyncStorage.setItem("token", data.token); // ✅ Save token
+        console.log("Token stored successfully:", data.token);
+      } else {
+        console.warn("No token received in login response"); // ✅ Log missing token
+      }
+      if (!response.ok) {
+        console.error("Login Error:", data); // ✅ Log error response
+        Alert.alert(
+          "Giriş Başarısız!",
+          data.message || "Yanlış mail ya da şifre."
+        );
+        return;
+      }
+
       const otpSessionToken = data.data.otpSessionToken;
       const identifier = data.data.identifier;
 
@@ -90,6 +105,13 @@ const Login = ({ navigation }) => {
             value={password}
           />
         </View>
+
+        {/* Forgot Password Button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ForgotPasswordScreen")}
+        >
+          <Text style={styles.forgotPasswordText}>Şifrenizi mi unuttunuz?</Text>
+        </TouchableOpacity>
 
         {/* Delivery Method Selection */}
         <View style={{ marginBottom: 10 }}>
@@ -247,6 +269,12 @@ const styles = StyleSheet.create({
   registerText: {
     fontWeight: "bold",
     color: "black", // Make text black to contrast with white button
+    fontSize: 16,
+  },
+  forgotPasswordText: {
+    textAlign: "center",
+    color: "blue",
+    marginBottom: 20,
     fontSize: 16,
   },
 });

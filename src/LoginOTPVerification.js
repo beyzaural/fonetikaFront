@@ -62,8 +62,12 @@ const LoginOTPVerification = ({ navigation, route }) => {
         return;
       }
 
-      await AsyncStorage.setItem("accessToken", data.data.accessToken);
-      await AsyncStorage.setItem("refreshToken", data.data.refreshToken);
+      if (data.data?.accessToken) {
+        await AsyncStorage.setItem("token", data.data.accessToken); // ✅ Store as "token"
+        console.log("Token stored successfully:", data.data.accessToken);
+      } else {
+        console.warn("No token received after OTP verification");
+      }
 
       Alert.alert("Başarı", "Giriş Başarılı!");
       navigation.navigate("Home");

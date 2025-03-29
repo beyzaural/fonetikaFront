@@ -10,7 +10,6 @@ import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
 import Merhaba from "../src/Merhaba";
 import Register from "../src/Register";
-import Paragraf from "../src/Paragraf";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import Atekrar from "../src/Atekrar";
@@ -23,6 +22,7 @@ import EmailVerification from "../src/EmailVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
 import Profile from "../src/Profile";
+
 import Ayarlar from "../src/Ayarlar";
 
 const Stack = createStackNavigator();
@@ -98,8 +98,6 @@ export default function Index() {
           options={{ headerShown: false }} // Hide header for Fonetika
         />
         <Stack.Screen
-          name="Paragraf"
-          component={Paragraf}
           options={{ headerShown: false }} // Hide header for Fonetika
         />
         <Stack.Screen

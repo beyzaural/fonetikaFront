@@ -99,7 +99,7 @@ const Home = ({ navigation, route }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Paragraf")} // Navigate to Paragraf.js
+            onPress={() => navigation.navigate("Paragraph")} // Navigate to Paragraf.js
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}

@@ -1,15 +1,30 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import { Audio } from "expo-av";
+import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Paragraf = () => {
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
+
+const Paragraph = () => {
   const navigation = useNavigation();
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [paragraph, setParagraph] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Parkinsans-Medium": require("../assets/fonts/Parkinsans-Medium.ttf"),
@@ -21,6 +36,45 @@ const Paragraf = () => {
     "Roboto-Bold": require("../assets/fonts/Roboto-Bold.ttf"),
     "Roboto-Black": require("../assets/fonts/Roboto-Black.ttf"),
   });
+
+  const fetchParagraph = async () => {
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem("accessToken"); // ✅ Retrieve token
+
+      if (!token) {
+        throw new Error("Yetkilendirme hatası: Kullanıcı giriş yapmamış.");
+      }
+
+      const response = await fetch(`${API_URL}/api/chat/generate-paragraph`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ Send token in header
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Backend Error:", errorData);
+        throw new Error(
+          `Paragraf yüklenirken hata oluştu: ${errorData.message}`
+        );
+      }
+
+      const data = await response.text();
+      setParagraph(data);
+    } catch (error) {
+      console.error("Error fetching paragraph:", error);
+      setParagraph("Paragraf yüklenirken hata oluştu. Lütfen tekrar deneyin.");
+    }
+    setLoading(false);
+  };
+
+  // Fetch paragraph on mount
+  useEffect(() => {
+    fetchParagraph();
+  }, []);
 
   const paragraphs = [
     "Bugün sabah kahvaltıda bir kahve içtim ve radyoda sevdiğim bir müzik çalıyordu. Öğle saatlerinde bir avukat ile görüşmem gerekti. Ancak randevuma geç kalınca İstanbul trafiğinde bir saat boyunca beklemek zorunda kaldım. Sonunda buluşmaya vardığımda, herkesin toplantıda olduğunu gördüm. Toplantıda, yeni çıkan bir program ve rakip şirket hakkında konuştuk.",
@@ -106,13 +160,15 @@ const Paragraf = () => {
       </View>
 
       <View style={styles.microphoneContainer}>
-        <Text style={styles.paragraphText}>
-          {paragraphs[currentParagraphIndex]}
-        </Text>
+        {loading ? (
+          <ActivityIndicator size="large" color="#007AFF" />
+        ) : (
+          <Text style={styles.paragraphText}>{paragraph}</Text>
+        )}
 
         <View style={styles.buttonsRow}>
           <View style={styles.iconButtonWithText}>
-            <TouchableOpacity onPress={handleRestartConversation}>
+            <TouchableOpacity onPress={fetchParagraph}>
               <FontAwesome name="refresh" size={50} color="#FF3B30" />
             </TouchableOpacity>
             <Text style={styles.iconText}>Yenile</Text>
@@ -134,7 +190,7 @@ const Paragraf = () => {
   );
 };
 
-export default Paragraf;
+export default Paragraph;
 
 const styles = StyleSheet.create({
   container: {
