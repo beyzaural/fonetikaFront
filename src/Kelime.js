@@ -25,14 +25,12 @@ const Kelime = ({ navigation }) => {
   useEffect(() => {
     fetchRandomWord(null); // İlk kelimeyi getir
   }, []);
-
-  const fetchRandomWord = (lastWordId) => {
+  const fetchRandomWord = (lastWordId = null) => {
     axios
       .get(`http://localhost:8080/api/words/random`, {
-        params: { lastWordId: lastWordId },
+        params: { lastWordId },
       })
       .then((res) => {
-        console.log("Random kelime yüklendi", res.data);
         const w = res.data;
         const enrichedWord = {
           ...w,
@@ -43,8 +41,17 @@ const Kelime = ({ navigation }) => {
           ipucu:
             "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
         };
-        setWords([enrichedWord]); // sadece 1 kelimeyi array olarak set et
-        setCurrentIndex(0);
+
+        setWords((prevWords) => {
+          const updatedWords = [...prevWords, enrichedWord];
+          // İlk kelimeyse index 0'da kal, değilse bir sonraki kelimeye geç
+          if (prevWords.length === 0) {
+            setCurrentIndex(0);
+          } else {
+            setCurrentIndex(updatedWords.length - 1);
+          }
+          return updatedWords;
+        });
       })
       .catch((err) => {
         console.error("Random kelime alınamadı", err);
@@ -103,18 +110,25 @@ const Kelime = ({ navigation }) => {
     }
   };
   const handleNextWord = () => {
-    const lastId = words[currentIndex]?.id || null;
-    fetchRandomWord(lastId); // bir sonraki random kelimeyi getir
     setShowFeedback(false);
     setIsRecording(false);
+
+    if (currentIndex < words.length - 1) {
+      // Daha önce alınmış kelimeye ilerle
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      // Yeni random kelime çek
+      const lastId = words[currentIndex]?.id || null;
+      fetchRandomWord(lastId);
+    }
   };
 
   const handlePreviousWord = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + words.length) % words.length
-    );
-    setShowFeedback(false);
-    setIsRecording(false);
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setShowFeedback(false);
+      setIsRecording(false);
+    }
   };
 
   return (
@@ -137,7 +151,7 @@ const Kelime = ({ navigation }) => {
         {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            {words.length > 0 ? (
+            {words[currentIndex] ? (
               <>
                 <Text style={styles.wordText}>{words[currentIndex].word}</Text>
                 <Text style={styles.phoneticText}>
