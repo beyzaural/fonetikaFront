@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios"; // <-- ekle
 import {
   StyleSheet,
   Text,
@@ -12,51 +13,36 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
 const Kelime = ({ navigation }) => {
+  const [words, setWords] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  const words = [
-    {
-      word: "Kamuflaj",
-      definition: "Kamuflâj",
-      tahmin: "Sanırım “kamoflâj” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "kamuflâj",
-      ipucu:
-        "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
-    },
-    {
-      word: "Ağabey",
-      definition: "A:bi",
-      tahmin: "Sanırım “a:bey” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "a:bi",
-      ipucu:
-        "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
-    },
-    {
-      word: "Sahi",
-      definition: "sa:hi",
-      tahmin: "Sanırım “sahi” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "sa:hi",
-      ipucu: "“:” harfin fazla uzatıldığını gösterir.",
-    },
-    {
-      word: "Şiir",
-      definition: "şi:r",
-      tahmin:
-        "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
-      kelime: "",
-      instruction: "",
-      ipucu: "",
-    },
-  ];
-
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // 🔽 Yeni: backend'den kelimeleri çek
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/words/all") // veya senin API endpoint'in
+      .then((res) => {
+        console.log("Kelimeler yüklendi", res.data);
+        // Burada mock feedback'leri ekleyebilirsin geçici olarak
+        const enrichedWords = res.data.map((w) => ({
+          ...w,
+          definition: w.phoneticWriting || "", // ✅ gerçek backend verisi
+          tahmin: "Sanırım “a:bey” dediniz.",
+          instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+          kelime: "a:bi",
+          ipucu:
+            "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
+        }));
+        setWords(enrichedWords);
+      })
+      .catch((err) => {
+        console.error("Kelime alınamadı", err);
+      });
+  }, []);
 
   const handleMicrophonePress = async () => {
     if (recording) {
@@ -68,7 +54,7 @@ const Kelime = ({ navigation }) => {
         setRecording(null);
         setIsRecording(false);
         setShowFeedback(true);
-        setFeedback(words[currentIndex].feedback);
+        setShowFeedback(true);
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
@@ -144,10 +130,16 @@ const Kelime = ({ navigation }) => {
         {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-            <Text style={styles.phoneticText}>
-              {words[currentIndex].definition}
-            </Text>
+            {words.length > 0 ? (
+              <>
+                <Text style={styles.wordText}>{words[currentIndex].word}</Text>
+                <Text style={styles.phoneticText}>
+                  {words[currentIndex].definition}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.wordText}>Yükleniyor...</Text>
+            )}
           </View>
 
           {/* Navigation Arrows and Microphone Button in a Row */}
@@ -183,34 +175,42 @@ const Kelime = ({ navigation }) => {
           <View style={styles.feedbackContainer}>
             <View style={styles.feedbackContent}>
               <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-              <Text style={styles.tahminText}>
-                {words[currentIndex].tahmin}
-              </Text>
-              <Text style={styles.instructionText}>
-                {words[currentIndex].instruction}
-              </Text>
-              <Text style={styles.kelimeText}>
-                {words[currentIndex].kelime.split("").map((char, index) => {
-                  const isRed =
-                    (words[currentIndex].word === "Kamuflaj" && char === "u") ||
-                    (words[currentIndex].word === "Ağabey" && char === "i") ||
-                    (words[currentIndex].word === "Sahi" && char === ":");
-                  return (
-                    <Text
-                      key={index}
-                      style={isRed ? styles.redText : styles.blackText}
-                    >
-                      {char}
-                    </Text>
-                  );
-                })}
-              </Text>
+              {words.length > 0 && words[currentIndex] ? (
+                <>
+                  <Text style={styles.tahminText}>
+                    {words[currentIndex].tahmin}
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    {words[currentIndex].instruction}
+                  </Text>
+                  <Text style={styles.kelimeText}>
+                    {words[currentIndex].kelime.split("").map((char, index) => {
+                      const isRed =
+                        (words[currentIndex].word === "Kamuflaj" &&
+                          char === "u") ||
+                        (words[currentIndex].word === "Ağabey" &&
+                          char === "i") ||
+                        (words[currentIndex].word === "Sahi" && char === ":");
+                      return (
+                        <Text
+                          key={index}
+                          style={isRed ? styles.redText : styles.blackText}
+                        >
+                          {char}
+                        </Text>
+                      );
+                    })}
+                  </Text>
 
-              {words[currentIndex].ipucu !== "" && (
-                <Text style={styles.ipucuText}>
-                  <Text style={styles.ipucuBold}>İpucu: </Text>
-                  {words[currentIndex].ipucu}
-                </Text>
+                  {words[currentIndex].ipucu !== "" && (
+                    <Text style={styles.ipucuText}>
+                      <Text style={styles.ipucuBold}>İpucu: </Text>
+                      {words[currentIndex].ipucu}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <Text>Yükleniyor...</Text>
               )}
 
               {/* Add Listen Button inside Feedback Container */}
