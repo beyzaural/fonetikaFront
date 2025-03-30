@@ -23,26 +23,33 @@ const Kelime = ({ navigation }) => {
 
   // 🔽 Yeni: backend'den kelimeleri çek
   useEffect(() => {
+    fetchRandomWord(null); // İlk kelimeyi getir
+  }, []);
+
+  const fetchRandomWord = (lastWordId) => {
     axios
-      .get("http://localhost:8080/api/words/all") // veya senin API endpoint'in
+      .get(`http://localhost:8080/api/words/random`, {
+        params: { lastWordId: lastWordId },
+      })
       .then((res) => {
-        console.log("Kelimeler yüklendi", res.data);
-        // Burada mock feedback'leri ekleyebilirsin geçici olarak
-        const enrichedWords = res.data.map((w) => ({
+        console.log("Random kelime yüklendi", res.data);
+        const w = res.data;
+        const enrichedWord = {
           ...w,
-          definition: w.phoneticWriting || "", // ✅ gerçek backend verisi
+          definition: w.phoneticWriting || "",
           tahmin: "Sanırım “a:bey” dediniz.",
           instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-          kelime: "a:bi",
+          kelime: w.phoneticWriting || "",
           ipucu:
             "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
-        }));
-        setWords(enrichedWords);
+        };
+        setWords([enrichedWord]); // sadece 1 kelimeyi array olarak set et
+        setCurrentIndex(0);
       })
       .catch((err) => {
-        console.error("Kelime alınamadı", err);
+        console.error("Random kelime alınamadı", err);
       });
-  }, []);
+  };
 
   const handleMicrophonePress = async () => {
     if (recording) {
@@ -95,9 +102,9 @@ const Kelime = ({ navigation }) => {
       console.error("Error playing audio:", error);
     }
   };
-
   const handleNextWord = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
+    const lastId = words[currentIndex]?.id || null;
+    fetchRandomWord(lastId); // bir sonraki random kelimeyi getir
     setShowFeedback(false);
     setIsRecording(false);
   };
