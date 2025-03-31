@@ -25,6 +25,7 @@ import GoalSelection from "../src/GoalSelection";
 import Profile from "../src/Profile";
 import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
 import ResetPasswordScreen from "../src/ResetPasswordScreen";
+import ResetOTPVerification from "../src/ResetOTPVerification";
 import Ayarlar from "../src/Ayarlar";
 
 const Stack = createStackNavigator();
@@ -32,7 +33,7 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="GoalSelection">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           component={Login}
@@ -69,6 +70,11 @@ export default function Index() {
           options={{ headerShown: false }}
         />
 
+        <Stack.Screen
+          name="ResetOTPVerification"
+          component={ResetOTPVerification}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="Ayarlar"
           component={Ayarlar}

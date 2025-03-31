@@ -13,11 +13,22 @@ const API_URL = extra.apiUrl;
 
 const ResetPasswordScreen = ({ route, navigation }) => {
   const { resetToken } = route.params || {};
-  const [newPassword, setNewPassword] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleResetPassword = async () => {
-    if (!newPassword) {
+    if (!password) {
       Alert.alert("Error", "Please enter a new password.");
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      Alert.alert("Error", "Please fill out both password fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
       return;
     }
 
@@ -25,7 +36,7 @@ const ResetPasswordScreen = ({ route, navigation }) => {
       const response = await fetch(`${API_URL}/auth/password/reset`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ resetToken, newPassword }),
+        body: JSON.stringify({ resetToken, newPassword: password }),
       });
 
       const data = await response.json();
@@ -49,10 +60,18 @@ const ResetPasswordScreen = ({ route, navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="New Password"
+        placeholder="Enter new password"
         secureTextEntry
-        onChangeText={setNewPassword}
-        value={newPassword}
+        onChangeText={setPassword}
+        value={password}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm new password"
+        secureTextEntry
+        onChangeText={setConfirmPassword}
+        value={confirmPassword}
       />
 
       <Pressable onPress={handleResetPassword} style={styles.button}>

@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import Constants from "expo-constants";
 import {
   View,
@@ -26,21 +25,21 @@ const ForgotPasswordScreen = ({ navigation }) => {
       const response = await fetch(`${API_URL}/auth/password/forgot`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({
+          email,
+        }),
       });
 
       const data = await response.json();
-      if (data.success) {
-        Alert.alert(
-          "Success",
-          "A password reset link has been sent to your email."
-        );
-        navigation.navigate("ResetPasswordScreen");
+      if (data.success && data.data?.otpSessionToken && data.data?.identifier) {
+        navigation.navigate("ResetOTPVerification", {
+          identifier: email,
+        });
       } else {
-        Alert.alert("Error", data.message || "Something went wrong.");
+        Alert.alert("Error", data.message || "Could not start reset flow.");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to request password reset.");
+      Alert.alert("Error", "Request failed. Please try again.");
     }
   };
 
@@ -48,7 +47,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     <View style={styles.container}>
       <Text style={styles.title}>Forgot Password?</Text>
       <Text style={styles.subtitle}>
-        Enter your email address to receive a password reset link.
+        Enter your email to receive a one-time code to reset your password.
       </Text>
 
       <TextInput
@@ -61,7 +60,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
       />
 
       <Pressable onPress={handleForgotPassword} style={styles.button}>
-        <Text style={styles.buttonText}>Send Reset Link</Text>
+        <Text style={styles.buttonText}>Send OTP to Email</Text>
       </Pressable>
     </View>
   );
