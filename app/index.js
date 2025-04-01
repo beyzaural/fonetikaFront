@@ -33,7 +33,7 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="GoalSelection">
         <Stack.Screen
           name="Login"
           component={Login}

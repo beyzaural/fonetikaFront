@@ -80,22 +80,22 @@ const Kelime = ({ navigation }) => {
           await recording.stopAndUnloadAsync();
           setRecording(null);
         }
-  
+
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
           alert("Microphone permission is required to record audio.");
           return;
         }
-  
+
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-  
+
         const { recording: newRecording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-  
+
         setRecording(newRecording);
         setIsRecording(true);
       } catch (error) {
@@ -127,23 +127,40 @@ const Kelime = ({ navigation }) => {
           type: "audio/m4a",
         };
       }
-      
+
       const formData = new FormData();
       formData.append("file", fileData);
       formData.append("expected_word", words[currentIndex]?.word || "");
-      
+
       // Set Accept to application/json so that the backend returns JSON.
       const response = await fetch(AUDIO_UPLOAD_URL, {
         method: "POST",
         headers: {
-          Accept: "application/json"
+          Accept: "application/json",
         },
         body: formData,
       });
-      
+
+      // 🔧 `data`'yı response.json() ile al
       const data = await response.json();
-      console.log("✅ Backend Response:", data);
+      console.log("✅ Backend full response:", data); // <-- BURASI
+
+      // Şimdi kullanabilirsin
       setFeedback(data.feedback);
+      setWords((prevWords) => {
+        const updatedWords = [...prevWords];
+        updatedWords[currentIndex].transcribedText = data.transcribedText;
+        console.log("Beklenen:", words[currentIndex]?.word);
+        console.log("Transkript:", data.transcribedText);
+        console.log(
+          "Eşleşti mi:",
+          data.transcribedText.toLowerCase() ===
+            words[currentIndex]?.word.toLowerCase()
+        );
+        console.log("Backend isCorrect:", data.correct);
+        updatedWords[currentIndex].isCorrect = data.correct;
+        return updatedWords;
+      });
       setShowFeedback(true);
     } catch (error) {
       console.error("❌ Error sending audio:", error);
@@ -151,7 +168,6 @@ const Kelime = ({ navigation }) => {
     }
   };
 
-  
   const playAudio = async () => {
     if (!audioUri) {
       alert("Henüz bir kayıt yapılmadı!");
@@ -166,7 +182,7 @@ const Kelime = ({ navigation }) => {
       console.error("Error playing audio:", error);
     }
   };
-  
+
   const handleNextWord = () => {
     setShowFeedback(false);
     setIsRecording(false);
@@ -252,10 +268,13 @@ const Kelime = ({ navigation }) => {
               {words.length > 0 && words[currentIndex] ? (
                 <>
                   <Text style={styles.tahminText}>
-                    {words[currentIndex].tahmin}
+                    Sanırım “{words[currentIndex]?.transcribedText || "..."}”
+                    dediniz.
                   </Text>
                   <Text style={styles.instructionText}>
-                    {words[currentIndex].instruction}
+                    {words[currentIndex]?.isCorrect
+                      ? "✅ Doğru söylediniz!"
+                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
                   </Text>
                   <Text style={styles.kelimeText}>
                     {words[currentIndex].kelime.split("").map((char, index) => {
