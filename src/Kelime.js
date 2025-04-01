@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // <-- ekle
+import axios from "axios";
+import { Alert } from "react-native";
 import {
   StyleSheet,
   Text,
@@ -12,6 +13,8 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 
+const AUDIO_UPLOAD_URL = "http://localhost:8080/api/speech/process";
+
 const Kelime = ({ navigation }) => {
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,10 +24,11 @@ const Kelime = ({ navigation }) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  // 🔽 Yeni: backend'den kelimeleri çek
+  // Fetch random word from backend
   useEffect(() => {
-    fetchRandomWord(null); // İlk kelimeyi getir
+    fetchRandomWord(null);
   }, []);
+
   const fetchRandomWord = (lastWordId = null) => {
     axios
       .get(`http://localhost:8080/api/words/random`, {
@@ -44,7 +48,6 @@ const Kelime = ({ navigation }) => {
 
         setWords((prevWords) => {
           const updatedWords = [...prevWords, enrichedWord];
-          // İlk kelimeyse index 0'da kal, değilse bir sonraki kelimeye geç
           if (prevWords.length === 0) {
             setCurrentIndex(0);
           } else {
@@ -67,26 +70,33 @@ const Kelime = ({ navigation }) => {
         setAudioUri(uri);
         setRecording(null);
         setIsRecording(false);
-        setShowFeedback(true);
-        setShowFeedback(true);
+        sendAudioToBackend(uri); // Send m4a file to backend
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
     } else {
       try {
+        if (recording !== null) {
+          await recording.stopAndUnloadAsync();
+          setRecording(null);
+        }
+  
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
           alert("Microphone permission is required to record audio.");
           return;
         }
+  
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-        const { recording } = await Audio.Recording.createAsync(
+  
+        const { recording: newRecording } = await Audio.Recording.createAsync(
           Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-        setRecording(recording);
+  
+        setRecording(newRecording);
         setIsRecording(true);
       } catch (error) {
         console.error("Failed to start recording:", error);
@@ -94,12 +104,59 @@ const Kelime = ({ navigation }) => {
     }
   };
 
+  // Utility: Convert a blob URL into a temporary File object with m4a name/type.
+  const createTemporaryFile = async (blobUri) => {
+    const response = await fetch(blobUri);
+    const blob = await response.blob();
+    // This File object only renames the file and sets the MIME type; it doesn't convert audio format.
+    return new File([blob], "recording.m4a", { type: "audio/m4a" });
+  };
+
+  // Send the audio file to the backend. The backend should perform any necessary conversion.
+  const sendAudioToBackend = async (uri) => {
+    try {
+      let fileData;
+      // For web: if the URI is a blob URL, convert it to a temporary File object.
+      if (uri.startsWith("blob:")) {
+        fileData = await createTemporaryFile(uri);
+      } else {
+        // For native platforms, use the provided URI.
+        fileData = {
+          uri,
+          name: "recording.m4a",
+          type: "audio/m4a",
+        };
+      }
+      
+      const formData = new FormData();
+      formData.append("file", fileData);
+      formData.append("expected_word", words[currentIndex]?.word || "");
+      
+      // Set Accept to application/json so that the backend returns JSON.
+      const response = await fetch(AUDIO_UPLOAD_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json"
+        },
+        body: formData,
+      });
+      
+      const data = await response.json();
+      console.log("✅ Backend Response:", data);
+      setFeedback(data.feedback);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error("❌ Error sending audio:", error);
+      Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
+    }
+  };
+
+  
   const playAudio = async () => {
     if (!audioUri) {
       alert("Henüz bir kayıt yapılmadı!");
       return;
     }
-
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioUri },
@@ -109,15 +166,14 @@ const Kelime = ({ navigation }) => {
       console.error("Error playing audio:", error);
     }
   };
+  
   const handleNextWord = () => {
     setShowFeedback(false);
     setIsRecording(false);
 
     if (currentIndex < words.length - 1) {
-      // Daha önce alınmış kelimeye ilerle
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Yeni random kelime çek
       const lastId = words[currentIndex]?.id || null;
       fetchRandomWord(lastId);
     }
@@ -137,7 +193,6 @@ const Kelime = ({ navigation }) => {
       style={styles.imageBackground}
     >
       <View style={styles.container}>
-        {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate("Home")}
@@ -148,7 +203,6 @@ const Kelime = ({ navigation }) => {
           />
         </TouchableOpacity>
 
-        {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
             {words[currentIndex] ? (
@@ -163,7 +217,6 @@ const Kelime = ({ navigation }) => {
             )}
           </View>
 
-          {/* Navigation Arrows and Microphone Button in a Row */}
           <View style={styles.navigationContainer}>
             <TouchableOpacity
               style={styles.prevButton}
@@ -234,7 +287,6 @@ const Kelime = ({ navigation }) => {
                 <Text>Yükleniyor...</Text>
               )}
 
-              {/* Add Listen Button inside Feedback Container */}
               <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
                 <Text style={styles.listenButtonText}>Dinle</Text>
               </TouchableOpacity>
@@ -249,7 +301,6 @@ const Kelime = ({ navigation }) => {
           </View>
         </Modal>
 
-        {/* Navigation Bar */}
         <View style={styles.navBar}>
           <TouchableOpacity style={styles.navItem}>
             <Image
@@ -311,15 +362,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     marginTop: 40,
-    marginBottom: 40, // Add margin to create space
+    marginBottom: 40,
   },
   navigationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "80%", // Adjust to your design needs
-    marginTop: 20, // Optional spacing
-    marginBottom: 20, // Optional spacing for further alignment
+    width: "80%",
+    marginTop: 20,
+    marginBottom: 20,
   },
   prevButton: {
     padding: 10,
@@ -327,7 +378,6 @@ const styles = StyleSheet.create({
   nextButton: {
     padding: 10,
   },
-
   wordText: {
     fontSize: 40,
     fontWeight: "bold",
@@ -338,7 +388,6 @@ const styles = StyleSheet.create({
     color: "#FF8754",
     marginTop: 10,
   },
-
   listenButton: {
     backgroundColor: "#FF3B30",
     paddingVertical: 10,
