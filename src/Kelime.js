@@ -116,11 +116,9 @@ const Kelime = ({ navigation }) => {
   const sendAudioToBackend = async (uri) => {
     try {
       let fileData;
-      // For web: if the URI is a blob URL, convert it to a temporary File object.
       if (uri.startsWith("blob:")) {
         fileData = await createTemporaryFile(uri);
       } else {
-        // For native platforms, use the provided URI.
         fileData = {
           uri,
           name: "recording.m4a",
@@ -132,7 +130,6 @@ const Kelime = ({ navigation }) => {
       formData.append("file", fileData);
       formData.append("expected_word", words[currentIndex]?.word || "");
 
-      // Set Accept to application/json so that the backend returns JSON.
       const response = await fetch(AUDIO_UPLOAD_URL, {
         method: "POST",
         headers: {
@@ -141,11 +138,9 @@ const Kelime = ({ navigation }) => {
         body: formData,
       });
 
-      // 🔧 `data`'yı response.json() ile al
       const data = await response.json();
-      console.log("✅ Backend full response:", data); // <-- BURASI
+      console.log("✅ Backend full response:", data);
 
-      // Şimdi kullanabilirsin
       setFeedback(data.feedback);
       setWords((prevWords) => {
         const updatedWords = [...prevWords];
@@ -161,6 +156,23 @@ const Kelime = ({ navigation }) => {
         updatedWords[currentIndex].isCorrect = data.correct;
         return updatedWords;
       });
+
+      // ❌ Eğer yanlış söylenmişse, backend'e MispronouncedWord kaydı at
+      if (!data.correct) {
+        const userId = "test-user"; // TODO: Gerçek userId ile değiştir
+        const wordId = words[currentIndex]?.id;
+
+        await axios.post(
+          "http://localhost:8080/api/mispronounced-words/record",
+          {
+            userId,
+            wordId,
+          }
+        );
+
+        console.log("❌ MispronouncedWord kaydı eklendi.");
+      }
+
       setShowFeedback(true);
     } catch (error) {
       console.error("❌ Error sending audio:", error);

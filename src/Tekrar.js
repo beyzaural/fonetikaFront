@@ -10,10 +10,27 @@ import {
 
 const Tekrar = ({ navigation }) => {
   const vowelModules = [
-    { title: "A Harfi", difficulty: "Tekrar Et", image: require("../assets/images/1.png"), navigateTo: "Atekrar" },
-    { title: "E Harfi", difficulty: "Tekrar Et", image: require("../assets/images/2.png") },
-    { title: "I Harfi", difficulty: "Tekrar Et", image: require("../assets/images/3.png") },
-    { title: "İ Harfi", difficulty: "Tekrar Et", image: require("../assets/images/4.png") },
+    {
+      title: "A Harfi",
+      difficulty: "Tekrar Et",
+      image: require("../assets/images/1.png"),
+      navigateTo: "Atekrar",
+    },
+    {
+      title: "E Harfi",
+      difficulty: "Tekrar Et",
+      image: require("../assets/images/2.png"),
+    },
+    {
+      title: "I Harfi",
+      difficulty: "Tekrar Et",
+      image: require("../assets/images/3.png"),
+    },
+    {
+      title: "İ Harfi",
+      difficulty: "Tekrar Et",
+      image: require("../assets/images/4.png"),
+    },
   ];
 
   return (
@@ -58,13 +75,25 @@ const Tekrar = ({ navigation }) => {
       {/* Navigation Bar */}
       <View style={styles.navBar}>
         <TouchableOpacity style={styles.navItem}>
-          <Image source={require("../assets/icons/profile.png")} style={styles.navIcon} />
+          <Image
+            source={require("../assets/icons/profile.png")}
+            style={styles.navIcon}
+          />
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
-          <Image source={require("../assets/icons/settings.png")} style={styles.navIcon} />
+          <Image
+            source={require("../assets/icons/settings.png")}
+            style={styles.navIcon}
+          />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-          <Image source={require("../assets/icons/fitness.png")} style={styles.navIcon} />
+        <TouchableOpacity
+          onPress={() => navigation.navigate("Dersler")}
+          style={styles.navItem}
+        >
+          <Image
+            source={require("../assets/icons/fitness.png")}
+            style={styles.navIcon}
+          />
         </TouchableOpacity>
       </View>
     </View>

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   StyleSheet,
   Text,
@@ -17,44 +18,45 @@ const Geneltekrar = ({ navigation }) => {
   const [audioUri, setAudioUri] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [mistakes, setMistakes] = useState([]);
+  const [enrichedMistakes, setEnrichedMistakes] = useState([]);
 
-  const words = [
-    {
-      word: "Kamuflaj",
-      definition: "Kamuflâj",
-      tahmin: "Sanırım “kamoflâj” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "kamuflâj",
-      ipucu:
-        "Türkçede “o” harfi dudaklar yuvarlak ve hafif açık konumdayken “u” harfi dudaklar daha dar ve ileri doğru yuvarlanmış şekilde telaffuz edilir.",
-    },
-    {
-      word: "Ağabey",
-      definition: "A:bi",
-      tahmin: "Sanırım “a:bey” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "a:bi",
-      ipucu:
-        "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
-    },
-    {
-      word: "Sahi",
-      definition: "sa:hi",
-      tahmin: "Sanırım “sahi” dediniz.",
-      instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
-      kelime: "sa:hi",
-      ipucu: "“:” harfin fazla uzatıldığını gösterir.",
-    },
-    {
-      word: "Şiir",
-      definition: "şi:r",
-      tahmin:
-        "Harika, 'şiir' kelimesini çok güzel ve doğru bir şekilde söyledin!",
-      kelime: "",
-      instruction: "",
-      ipucu: "",
-    },
-  ];
+  useEffect(() => {
+    const fetchMistakes = async () => {
+      try {
+        const userId = "test-user"; // TODO: Gerçek userId
+        const res = await axios.get(
+          `http://localhost:8080/api/mispronounced-words/user/${userId}`
+        );
+        const mistakes = res.data;
+
+        // Her mistake için wordId ile kelime detayını getir
+        const enriched = await Promise.all(
+          mistakes.map(async (mistake) => {
+            const wordRes = await axios.get(
+              `http://localhost:8080/api/words/id/${mistake.wordId}`
+            );
+            const wordData = wordRes.data;
+
+            if (!wordData || !wordData.word) return null;
+
+            return {
+              ...mistake,
+              word: wordData.word,
+              phonetic: wordData.phoneticWriting,
+              ipucu: "'Bu kelimeyi daha önce yanlış telaffuz ettiniz.'",
+            };
+          })
+        );
+
+        setEnrichedMistakes(enriched.filter((e) => e !== null));
+      } catch (error) {
+        console.error("❌ Hatalar alınamadı:", error);
+      }
+    };
+
+    fetchMistakes();
+  }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -68,7 +70,7 @@ const Geneltekrar = ({ navigation }) => {
         setRecording(null);
         setIsRecording(false);
         setShowFeedback(true);
-        setFeedback(words[currentIndex].feedback);
+        setFeedback(enrichedMistakes[currentIndex]?.feedback || "");
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
@@ -111,14 +113,15 @@ const Geneltekrar = ({ navigation }) => {
   };
 
   const handleNextWord = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % enrichedMistakes.length);
     setShowFeedback(false);
     setIsRecording(false);
   };
 
   const handlePreviousWord = () => {
     setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + words.length) % words.length
+      (prevIndex) =>
+        (prevIndex - 1 + enrichedMistakes.length) % enrichedMistakes.length
     );
     setShowFeedback(false);
     setIsRecording(false);
@@ -144,10 +147,18 @@ const Geneltekrar = ({ navigation }) => {
         {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-            <Text style={styles.phoneticText}>
-              {words[currentIndex].definition}
-            </Text>
+            {enrichedMistakes[currentIndex] ? (
+              <>
+                <Text style={styles.wordText}>
+                  {enrichedMistakes[currentIndex].word}
+                </Text>
+                <Text style={styles.phoneticText}>
+                  {enrichedMistakes[currentIndex].phonetic}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.wordText}>Yükleniyor...</Text>
+            )}
           </View>
 
           {/* Navigation Arrows and Microphone Button in a Row */}
@@ -183,37 +194,49 @@ const Geneltekrar = ({ navigation }) => {
           <View style={styles.feedbackContainer}>
             <View style={styles.feedbackContent}>
               <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-              <Text style={styles.tahminText}>
-                {words[currentIndex].tahmin}
-              </Text>
-              <Text style={styles.instructionText}>
-                {words[currentIndex].instruction}
-              </Text>
-              <Text style={styles.kelimeText}>
-                {words[currentIndex].kelime.split("").map((char, index) => {
-                  const isRed =
-                    (words[currentIndex].word === "Kamuflaj" && char === "u") ||
-                    (words[currentIndex].word === "Ağabey" && char === "i") ||
-                    (words[currentIndex].word === "Sahi" && char === ":");
-                  return (
-                    <Text
-                      key={index}
-                      style={isRed ? styles.redText : styles.blackText}
-                    >
-                      {char}
-                    </Text>
-                  );
-                })}
-              </Text>
 
-              {words[currentIndex].ipucu !== "" && (
-                <Text style={styles.ipucuText}>
-                  <Text style={styles.ipucuBold}>İpucu: </Text>
-                  {words[currentIndex].ipucu}
-                </Text>
+              {enrichedMistakes[currentIndex] ? (
+                <>
+                  <Text style={styles.tahminText}>
+                    Sanırım “{enrichedMistakes[currentIndex].phonetic}” dediniz.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    ❌ Yanlış söylediniz. Bir kez daha deneyin.
+                  </Text>
+                  <Text style={styles.kelimeText}>
+                    {enrichedMistakes[currentIndex].phonetic
+                      .split("")
+                      .map((char, index) => {
+                        const isRed =
+                          (enrichedMistakes[currentIndex].word === "Kamuflaj" &&
+                            char === "u") ||
+                          (enrichedMistakes[currentIndex].word === "Ağabey" &&
+                            char === "i") ||
+                          (enrichedMistakes[currentIndex].word === "Sahi" &&
+                            char === ":");
+
+                        return (
+                          <Text
+                            key={index}
+                            style={isRed ? styles.redText : styles.blackText}
+                          >
+                            {char}
+                          </Text>
+                        );
+                      })}
+                  </Text>
+
+                  {enrichedMistakes[currentIndex].ipucu && (
+                    <Text style={styles.ipucuText}>
+                      <Text style={styles.ipucuBold}>İpucu: </Text>
+                      {enrichedMistakes[currentIndex].ipucu}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <Text>Yükleniyor...</Text>
               )}
 
-              {/* Add Listen Button inside Feedback Container */}
               <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
                 <Text style={styles.listenButtonText}>Dinle</Text>
               </TouchableOpacity>
