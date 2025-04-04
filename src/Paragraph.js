@@ -14,7 +14,7 @@ import { useFonts } from "expo-font";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import { Modal } from "react-native";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
@@ -25,6 +25,9 @@ const Paragraph = () => {
   const [audioUri, setAudioUri] = useState(null);
   const [loading, setLoading] = useState(false);
   const [paragraph, setParagraph] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [transcribedText, setTranscribedText] = useState("");
 
   const [fontsLoaded] = useFonts({
     "Parkinsans-Medium": require("../assets/fonts/Parkinsans-Medium.ttf"),
@@ -90,7 +93,46 @@ const Paragraph = () => {
     );
   };
 
-  // Function to start/stop recording
+  const sendAudioToBackend = async (uri) => {
+    try {
+      setLoading(true);
+      let fileData;
+      if (uri.startsWith("blob:")) {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        fileData = new File([blob], "recording.m4a", { type: "audio/m4a" });
+      } else {
+        fileData = {
+          uri,
+          name: "recording.m4a",
+          type: "audio/m4a",
+        };
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileData);
+      formData.append("expected_word", paragraph);
+
+      const response = await fetch("http://localhost:8080/api/speech/process", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("✅ Backend:", data);
+
+      setFeedback(data.feedback);
+      setTranscribedText(data.transcribedText);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error("❌ Error sending audio:", error);
+      Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleMicrophonePress = async () => {
     if (recording) {
       try {
@@ -100,6 +142,7 @@ const Paragraph = () => {
         setAudioUri(uri);
         setRecording(null);
         setIsRecording(false);
+        sendAudioToBackend(uri); // ← burada çağır
       } catch (err) {
         console.error("Error stopping recording:", err);
       }
@@ -186,6 +229,40 @@ const Paragraph = () => {
           </TouchableOpacity>
         </View>
       </View>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={showFeedback}
+        onRequestClose={() => setShowFeedback(false)}
+      >
+        <View style={styles.feedbackContainer}>
+          <View style={styles.feedbackContent}>
+            <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+
+            <Text style={styles.feedbackText}>
+              <Text style={styles.feedbackLabel}>Beklenen:</Text> {"\n"}
+              {paragraph}
+            </Text>
+
+            <Text style={styles.feedbackText}>
+              <Text style={styles.feedbackLabel}>Anlaşılan:</Text> {"\n"}
+              {transcribedText || "Tanımlanamadı"}
+            </Text>
+
+            <Text style={styles.feedbackText}>
+              <Text style={styles.feedbackLabel}>Yorum:</Text> {"\n"}
+              {feedback}
+            </Text>
+
+            <TouchableOpacity
+              style={styles.listenButton}
+              onPress={() => setShowFeedback(false)}
+            >
+              <Text style={styles.listenButtonText}>Kapat</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -286,5 +363,39 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  feedbackContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  feedbackContent: {
+    height: "50%",
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    justifyContent: "space-between",
+  },
+
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 10,
+    color: "#333",
+  },
+
+  feedbackText: {
+    fontSize: 16,
+    color: "black",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  feedbackLabel: {
+    fontWeight: "bold",
+    color: "#FF3B30",
+    fontSize: 16,
   },
 });
