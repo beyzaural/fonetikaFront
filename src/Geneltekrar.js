@@ -59,8 +59,8 @@ const Geneltekrar = ({ navigation }) => {
   }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
-
   const sendAudioToBackend = async (uri) => {
+    const userId = "test-user"; // ✅ Bu satır en başta olmalı
     try {
       const fileData = {
         uri,
@@ -86,14 +86,11 @@ const Geneltekrar = ({ navigation }) => {
       const data = await response.json();
       console.log("✅ Geneltekrar backend response:", data);
 
-      // Feedback'i state'e yaz
-      setFeedback(data.feedback);
-      // 🧠 Backend'e doğru/yanlış bilgisini gönder
-      // Eğer doğru söylendiyse, correctCount'u artır
-      if (data.correct) {
-        const userId = "test-user"; // TODO: gerçek kullanıcı ID
-        const wordId = enrichedMistakes[currentIndex]?.wordId;
+      const wordId = enrichedMistakes[currentIndex]?.wordId;
 
+      setFeedback(data.feedback);
+
+      if (data.correct) {
         await axios.post(
           "http://localhost:8080/api/mispronounced-words/record-pronunciation",
           {
@@ -102,11 +99,31 @@ const Geneltekrar = ({ navigation }) => {
             correct: true,
           }
         );
-
         console.log("✅ Doğru telaffuz kaydedildi.");
       }
 
-      // enrichedMistakes güncelle (opsiyonel olarak transcribedText ve isCorrect gibi)
+      const updatedRes = await axios.get(
+        `http://localhost:8080/api/mispronounced-words/user/${userId}`
+      );
+
+      const stillMistaken = updatedRes.data.find(
+        (item) => item.wordId === wordId
+      );
+
+      if (!stillMistaken) {
+        setEnrichedMistakes((prev) =>
+          prev.filter((w, index) => index !== currentIndex)
+        );
+
+        setCurrentIndex((prev) => {
+          if (prev >= enrichedMistakes.length - 1) return 0;
+          return prev;
+        });
+
+        setShowFeedback(false);
+        return;
+      }
+
       setEnrichedMistakes((prev) => {
         const updated = [...prev];
         updated[currentIndex] = {
@@ -188,7 +205,6 @@ const Geneltekrar = ({ navigation }) => {
     setShowFeedback(false);
     setIsRecording(false);
   };
-
   return (
     <ImageBackground
       source={require("../assets/images/bluedalga.png")}
