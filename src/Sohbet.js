@@ -1,102 +1,171 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
+  TextInput,
   TouchableOpacity,
-  Image,
-  Modal,
-  SafeAreaView,
-  ScrollView,
+  FlatList,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
+import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
+import { Modal } from "react-native";
+
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
+
+const API_BASE = "http://localhost:8080"; // Update if needed
 
 const Sohbet = ({ navigation }) => {
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "bot", text: "Merhaba! Bugün nasılsın?" },
-    { id: 2, sender: "user", text: "İyiyim, teşekkürler! Sen?" },
-    { id: 3, sender: "bot", text: "Ben de iyiyim. Bugün ne yapmak istersin?" },
-    { id: 6, sender: "user", text: "Konuşma pratiği yapmak istiyorum." },
-    { id: 7, sender: "bot", text: "Pekala! Hadi başlayalım." },
-    { id: 8, sender: "bot", text: "Sana birkaç soru soracağım, hazır mısın?" },
-    { id: 9, sender: "user", text: "Evet, hazırım!" },
-  ]);
-
-  const [isRecording, setIsRecording] = useState(false);
+  const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
 
-  const handleMicrophonePress = async () => {
-    if (isRecording) {
-      setIsRecording(false);
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      console.log("Recording saved to:", uri);
-      setRecording(null);
-    } else {
-      try {
-        const { status } = await Audio.requestPermissionsAsync();
-        if (status === "granted") {
-          setIsRecording(true);
-          const newRecording = new Audio.Recording();
-          await newRecording.prepareToRecordAsync(
-            Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-          );
-          await newRecording.startAsync();
-          setRecording(newRecording);
+  const flatListRef = useRef(null);
+
+  const scrollToBottom = () => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  };
+
+  const handleMicPress = async () => {
+    try {
+      if (recording) {
+        const status = await recording.getStatusAsync();
+        if (status.isRecording) {
+          await recording.stopAndUnloadAsync();
+          const uri = recording.getURI();
+          setRecording(null);
+          setIsRecording(false);
+          handleAudioUpload(uri);
         }
-      } catch (error) {
-        console.error("Recording error:", error);
+      } else {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+          Alert.alert("Permission Denied", "Microphone access is required.");
+          return;
+        }
+
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording: newRecording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+
+        setRecording(newRecording);
+        setIsRecording(true);
       }
+    } catch (error) {
+      console.error("Recording error:", error);
+      Alert.alert("Error", "Recording failed. Try again.");
     }
+  };
+
+  const handleRestartConversation = () => {
+    setMessages([]);
   };
 
   const handleEndConversation = () => {
     setShowFeedback(true);
   };
 
-  const handleRestartConversation = () => {
-    setMessages([{ id: 1, sender: "bot", text: "Merhaba! Bugün nasılsın?" }]);
+  const handleAudioUpload = async (uri) => {
+    try {
+      setLoading(true);
+
+      let fileData;
+      if (uri.startsWith("blob:")) {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        fileData = new File([blob], "recording.m4a", { type: "audio/m4a" });
+      } else {
+        fileData = {
+          uri: uri,
+          name: "recording.m4a",
+          type: "audio/m4a",
+        };
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileData);
+
+      const chatRes = await fetch(`${API_BASE}/api/chat/conversation`, {
+        method: "POST",
+        body: formData, // ✅ Multipart gönder
+      });
+
+      const chatData = await chatRes.json();
+
+      addMessage("user", chatData.transcription);
+
+      addMessage("assistant", chatData.response);
+    } catch (error) {
+      console.error("Voice chat failed:", error);
+      Alert.alert("Error", "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   };
 
+  const addMessage = (sender, text) => {
+    setMessages((prev) => [...prev, { sender, text }]);
+    setTimeout(scrollToBottom, 100);
+  };
+
+  const renderItem = ({ item }) => (
+    <View
+      style={[
+        styles.message,
+        item.sender === "user" ? styles.userBubble : styles.assistantBubble,
+      ]}
+    >
+      <Text
+        style={item.sender === "user" ? styles.userText : styles.assistantText}
+      >
+        {item.text}
+      </Text>
+    </View>
+  );
+
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.container}
+    >
       <View style={styles.topContainer}>
-        {/* Back Button */}
         <TouchableOpacity
-          onPress={() => navigation.goBack()}
           style={styles.backButton}
+          onPress={() => navigation.navigate("Home")}
         >
-          <FontAwesome name="chevron-left" size={24} color="black" />
+          <FontAwesome name="arrow-left" size={24} color="#333" />
         </TouchableOpacity>
         <Text style={styles.headerText}>Sohbet</Text>
       </View>
 
-      {/* Chat Container with ScrollView */}
-      <View style={styles.chatContainer}>
-        <ScrollView>
-          {messages.map((message) => (
-            <View
-              key={message.id}
-              style={[
-                styles.message,
-                message.sender === "user"
-                  ? styles.userMessage
-                  : styles.botMessage,
-              ]}
-            >
-              <Text
-                style={
-                  message.sender === "user" ? styles.userText : styles.botText
-                }
-              >
-                {message.text}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        renderItem={renderItem}
+        keyExtractor={(_, index) => index.toString()}
+        contentContainerStyle={styles.chatContainer}
+      />
+
+      {loading && (
+        <ActivityIndicator
+          size="large"
+          color="#FF3B30"
+          style={{ margin: 10 }}
+        />
+      )}
 
       {/* Microphone and Icons */}
       <View style={styles.microphoneContainer}>
@@ -111,10 +180,7 @@ const Sohbet = ({ navigation }) => {
           </TouchableOpacity>
           <Text style={styles.iconText}>Yenile</Text>
         </View>
-        <TouchableOpacity
-          onPress={handleMicrophonePress}
-          style={{ paddingTop: 30 }}
-        >
+        <TouchableOpacity onPress={handleMicPress} style={{ paddingTop: 30 }}>
           <FontAwesome
             name="microphone"
             size={100}
@@ -156,14 +222,14 @@ const Sohbet = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 };
 
 export default Sohbet;
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
     backgroundColor: "white",
   },
@@ -173,7 +239,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    //paddingHorizontal: 15,
   },
   backButton: {
     position: "absolute",
@@ -184,7 +249,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 8,
     color: "#333",
-    fontWeight: "bold", // Added bold styling
+    fontWeight: "bold",
+  },
+
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderTopColor: "#ccc",
+    borderTopWidth: 1,
+    padding: 12,
+    justifyContent: "center",
   },
   chatContainer: {
     flex: 1,
@@ -206,19 +280,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     maxWidth: "70%",
   },
-  userMessage: {
+
+  userBubble: {
     backgroundColor: "#F9F4F1",
     alignSelf: "flex-end",
   },
-  botMessage: {
+  assistantBubble: {
     backgroundColor: "#6CA3AD",
     alignSelf: "flex-start",
   },
-  userText: {
+  userTextText: {
     fontSize: 16,
     color: "#000",
   },
-  botText: {
+  assistantText: {
     fontSize: 16,
     color: "#fff",
   },

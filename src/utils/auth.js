@@ -4,14 +4,14 @@ import Constants from "expo-constants";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-
 // Check if the module has a default export; otherwise, use the imported object directly.
 const decodeFunction =
   typeof jwtDecodeLib === "function" ? jwtDecodeLib : jwtDecodeLib.default;
 
 export const getUserInfo = async () => {
   try {
-    const token = await AsyncStorage.getItem("accessToken");
+    const token = await AsyncStorage.getItem("token");
+
     console.log("Token retrieved:", token);
     if (!token) return null;
 
@@ -26,7 +26,7 @@ export const getUserInfo = async () => {
 // New function to fetch user profile
 export const getUserProfile = async () => {
   try {
-    const token = await AsyncStorage.getItem("accessToken");
+    const token = await AsyncStorage.getItem("token");
     if (!token) return null;
 
     const decoded = decodeFunction(token);

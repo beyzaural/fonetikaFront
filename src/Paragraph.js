@@ -40,7 +40,7 @@ const Paragraph = () => {
   const fetchParagraph = async () => {
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem("accessToken"); // ✅ Retrieve token
+      const token = await AsyncStorage.getItem("token"); // ✅ Retrieve token
 
       if (!token) {
         throw new Error("Yetkilendirme hatası: Kullanıcı giriş yapmamış.");

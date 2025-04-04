@@ -33,7 +33,7 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="GoalSelection">
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           component={Login}
@@ -138,7 +138,7 @@ export default function Index() {
         <Stack.Screen
           name="Sohbet"
           component={Sohbet}
-          options={{ headerShown: false }} // Hide header for Home
+          options={{ headerShown: false }} 
         />
         <Stack.Screen
           name="Acourse"
