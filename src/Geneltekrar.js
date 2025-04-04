@@ -60,6 +60,69 @@ const Geneltekrar = ({ navigation }) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const sendAudioToBackend = async (uri) => {
+    try {
+      const fileData = {
+        uri,
+        name: "recording.m4a",
+        type: "audio/m4a",
+      };
+
+      const formData = new FormData();
+      formData.append("file", fileData);
+      formData.append(
+        "expected_word",
+        enrichedMistakes[currentIndex]?.word || ""
+      );
+
+      const response = await fetch("http://localhost:8080/api/speech/process", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("✅ Geneltekrar backend response:", data);
+
+      // Feedback'i state'e yaz
+      setFeedback(data.feedback);
+      // 🧠 Backend'e doğru/yanlış bilgisini gönder
+      // Eğer doğru söylendiyse, correctCount'u artır
+      if (data.correct) {
+        const userId = "test-user"; // TODO: gerçek kullanıcı ID
+        const wordId = enrichedMistakes[currentIndex]?.wordId;
+
+        await axios.post(
+          "http://localhost:8080/api/mispronounced-words/record-pronunciation",
+          {
+            userId,
+            wordId,
+            correct: true,
+          }
+        );
+
+        console.log("✅ Doğru telaffuz kaydedildi.");
+      }
+
+      // enrichedMistakes güncelle (opsiyonel olarak transcribedText ve isCorrect gibi)
+      setEnrichedMistakes((prev) => {
+        const updated = [...prev];
+        updated[currentIndex] = {
+          ...updated[currentIndex],
+          transcribedText: data.transcribedText,
+          isCorrect: data.correct,
+        };
+        return updated;
+      });
+
+      setShowFeedback(true);
+    } catch (error) {
+      console.error("❌ Feedback alınırken hata oluştu:", error);
+    }
+  };
+
   const handleMicrophonePress = async () => {
     if (recording) {
       try {
@@ -69,8 +132,7 @@ const Geneltekrar = ({ navigation }) => {
         setAudioUri(uri);
         setRecording(null);
         setIsRecording(false);
-        setShowFeedback(true);
-        setFeedback(enrichedMistakes[currentIndex]?.feedback || "");
+        await sendAudioToBackend(uri); // 🔁 Buraya eklendi
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
@@ -198,10 +260,14 @@ const Geneltekrar = ({ navigation }) => {
               {enrichedMistakes[currentIndex] ? (
                 <>
                   <Text style={styles.tahminText}>
-                    Sanırım “{enrichedMistakes[currentIndex].phonetic}” dediniz.
+                    Sanırım “
+                    {enrichedMistakes[currentIndex]?.transcribedText || "..."}”
+                    dediniz.
                   </Text>
                   <Text style={styles.instructionText}>
-                    ❌ Yanlış söylediniz. Bir kez daha deneyin.
+                    {enrichedMistakes[currentIndex]?.isCorrect
+                      ? "✅ Doğru söylediniz!"
+                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
                   </Text>
                   <Text style={styles.kelimeText}>
                     {enrichedMistakes[currentIndex].phonetic
