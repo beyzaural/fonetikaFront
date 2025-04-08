@@ -13,10 +13,7 @@ import Register from "../src/Register";
 import Paragraph from "../src/Paragraph";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
-import Atekrar from "../src/Atekrar";
 import Sohbet from "../src/Sohbet";
-import Acourse from "../src/Acourse";
-import Akelime from "../src/Akelime";
 import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
 import EmailVerification from "../src/EmailVerification";
@@ -131,8 +128,6 @@ export default function Index() {
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
-          name="Atekrar"
-          component={Atekrar}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
@@ -141,13 +136,9 @@ export default function Index() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="Acourse"
-          component={Acourse}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
-          name="Akelime"
-          component={Akelime}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen

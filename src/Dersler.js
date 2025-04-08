@@ -1,4 +1,8 @@
 import React from "react";
+import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+import axios from "axios";
 import {
   StyleSheet,
   Text,
@@ -32,11 +36,54 @@ const Dersler = ({ navigation }) => {
       image: require("../assets/images/o.png"),
     },
   ];
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
 
+const Dersler = ({ navigation }) => {
+  const [courses, setCourses] = useState("");
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          console.warn("No token found in AsyncStorage.");
+          return;
+        }
+
+        const res = await axios.get(`${API_URL}/api/courses/user`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setCourses(res.data);
+      } catch (error) {
+        console.error("Failed to fetch courses:", error);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const getImageForCourse = (name) => {
+    const lower = name.toLowerCase();
+    switch (lower) {
+      case "a":
+        return require("../assets/images/a.png");
+      case "e":
+        return require("../assets/images/e.png");
+      case "i":
+      case "ı":
+        return require("../assets/images/ı.png");
+
+      case "o":
+      case "ö":
+        return require("../assets/images/o.png");
+    }
+  };
   // Handle navigation based on the selected card
   const handleCardPress = (moduleTitle) => {
     if (moduleTitle === "A Harfi") {
-      navigation.navigate("Acourse"); // Navigate to Acourse.js for "A Harfi"
     }
     // You can add more conditions for other cards if needed
   };
@@ -78,10 +125,34 @@ const Dersler = ({ navigation }) => {
                 <View>
                   <Text style={styles.cardTitle}>{module.title}</Text>
                   <Text style={styles.cardDifficulty}>{module.difficulty}</Text>
+          {Array.isArray(courses) &&
+            courses.map((course, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.card}
+                onPress={() =>
+                  navigation.navigate("Ders", { courseId: course.id })
+                }
+              >
+                <View style={styles.cardContent}>
+                  <Image
+                    source={getImageForCourse(course.courseName)}
+                    style={styles.cardImage}
+                  />
+                  <View>
+                    <Text style={styles.cardTitle}>
+                      {course.courseName.toUpperCase()} Harfi
+                    </Text>
+                    <Text style={styles.cardDifficulty}>
+                      Zorluk: {course.difficulty || "Bilinmiyor"}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </TouchableOpacity>
           ))}
+              </TouchableOpacity>
+            ))}
         </ScrollView>
       </View>
     </View>
