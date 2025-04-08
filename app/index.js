@@ -13,7 +13,10 @@ import Register from "../src/Register";
 import Paragraph from "../src/Paragraph";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
+import KursTekrar from "../src/KursTekrar";
 import Sohbet from "../src/Sohbet";
+import Ders from "../src/Ders";
+import KursKelime from "../src/KursKelime";
 import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
 import EmailVerification from "../src/EmailVerification";
@@ -128,6 +131,8 @@ export default function Index() {
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
+          name="KursTekrar"
+          component={KursTekrar}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
@@ -136,9 +141,13 @@ export default function Index() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="Ders"
+          component={Ders}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
+          name="KursKelime"
+          component={KursKelime}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen

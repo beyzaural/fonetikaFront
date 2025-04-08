@@ -1,4 +1,3 @@
-import React from "react";
 import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
@@ -13,29 +12,6 @@ import {
   Image,
 } from "react-native";
 
-const Dersler = ({ navigation }) => {
-  const vowelModules = [
-    {
-      title: "A Harfi",
-      difficulty: "Kolay",
-      image: require("../assets/images/a.png"),
-    },
-    {
-      title: "E Harfi",
-      difficulty: "Orta",
-      image: require("../assets/images/e.png"),
-    },
-    {
-      title: "I Harfi",
-      difficulty: "Zor",
-      image: require("../assets/images/ı.png"),
-    },
-    {
-      title: "O/Ö Harfi",
-      difficulty: "Orta",
-      image: require("../assets/images/o.png"),
-    },
-  ];
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
@@ -84,6 +60,7 @@ const Dersler = ({ navigation }) => {
   // Handle navigation based on the selected card
   const handleCardPress = (moduleTitle) => {
     if (moduleTitle === "A Harfi") {
+      navigation.navigate("Ders"); // Navigate to Acourse.js for "A Harfi"
     }
     // You can add more conditions for other cards if needed
   };
@@ -97,7 +74,6 @@ const Dersler = ({ navigation }) => {
           style={styles.imageBackground}
           imageStyle={styles.imageStyle}
         >
-          {/* Back Arrow */}
           <TouchableOpacity
             style={styles.backButton}
             onPress={() => navigation.navigate("Home")}
@@ -114,17 +90,6 @@ const Dersler = ({ navigation }) => {
       <View style={styles.bottomContainer}>
         <Text style={styles.title}>Dersler</Text>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {vowelModules.map((module, index) => (
-            <TouchableOpacity
-              key={index}
-              style={styles.card}
-              onPress={() => handleCardPress(module.title)}
-            >
-              <View style={styles.cardContent}>
-                <Image source={module.image} style={styles.cardImage} />
-                <View>
-                  <Text style={styles.cardTitle}>{module.title}</Text>
-                  <Text style={styles.cardDifficulty}>{module.difficulty}</Text>
           {Array.isArray(courses) &&
             courses.map((course, index) => (
               <TouchableOpacity
@@ -148,9 +113,6 @@ const Dersler = ({ navigation }) => {
                     </Text>
                   </View>
                 </View>
-              </View>
-            </TouchableOpacity>
-          ))}
               </TouchableOpacity>
             ))}
         </ScrollView>
@@ -158,7 +120,6 @@ const Dersler = ({ navigation }) => {
     </View>
   );
 };
-
 export default Dersler;
 const styles = StyleSheet.create({
   container: {

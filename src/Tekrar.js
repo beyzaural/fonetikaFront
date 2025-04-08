@@ -14,7 +14,6 @@ const Tekrar = ({ navigation }) => {
       title: "A Harfi",
       difficulty: "Tekrar Et",
       image: require("../assets/images/1.png"),
-      navigateTo: "Atekrar",
       navigateTo: "KursTekrar",
     },
     {
