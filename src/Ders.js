@@ -22,9 +22,7 @@ const Ders = ({ navigation, route }) => {
       {/* Back Arrow */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() =>
-          navigation.navigate()
-        }
+        onPress={() => navigation.navigate()}
       >
         <Image
           source={require("../assets/images/backspace.png")}
@@ -63,7 +61,9 @@ const Ders = ({ navigation, route }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => navigation.navigate("KursTekrar")}
+            onPress={() =>
+              navigation.navigate("KursTekrar", { courseId: courseId })
+            }
           >
             <Text style={styles.buttonText}>Geçmiş Tekrarı</Text>
           </TouchableOpacity>

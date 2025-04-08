@@ -7,20 +7,39 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+import axios from "axios";
+const API_URL = extra.apiUrl;
+const KursTekrar = ({ navigation, route }) => {
+  const { courseId } = route.params;
 
-const KursTekrar = ({ navigation }) => {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [definition, setDefinition] = useState("");
 
-  // List of words and definitions
-  const words = [
-    { word: "Ağabey", definition: "A:bi" },
-    { word: "Alet", definition: "a:lét" },
-    { word: "Ameliyathane", definition: "améliyatha:né" },
-  ];
+  const [words, setWords] = useState([]);
+
+  useEffect(() => {
+    const fetchMistakes = async () => {
+      const token = await AsyncStorage.getItem("token");
+      if (!token) return;
+
+      const res = await axios.get(
+        `${API_URL}/api/mispronounced-words/user-course?courseId=${courseId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      setWords(res.data);
+    };
+
+    fetchMistakes();
+  }, []);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -41,7 +60,9 @@ const KursTekrar = ({ navigation }) => {
   };
 
   const handlePreviousWord = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + words.length) % words.length);
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + words.length) % words.length
+    );
     setShowFeedback(false);
     setIsSpeaking(false);
   };
@@ -55,7 +76,7 @@ const KursTekrar = ({ navigation }) => {
         {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Ders")}
+          onPress={() => navigation.navigate("Ders", { courseId: courseId })}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -66,11 +87,19 @@ const KursTekrar = ({ navigation }) => {
         {/* Top Container */}
         <View style={styles.topContainer}>
           <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
-
-          <View style={styles.wordContainer}>
-            <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-            <Text style={styles.phoneticText}>{words[currentIndex].definition}</Text>
-          </View>
+          {words.length > 0 && (
+            <View style={styles.wordContainer}>
+              <Text style={styles.wordText}>{words[currentIndex].word}</Text>
+              <Text style={styles.phoneticText}>
+                {words[currentIndex].definition}
+              </Text>
+            </View>
+          )}
+          {words.length === 0 && (
+            <Text style={{ textAlign: "center", marginTop: 40, fontSize: 18 }}>
+              No mispronounced words for this course.
+            </Text>
+          )}
         </View>
 
         {/* Bottom Container */}
@@ -81,7 +110,10 @@ const KursTekrar = ({ navigation }) => {
         </View>
 
         {/* Navigation Arrows */}
-        <TouchableOpacity style={styles.prevButton} onPress={handlePreviousWord}>
+        <TouchableOpacity
+          style={styles.prevButton}
+          onPress={handlePreviousWord}
+        >
           <FontAwesome name="arrow-left" size={50} color="#880000" />
         </TouchableOpacity>
 
@@ -112,12 +144,15 @@ const KursTekrar = ({ navigation }) => {
 
         {/* Navigation Bar */}
         <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => navigation.navigate("Home")} style={styles.navItem}>
-    <Image
-      source={require("../assets/icons/home.png")} // Your home icon
-      style={styles.navIcon}
-    />
-  </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Home")}
+            style={styles.navItem}
+          >
+            <Image
+              source={require("../assets/icons/home.png")} // Your home icon
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
           <TouchableOpacity style={styles.navItem}>
             <Image
               source={require("../assets/icons/profile.png")}
@@ -130,14 +165,16 @@ const KursTekrar = ({ navigation }) => {
               style={styles.navIcon}
             />
           </TouchableOpacity>
-        
-        <TouchableOpacity onPress={() => navigation.navigate("Dersler")} style={styles.navItem}>
-  <Image
-    source={require("../assets/icons/fitness.png")} // Your fitness icon
-    style={styles.navIcon}
-  />
-</TouchableOpacity>
 
+          <TouchableOpacity
+            onPress={() => navigation.navigate("Dersler")}
+            style={styles.navItem}
+          >
+            <Image
+              source={require("../assets/icons/fitness.png")} // Your fitness icon
+              style={styles.navIcon}
+            />
+          </TouchableOpacity>
         </View>
       </View>
     </ImageBackground>
@@ -274,5 +311,4 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
-
 });
