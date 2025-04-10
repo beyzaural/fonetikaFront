@@ -39,7 +39,7 @@ const ResetOTPVerification = ({ navigation, route }) => {
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
-      Alert.alert("Error", "Please enter the 6-digit OTP.");
+      Alert.alert("Hata!", "Lütfen altı haneli kodu giriniz.");
       return;
     }
 
@@ -61,10 +61,10 @@ const ResetOTPVerification = ({ navigation, route }) => {
           resetToken: data.data.resetToken,
         });
       } else {
-        Alert.alert("Error", data.message || "Invalid OTP.");
+        Alert.alert("Hata", data.message || "Geçersiz kod.");
       }
     } catch (error) {
-      Alert.alert("Error", "OTP verification failed. Try again.");
+      Alert.alert("Hata", "Kod doğrulanamadı, tekrar deneyiniz.");
     } finally {
       setLoading(false);
     }
@@ -83,12 +83,12 @@ const ResetOTPVerification = ({ navigation, route }) => {
 
       const data = await response.json();
       if (data.success) {
-        Alert.alert("Success", "OTP resent to email.");
+        Alert.alert("Başarı", "Tek seferlik kod mailinize gönderildi.");
       } else {
-        Alert.alert("Error", data.message || "Could not resend OTP.");
+        Alert.alert("Error", data.message || "Tek seferlik kod gönderilemedi.");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to resend OTP.");
+      Alert.alert("Hata", "Tek seferlik kod gönderilemedi.");
     }
   };
 
@@ -96,7 +96,7 @@ const ResetOTPVerification = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.titleText}>Verify OTP</Text>
       <Text style={styles.subtitleText}>
-        Enter the 6-digit code sent to your email
+        Mailinize gönderilen altı haneli tek seferlik kodu giriniz.
       </Text>
 
       <TextInput
@@ -117,7 +117,7 @@ const ResetOTPVerification = ({ navigation, route }) => {
         {loading ? (
           <ActivityIndicator color="white" />
         ) : (
-          <Text style={styles.buttonText}>Verify</Text>
+          <Text style={styles.buttonText}>Doğrula</Text>
         )}
       </Pressable>
 
@@ -130,7 +130,9 @@ const ResetOTPVerification = ({ navigation, route }) => {
         disabled={resendDisabled}
       >
         <Text style={styles.buttonText}>
-          {resendDisabled ? `Resend OTP in ${timer}s` : "Resend OTP"}
+          {resendDisabled
+            ? `Kodu ${timer}s saniye içinde bir daha gönder`
+            : "Tekrar gönder"}
         </Text>
       </Pressable>
     </View>

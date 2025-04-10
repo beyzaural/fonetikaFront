@@ -52,7 +52,6 @@ const KursKelime = ({ navigation, route }) => {
       try {
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI(); // Get URI of the recorded audio
-        console.log("Recording saved at:", uri);
         setAudioUri(uri); // Save URI for further processing or playback
         setRecording(null); // Clear the recording object
         setIsRecording(false);

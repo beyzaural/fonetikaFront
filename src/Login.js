@@ -11,7 +11,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import React, { useState } from "react";
 import { Alert } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
@@ -35,13 +34,12 @@ const Login = ({ navigation }) => {
 
       const data = await response.json();
       if (data.token) {
-        await AsyncStorage.setItem("token", data.token); // ✅ Save token
-        console.log("Token stored successfully:", data.token);
+        await AsyncStorage.setItem("token", data.token); 
       } else {
         console.warn("No token received in login response"); // ✅ Log missing token
       }
       if (!response.ok) {
-        console.error("Login Error:", data); // ✅ Log error response
+        console.error("Login Error:", data); 
         Alert.alert(
           "Giriş Başarısız!",
           data.message || "Yanlış mail ya da şifre."

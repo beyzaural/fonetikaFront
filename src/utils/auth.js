@@ -12,7 +12,6 @@ export const getUserInfo = async () => {
   try {
     const token = await AsyncStorage.getItem("token");
 
-    console.log("Token retrieved:", token);
     if (!token) return null;
 
     const decoded = decodeFunction(token);

@@ -18,17 +18,17 @@ const ResetPasswordScreen = ({ route, navigation }) => {
 
   const handleResetPassword = async () => {
     if (!password) {
-      Alert.alert("Error", "Please enter a new password.");
+      Alert.alert("Hata", "Lütfen yeni parolanızı girin.");
       return;
     }
 
     if (!password || !confirmPassword) {
-      Alert.alert("Error", "Please fill out both password fields.");
+      Alert.alert("Hata", "Lütfen boş alanları doldurun.");
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match.");
+      Alert.alert("Hata", "Parolalar uyuşmuyor.");
       return;
     }
 
@@ -41,26 +41,23 @@ const ResetPasswordScreen = ({ route, navigation }) => {
 
       const data = await response.json();
       if (data.success) {
-        Alert.alert("Success", "Your password has been reset.");
-        navigation.navigate("Login"); // Redirect back to login
-      } else {
-        Alert.alert("Error", data.message || "Failed to reset password.");
+        Alert.alert("Başarı", "Parolanız değiştirildi.");
+        navigation.navigate("Login");
+        Alert.alert("Error", data.message || "Parola değiştirilemedi.");
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to reset password.");
+      Alert.alert("Hata", "Parola değiştirilemedi.");
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Reset Password</Text>
-      <Text style={styles.subtitle}>
-        Enter your new password below to reset your account.
-      </Text>
+      <Text style={styles.title}>Parola sıfırlama</Text>
+      <Text style={styles.subtitle}>Yeni parolanızı girin.</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Enter new password"
+        placeholder="Yeni parola"
         secureTextEntry
         onChangeText={setPassword}
         value={password}
@@ -68,14 +65,14 @@ const ResetPasswordScreen = ({ route, navigation }) => {
 
       <TextInput
         style={styles.input}
-        placeholder="Confirm new password"
+        placeholder="Yeni parola (tekrar)"
         secureTextEntry
         onChangeText={setConfirmPassword}
         value={confirmPassword}
       />
 
       <Pressable onPress={handleResetPassword} style={styles.button}>
-        <Text style={styles.buttonText}>Reset Password</Text>
+        <Text style={styles.buttonText}>Parolayı sıfırla</Text>
       </Pressable>
     </View>
   );

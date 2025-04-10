@@ -18,7 +18,6 @@ const Home = ({ navigation, route }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       const userInfo = await getUserInfo(); // Fetch user info from token
-      console.log("Decoded user info:", userInfo);
       if (userInfo?.username) {
         setUserName(userInfo.username); // Use 'username' instead of 'name'
       }

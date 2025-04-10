@@ -16,7 +16,6 @@ import axios from "axios";
 const API_URL = extra.apiUrl;
 const KursTekrar = ({ navigation, route }) => {
   const { courseId, phoneme } = route.params;
-  console.log("Gelen phoneme:", phoneme);
 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -29,7 +28,6 @@ const KursTekrar = ({ navigation, route }) => {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
 
-     
       const res = await axios.get(
         `${API_URL}/api/mispronounced-words/user-course-phoneme?&phoneme=${phoneme}`,
         {
@@ -38,7 +36,6 @@ const KursTekrar = ({ navigation, route }) => {
       );
 
       setWords(res.data);
-      console.log("Backend'den gelen kelimeler:", res.data);
     };
 
     fetchMistakes();

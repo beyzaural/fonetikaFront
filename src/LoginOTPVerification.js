@@ -63,8 +63,7 @@ const LoginOTPVerification = ({ navigation, route }) => {
       }
 
       if (data.data?.accessToken) {
-        await AsyncStorage.setItem("token", data.data.accessToken); // ✅ Store as "token"
-        console.log("Token stored successfully:", data.data.accessToken);
+        await AsyncStorage.setItem("token", data.data.accessToken);
       } else {
         console.warn("No token received after OTP verification");
       }
@@ -112,9 +111,10 @@ const LoginOTPVerification = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Two-Factor Authentication</Text>
+      <Text style={styles.titleText}>İki aşamalı doğrulama</Text>
       <Text style={styles.subtitleText}>
-        Please enter the 6-digit OTP sent to your {currentDeliveryMethod}.
+        Lütfen {currentDeliveryMethod} yoluyla size iletilen altı hanel kodu
+        girin..
       </Text>
 
       <TextInput
@@ -128,7 +128,7 @@ const LoginOTPVerification = ({ navigation, route }) => {
       />
 
       <Pressable onPress={handleVerifyOTP} style={styles.button}>
-        <Text style={styles.buttonText}>Verify OTP</Text>
+        <Text style={styles.buttonText}>Kodu doğrula</Text>
       </Pressable>
 
       <Pressable
@@ -143,7 +143,7 @@ const LoginOTPVerification = ({ navigation, route }) => {
           <ActivityIndicator color="white" />
         ) : (
           <Text style={styles.buttonText}>
-            Tek seferlik kod {deliveryMethodMapping[currentDeliveryMethod]} ile
+            Tek seferlik kodu {deliveryMethodMapping[currentDeliveryMethod]} ile
             gönder
           </Text>
         )}
@@ -161,7 +161,7 @@ const LoginOTPVerification = ({ navigation, route }) => {
           <ActivityIndicator color="white" />
         ) : (
           <Text style={styles.buttonText}>
-            Tek seferlik kod {deliveryMethodMapping[otherMethod]} ile gönder
+            Tek seferlik kodu {deliveryMethodMapping[otherMethod]} ile gönder
           </Text>
         )}
       </Pressable>
