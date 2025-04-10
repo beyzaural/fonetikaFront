@@ -12,7 +12,7 @@ import * as Progress from "react-native-progress"; // Import the progress bar
 
 const Ders = ({ navigation, route }) => {
   const progress = 0.35; // Example progress value (50%)
-  const { courseId } = route.params;
+  const { courseId, phoneme } = route.params;
 
   return (
     <ImageBackground
@@ -22,7 +22,7 @@ const Ders = ({ navigation, route }) => {
       {/* Back Arrow */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate()}
+        onPress={() => navigation.navigate("Dersler")}
       >
         <Image
           source={require("../assets/images/backspace.png")}
@@ -62,7 +62,10 @@ const Ders = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
-              navigation.navigate("KursTekrar", { courseId: courseId })
+              navigation.navigate("KursTekrar", {
+                courseId: courseId,
+                phoneme: phoneme,
+              })
             }
           >
             <Text style={styles.buttonText}>Geçmiş Tekrarı</Text>

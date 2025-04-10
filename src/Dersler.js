@@ -57,13 +57,6 @@ const Dersler = ({ navigation }) => {
         return require("../assets/images/o.png");
     }
   };
-  // Handle navigation based on the selected card
-  const handleCardPress = (moduleTitle) => {
-    if (moduleTitle === "A Harfi") {
-      navigation.navigate("Ders"); // Navigate to Acourse.js for "A Harfi"
-    }
-    // You can add more conditions for other cards if needed
-  };
 
   return (
     <View style={styles.container}>
@@ -96,7 +89,10 @@ const Dersler = ({ navigation }) => {
                 key={index}
                 style={styles.card}
                 onPress={() =>
-                  navigation.navigate("Ders", { courseId: course.id })
+                  navigation.navigate("Ders", {
+                    courseId: course.id,
+                    phoneme: course.courseName,
+                  })
                 }
               >
                 <View style={styles.cardContent}>

@@ -62,6 +62,7 @@ const Ayarlar = ({ navigation }) => {
           <Text style={styles.settingText}>Destek</Text>
         </TouchableOpacity>
       </ScrollView>
+      
     </View>
   );
 };

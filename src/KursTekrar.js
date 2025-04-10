@@ -15,7 +15,8 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 import axios from "axios";
 const API_URL = extra.apiUrl;
 const KursTekrar = ({ navigation, route }) => {
-  const { courseId } = route.params;
+  const { courseId, phoneme } = route.params;
+  console.log("Gelen phoneme:", phoneme);
 
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -28,14 +29,16 @@ const KursTekrar = ({ navigation, route }) => {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
 
+     
       const res = await axios.get(
-        `${API_URL}/api/mispronounced-words/user-course?courseId=${courseId}`,
+        `${API_URL}/api/mispronounced-words/user-course-phoneme?&phoneme=${phoneme}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       setWords(res.data);
+      console.log("Backend'den gelen kelimeler:", res.data);
     };
 
     fetchMistakes();
@@ -46,7 +49,7 @@ const KursTekrar = ({ navigation, route }) => {
   const handleMicrophonePress = () => {
     if (isSpeaking) {
       setShowFeedback(true);
-      setDefinition(words[currentIndex].definition);
+      setDefinition(words[currentIndex]?.definition || "");
     } else {
       setShowFeedback(false);
     }
@@ -76,7 +79,12 @@ const KursTekrar = ({ navigation, route }) => {
         {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Ders", { courseId: courseId })}
+          onPress={() =>
+            navigation.navigate("Ders", {
+              courseId: courseId,
+              phoneme: phoneme,
+            })
+          }
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -90,6 +98,7 @@ const KursTekrar = ({ navigation, route }) => {
           {words.length > 0 && (
             <View style={styles.wordContainer}>
               <Text style={styles.wordText}>{words[currentIndex].word}</Text>
+
               <Text style={styles.phoneticText}>
                 {words[currentIndex].definition}
               </Text>
