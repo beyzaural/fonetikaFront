@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { getUserInfo } from "./utils/auth";
+import BottomNavBar from "./BottomNavBar";
 
 const Home = ({ navigation, route }) => {
   const [userName, setUserName] = useState("");
@@ -116,47 +117,7 @@ const Home = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-
-      {/* Navigation Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Home")}
-          style={styles.navItem}
-        >
-          <Image
-            source={require("../assets/icons/home.png")} // Your home icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Profile")}
-          style={styles.navItem}
-        >
-          <Image
-            source={require("../assets/icons/profile.png")} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate("Ayarlar")}
-        >
-          <Image
-            source={require("../assets/icons/settings.png")} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Dersler")}
-          style={styles.navItem}
-        >
-          <Image
-            source={require("../assets/icons/fitness.png")} // Your fitness icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-      </View>
+      <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
 };

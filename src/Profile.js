@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getUserProfile } from "./utils/auth"; // Adjust the path as needed
+import { getUserProfile } from "./utils/auth";
+import BottomNavBar from "./BottomNavBar";
 
 const Profile = ({ navigation }) => {
   const [avatar, setAvatar] = useState("");
@@ -91,6 +92,7 @@ const Profile = ({ navigation }) => {
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>HESABI GÜNCELLE</Text>
       </TouchableOpacity>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };

@@ -7,6 +7,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import BottomNavBar from "./BottomNavBar";
 
 const Tekrar = ({ navigation }) => {
   const vowelModules = [
@@ -70,31 +71,7 @@ const Tekrar = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-      </View>
-
-      {/* Navigation Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity style={styles.navItem}>
-          <Image
-            source={require("../assets/icons/profile.png")}
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image
-            source={require("../assets/icons/settings.png")}
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Dersler")}
-          style={styles.navItem}
-        >
-          <Image
-            source={require("../assets/icons/fitness.png")}
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
+        <BottomNavBar navigation={navigation} />
       </View>
     </View>
   );

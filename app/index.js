@@ -27,6 +27,8 @@ import ForgotPasswordScreen from "../src/ForgotPasswordScreen";
 import ResetPasswordScreen from "../src/ResetPasswordScreen";
 import ResetOTPVerification from "../src/ResetOTPVerification";
 import Ayarlar from "../src/Ayarlar";
+import Parola from "../src/Parola";
+
 
 const Stack = createStackNavigator();
 

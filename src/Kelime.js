@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import BottomNavBar from "./BottomNavBar";
 
 const AUDIO_UPLOAD_URL = "http://localhost:8080/api/speech/process";
 
@@ -332,30 +333,9 @@ const Kelime = ({ navigation }) => {
           </View>
         </Modal>
 
-        <View style={styles.navBar}>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/profile.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/settings.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Dersler")}
-            style={styles.navItem}
-          >
-            <Image
-              source={require("../assets/icons/fitness.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-        </View>
+        
       </View>
+      <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
 };

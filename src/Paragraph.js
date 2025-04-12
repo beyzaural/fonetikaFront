@@ -15,6 +15,8 @@ import { Audio } from "expo-av";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Modal } from "react-native";
+import BottomNavBar from "./BottomNavBar";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
@@ -263,6 +265,7 @@ const Paragraph = () => {
           </View>
         </View>
       </Modal>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };
@@ -273,6 +276,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
+    flexDirection: "column", // ✔️ alt çubuğu en alta it
   },
   backButton: {
     position: "absolute",
@@ -311,9 +315,8 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   microphoneContainer: {
-    position: "absolute",
     bottom: 0,
-    height: "85%", // Covers 85% of the screen
+    flex: 1,
     width: "100%",
     backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 35,
@@ -324,7 +327,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
     paddingHorizontal: 15,
-    paddingBottom: 20, // Ensures padding at the bottom
+    paddingBottom: 10, // Ensures padding at the bottom
     alignItems: "center",
   },
   buttonsRow: {
@@ -333,7 +336,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 20,
     position: "absolute",
-    bottom: 60, // Keeps the microphone row 60-space padding from the bottom
+    bottom: 20, // Keeps the microphone row 60-space padding from the bottom
     width: "100%",
   },
   iconButtonWithText: {

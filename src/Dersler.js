@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import axios from "axios";
+import BottomNavBar from "./BottomNavBar";
 import {
   StyleSheet,
   Text,
@@ -113,6 +114,7 @@ const Dersler = ({ navigation }) => {
             ))}
         </ScrollView>
       </View>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };

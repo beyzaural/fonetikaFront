@@ -13,6 +13,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 import axios from "axios";
+import BottomNavBar from "./BottomNavBar";
+
 const API_URL = extra.apiUrl;
 const KursTekrar = ({ navigation, route }) => {
   const { courseId, phoneme } = route.params;
@@ -148,40 +150,7 @@ const KursTekrar = ({ navigation, route }) => {
           </View>
         </Modal>
 
-        {/* Navigation Bar */}
-        <View style={styles.navBar}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Home")}
-            style={styles.navItem}
-          >
-            <Image
-              source={require("../assets/icons/home.png")} // Your home icon
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/profile.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/settings.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Dersler")}
-            style={styles.navItem}
-          >
-            <Image
-              source={require("../assets/icons/fitness.png")} // Your fitness icon
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-        </View>
+        <BottomNavBar navigation={navigation} />
       </View>
     </ImageBackground>
   );

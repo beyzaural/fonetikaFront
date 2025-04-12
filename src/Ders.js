@@ -8,7 +8,8 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import * as Progress from "react-native-progress"; // Import the progress bar
+import * as Progress from "react-native-progress";
+import BottomNavBar from "./BottomNavBar"; // Import the progress bar
 
 const Ders = ({ navigation, route }) => {
   const progress = 0.35; // Example progress value (50%)
@@ -75,40 +76,7 @@ const Ders = ({ navigation, route }) => {
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           {/* Your content goes here */}
         </ScrollView>
-      </View>
-
-      {/* Navigation Bar */}
-      <View style={styles.navBar}>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Home")}
-          style={styles.navItem}
-        >
-          <Image
-            source={require("../assets/icons/home.png")} // Your home icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image
-            source={require("../assets/icons/profile.png")} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}>
-          <Image
-            source={require("../assets/icons/settings.png")} // Replace with your icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Dersler")}
-          style={styles.navItem}
-        >
-          <Image
-            source={require("../assets/icons/fitness.png")} // Your fitness icon
-            style={styles.navIcon}
-          />
-        </TouchableOpacity>
+        <BottomNavBar navigation={navigation} />
       </View>
     </ImageBackground>
   );

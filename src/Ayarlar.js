@@ -1,4 +1,5 @@
 import React from "react";
+import BottomNavBar from "./BottomNavBar";
 import {
   StyleSheet,
   Text,
@@ -31,6 +32,12 @@ const Ayarlar = ({ navigation }) => {
 
       {/* Settings List */}
       <ScrollView style={styles.settingsContainer}>
+        <TouchableOpacity
+          style={styles.settingItem}
+          onPress={() => navigation.navigate("ChangePassword")}
+        >
+          <Text style={styles.settingText}>Şifreyi Değiştir</Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Tercihler</Text>
         </TouchableOpacity>
@@ -62,7 +69,7 @@ const Ayarlar = ({ navigation }) => {
           <Text style={styles.settingText}>Destek</Text>
         </TouchableOpacity>
       </ScrollView>
-      
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };

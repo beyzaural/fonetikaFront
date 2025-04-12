@@ -15,6 +15,7 @@ import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
 import { Modal } from "react-native";
+import BottomNavBar from "./BottomNavBar";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -137,7 +138,7 @@ const Sohbet = ({ navigation }) => {
   );
 
   return (
-    <KeyboardAvoidingView
+    <View
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
     >
@@ -199,7 +200,7 @@ const Sohbet = ({ navigation }) => {
           <Text style={styles.iconText}>Bitir</Text>
         </View>
       </View>
-
+      <BottomNavBar navigation={navigation} />
       {/* Feedback Modal */}
       <Modal
         animationType="slide"
@@ -222,7 +223,7 @@ const Sohbet = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+    </View>
   );
 };
 
@@ -298,7 +299,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   microphoneContainer: {
-    position: "absolute",
+    flex: 1,
     bottom: 0,
     flexDirection: "row",
     justifyContent: "space-around",
@@ -307,14 +308,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     zIndex: 10,
-    paddingBottom: 50, // Prevent overlap with SafeArea
+    paddingBottom: 20, // Prevent overlap with SafeArea
     borderTopLeftRadius: 35, // Added rounded top-left corner
     borderTopRightRadius: 35, // Added rounded top-right corner
     shadowColor: "#000", // Optional: Shadow for better aesthetics
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 4, // For Android
+    elevation: 4, 
   },
 
   iconButtonWithText: {

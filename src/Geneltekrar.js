@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import BottomNavBar from "./BottomNavBar";
 
 const Geneltekrar = ({ navigation }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -333,30 +334,7 @@ const Geneltekrar = ({ navigation }) => {
           </View>
         </Modal>
 
-        {/* Navigation Bar */}
-        <View style={styles.navBar}>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/profile.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.navItem}>
-            <Image
-              source={require("../assets/icons/settings.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Dersler")}
-            style={styles.navItem}
-          >
-            <Image
-              source={require("../assets/icons/fitness.png")}
-              style={styles.navIcon}
-            />
-          </TouchableOpacity>
-        </View>
+        <BottomNavBar navigation={navigation} />
       </View>
     </ImageBackground>
   );
