@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
+import { logout } from "./utils/auth";
+//import { Alert } from "react-native";
 
 const Ayarlar = ({ navigation }) => {
   return (
@@ -67,6 +69,33 @@ const Ayarlar = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Destek</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.settingItem, { borderBottomWidth: 0 }]}
+          // webde simulate ettiğim için alertliyi şimdilik yorum aldım değiştiriiz
+          /*onPress={() =>
+  Alert.alert("Çıkış Yap", "Emin misiniz?", [
+    { text: "İptal", style: "cancel" },
+    {
+      text: "Evet",
+      style: "destructive",
+      onPress: async () => {
+        await logout();
+        navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      },
+    },
+  ])
+}
+ */
+          onPress={async () => {
+            await logout();
+            navigation.reset({
+              index: 0,
+              routes: [{ name: "Login" }],
+            });
+          }}
+        >
+          <Text style={[styles.settingText, { color: "red" }]}>Çıkış Yap</Text>
         </TouchableOpacity>
       </ScrollView>
       <BottomNavBar navigation={navigation} />

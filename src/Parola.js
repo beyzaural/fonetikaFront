@@ -11,6 +11,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "./utils/auth";
 
+
 const Parola = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
