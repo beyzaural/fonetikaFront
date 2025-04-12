@@ -34,7 +34,7 @@ const Ayarlar = ({ navigation }) => {
       <ScrollView style={styles.settingsContainer}>
         <TouchableOpacity
           style={styles.settingItem}
-          onPress={() => navigation.navigate("ChangePassword")}
+          onPress={() => navigation.navigate("Parola")}
         >
           <Text style={styles.settingText}>Şifreyi Değiştir</Text>
         </TouchableOpacity>

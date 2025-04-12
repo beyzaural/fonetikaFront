@@ -29,7 +29,6 @@ import ResetOTPVerification from "../src/ResetOTPVerification";
 import Ayarlar from "../src/Ayarlar";
 import Parola from "../src/Parola";
 
-
 const Stack = createStackNavigator();
 
 export default function Index() {
@@ -80,6 +79,11 @@ export default function Index() {
         <Stack.Screen
           name="Ayarlar"
           component={Ayarlar}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Parola"
+          component={Parola}
           options={{ headerShown: false }}
         />
         <Stack.Screen

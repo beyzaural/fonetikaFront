@@ -1,12 +1,19 @@
 const jwtDecodeLib = require("jwt-decode");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 // Check if the module has a default export; otherwise, use the imported object directly.
 const decodeFunction =
   typeof jwtDecodeLib === "function" ? jwtDecodeLib : jwtDecodeLib.default;
+
+export const logout = async () => {
+  await AsyncStorage.removeItem("token");
+  await AsyncStorage.removeItem("refreshToken");
+  await AsyncStorage.removeItem("userInfo");
+};
 
 export const getUserInfo = async () => {
   try {

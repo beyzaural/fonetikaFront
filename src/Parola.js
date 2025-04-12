@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { logout } from "./utils/auth";
 
 const Parola = ({ navigation }) => {
   const [step, setStep] = useState(1);
@@ -16,6 +17,8 @@ const Parola = ({ navigation }) => {
   const [otp, setOtp] = useState("");
   const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const [loading, setLoading] = useState(false);
 
   // Auto-load email from local storage
@@ -25,7 +28,7 @@ const Parola = ({ navigation }) => {
       if (!token) return;
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      setEmail(payload.sub);
+      setEmail(payload.email); // 🔐 Artık doğru değer burada
     };
     loadEmail();
   }, []);
@@ -78,6 +81,11 @@ const Parola = ({ navigation }) => {
   };
 
   const handleResetPassword = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Hata", "Şifreler uyuşmuyor.");
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await fetch(
@@ -91,8 +99,10 @@ const Parola = ({ navigation }) => {
 
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
-      Alert.alert("Başarılı", "Şifreniz başarıyla değiştirildi.");
-      navigation.goBack();
+
+      // ✅ Clear stored token
+      await logout();
+      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {
@@ -135,6 +145,13 @@ const Parola = ({ navigation }) => {
             style={styles.input}
             value={newPassword}
             onChangeText={setNewPassword}
+            secureTextEntry
+          />
+          <Text style={styles.label}>Yeni Şifre (Tekrar)</Text>
+          <TextInput
+            style={styles.input}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
             secureTextEntry
           />
           <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
