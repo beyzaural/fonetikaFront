@@ -37,7 +37,6 @@ export const getUserProfile = async () => {
 
     const decoded = decodeFunction(token);
     const userId = decoded.userId;
-    console.log("Extracted userId:", userId);
 
     // Fetch the profile from the backend using the userId
     const response = await fetch(`${API_URL}/users/profile?userId=${userId}`, {

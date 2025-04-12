@@ -36,15 +36,15 @@ const Ayarlar = ({ navigation }) => {
       <ScrollView style={styles.settingsContainer}>
         <TouchableOpacity
           style={styles.settingItem}
-          onPress={() => navigation.navigate("Parola")}
+          onPress={() => navigation.navigate("Hesap")}
         >
-          <Text style={styles.settingText}>Şifreyi Değiştir</Text>
+          <Text style={styles.settingText}>Hesap</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Tercihler</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Profil</Text>
+          <Text style={styles.settingText}>Hesap</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Bildirimler</Text>

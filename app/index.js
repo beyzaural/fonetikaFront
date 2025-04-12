@@ -30,6 +30,8 @@ import Ayarlar from "../src/Ayarlar";
 import Parola from "../src/Parola";
 import Destek from "../src/Destek";
 import FAQ from "../src/FAQ";
+import Hesap from "../src/Hesap";
+import ChangeEmail from "../src/ChangeEmail";
 
 const Stack = createStackNavigator();
 
@@ -81,6 +83,16 @@ export default function Index() {
         <Stack.Screen
           name="Ayarlar"
           component={Ayarlar}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Hesap"
+          component={Hesap}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ChangeEmail"
+          component={ChangeEmail}
           options={{ headerShown: false }}
         />
         <Stack.Screen
