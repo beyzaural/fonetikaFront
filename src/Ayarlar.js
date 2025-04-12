@@ -67,9 +67,13 @@ const Ayarlar = ({ navigation }) => {
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Aboneliği Tekrar Aktifleştir</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
+        <TouchableOpacity
+          style={styles.settingItem}
+          onPress={() => navigation.navigate("Destek")}
+        >
           <Text style={styles.settingText}>Destek</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={[styles.settingItem, { borderBottomWidth: 0 }]}
           // webde simulate ettiğim için alertliyi şimdilik yorum aldım değiştiriiz

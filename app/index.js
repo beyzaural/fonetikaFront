@@ -28,6 +28,8 @@ import ResetPasswordScreen from "../src/ResetPasswordScreen";
 import ResetOTPVerification from "../src/ResetOTPVerification";
 import Ayarlar from "../src/Ayarlar";
 import Parola from "../src/Parola";
+import Destek from "../src/Destek";
+import FAQ from "../src/FAQ";
 
 const Stack = createStackNavigator();
 
@@ -84,6 +86,16 @@ export default function Index() {
         <Stack.Screen
           name="Parola"
           component={Parola}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Destek"
+          component={Destek}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="FAQ"
+          component={FAQ}
           options={{ headerShown: false }}
         />
         <Stack.Screen
