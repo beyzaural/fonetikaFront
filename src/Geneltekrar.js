@@ -368,7 +368,7 @@ const styles = StyleSheet.create({
   wordContainer: {
     backgroundColor: "#F9F4F1",
     width: "80%",
-    height: "52%",
+    height: 430, // Sabit yükseklik ver
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,

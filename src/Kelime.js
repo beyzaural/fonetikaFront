@@ -332,8 +332,6 @@ const Kelime = ({ navigation }) => {
             </View>
           </View>
         </Modal>
-
-        
       </View>
       <BottomNavBar navigation={navigation} />
     </ImageBackground>
@@ -368,7 +366,7 @@ const styles = StyleSheet.create({
   wordContainer: {
     backgroundColor: "#F9F4F1",
     width: "80%",
-    height: "52%",
+    height: 430,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,

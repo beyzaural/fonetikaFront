@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import {
   StyleSheet,
   Text,
@@ -11,10 +12,12 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { getUserInfo } from "./utils/auth";
 import BottomNavBar from "./BottomNavBar";
+import ProgressBar from "./ProgressBar";
 
 const Home = ({ navigation, route }) => {
   const [userName, setUserName] = useState("");
   const dailyGoal = route.params?.dailyGoal; // Get dailyGoal from route.params
+  const [weeklyLoginDays, setWeeklyLoginDays] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -25,6 +28,42 @@ const Home = ({ navigation, route }) => {
     };
     fetchUserData();
   }, []);
+  useEffect(() => {
+    const logDailyUsage = async () => {
+      try {
+        await axios.post(
+          "http://localhost:8080/api/progress/app-usage/log",
+          null, // POST body boş
+          {
+            params: { userId: "test-user" },
+          }
+        );
+        console.log("✅ Günlük giriş kaydedildi");
+      } catch (error) {
+        console.error("❌ Giriş logu kaydedilemedi:", error);
+      }
+    };
+
+    logDailyUsage();
+  }, []);
+
+  useEffect(() => {
+    const fetchLoginDays = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:8080/api/progress/app-usage",
+          {
+            params: { userId: "test-user" },
+          }
+        );
+        setWeeklyLoginDays(res.data); // örnek: ["Mon", "Wed", "Fri"]
+      } catch (error) {
+        console.error("❌ Haftalık login verisi alınamadı", error);
+      }
+    };
+
+    fetchLoginDays();
+  }, []);
 
   return (
     <ImageBackground
@@ -34,6 +73,9 @@ const Home = ({ navigation, route }) => {
       {/* Welcome Text */}
       <Text style={styles.welcomeText}>Hoşgeldin</Text>
       <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
+
+      {/* ✅ Yeni ProgressBar sadece login günlerini gösterir */}
+      <ProgressBar weeklyLoginDays={weeklyLoginDays} />
 
       {/* Subtitle */}
       <Text style={styles.subtitle}>Derslerin</Text>
@@ -132,7 +174,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "white",
-    marginTop: 90,
+    marginTop: 60,
     marginLeft: 20,
   },
   nameText: {
@@ -156,7 +198,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1, // Ensures ScrollView content stretches properly
-    paddingVertical: 40, // Adds vertical padding
+    paddingVertical: 20, // Adds vertical padding
   },
   cardsContainer: {
     flexDirection: "row",
