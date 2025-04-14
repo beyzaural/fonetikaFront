@@ -98,6 +98,11 @@ export default function Index() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
+          name="ChangeName"
+          component={ChangeName}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
           name="Parola"
           component={Parola}
           options={{ headerShown: false }}
