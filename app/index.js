@@ -19,6 +19,7 @@ import Ders from "../src/Ders";
 import KursKelime from "../src/KursKelime";
 import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
+
 import EmailOTPVerification from "../src/EmailOTPVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
@@ -39,7 +40,6 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
