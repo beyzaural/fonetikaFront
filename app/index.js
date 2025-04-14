@@ -19,7 +19,6 @@ import Ders from "../src/Ders";
 import KursKelime from "../src/KursKelime";
 import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
-import EmailVerification from "../src/EmailVerification";
 import EmailOTPVerification from "../src/EmailOTPVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
@@ -33,13 +32,15 @@ import Destek from "../src/Destek";
 import FAQ from "../src/FAQ";
 import Hesap from "../src/Hesap";
 import ChangeEmail from "../src/ChangeEmail";
+import ChangeName from "../src/ChangeName";
 
 const Stack = createStackNavigator();
 
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+
+      <Stack.Navigator initialRouteName="Login">
         <Stack.Screen
           name="Login"
           component={Login}
@@ -112,8 +113,8 @@ export default function Index() {
           options={{ headerShown: false }}
         />
         <Stack.Screen
-          name="EmailVerification"
-          component={EmailVerification}
+          name="EmailOTPVerification"
+          component={EmailOTPVerification}
           options={{ headerShown: false }}
         />
         <Stack.Screen
