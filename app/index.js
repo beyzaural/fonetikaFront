@@ -38,7 +38,7 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="GoalSelection">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
           name="Login"
           component={Login}

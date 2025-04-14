@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -28,24 +30,26 @@ const Home = ({ navigation, route }) => {
     };
     fetchUserData();
   }, []);
-  useEffect(() => {
-    const logDailyUsage = async () => {
-      try {
-        await axios.post(
-          "http://localhost:8080/api/progress/app-usage/log",
-          null, // POST body boş
-          {
-            params: { userId: "test-user" },
-          }
-        );
-        console.log("✅ Günlük giriş kaydedildi");
-      } catch (error) {
-        console.error("❌ Giriş logu kaydedilemedi:", error);
-      }
-    };
 
-    logDailyUsage();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      const logDailyUsage = async () => {
+        try {
+          await axios.post(
+            "http://localhost:8080/api/progress/app-usage/log",
+            null,
+            {
+              params: { userId: "test-user" },
+            }
+          );
+          console.log("✅ Günlük giriş kaydedildi");
+        } catch (error) {
+          console.error("❌ Giriş logu kaydedilemedi:", error);
+        }
+      };
+      logDailyUsage();
+    }, [])
+  );
 
   useEffect(() => {
     const fetchLoginDays = async () => {
