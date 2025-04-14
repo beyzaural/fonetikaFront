@@ -57,6 +57,7 @@ const Home = ({ navigation, route }) => {
           }
         );
         setWeeklyLoginDays(res.data); // örnek: ["Mon", "Wed", "Fri"]
+        console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
       } catch (error) {
         console.error("❌ Haftalık login verisi alınamadı", error);
       }
