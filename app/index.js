@@ -19,7 +19,6 @@ import Ders from "../src/Ders";
 import KursKelime from "../src/KursKelime";
 import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
-
 import EmailOTPVerification from "../src/EmailOTPVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
