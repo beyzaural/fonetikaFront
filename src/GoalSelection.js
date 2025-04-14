@@ -7,17 +7,55 @@ import {
   Image,
   Alert,
 } from "react-native";
+import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect } from "react";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
 
-const GoalSelection = ({ navigation }) => {
+const GoalSelection = ({ navigation, route }) => {
   const [selectedGoal, setSelectedGoal] = useState(null);
+  const [tempToken, setTempToken] = useState(null);
 
-  const handleApply = () => {
+  useEffect(() => {
+    const getToken = async () => {
+      const storedToken = await AsyncStorage.getItem("tempToken");
+      if (!storedToken) {
+        Alert.alert("Hata", "Kimlik doğrulama bulunamadı.");
+        navigation.navigate("Login"); // veya login sayfan
+      } else {
+        setTempToken(storedToken);
+      }
+    };
+    getToken();
+  }, []);
+
+  const handleApply = async () => {
     if (!selectedGoal) {
       Alert.alert("Error", "Lütfen bir hedef seçiniz!");
       return;
     }
-    // Navigate to Home with the selected goal
-    navigation.navigate("Home", { dailyGoal: selectedGoal });
+
+    try {
+      const response = await fetch(`${API_URL}/users/update-daily-goal`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tempToken}`,
+        },
+        body: JSON.stringify({ dailyGoal: selectedGoal }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        navigation.navigate("Home", { dailyGoal: selectedGoal });
+      } else {
+        Alert.alert("Hata", data.message || "Günlük hedef kaydedilemedi.");
+      }
+    } catch (error) {
+      console.error("Goal update error:", error);
+      Alert.alert("Hata", "Sunucu hatası oluştu.");
+    }
   };
 
   return (

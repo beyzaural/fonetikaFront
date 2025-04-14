@@ -7,11 +7,37 @@ import {
   StyleSheet,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
+import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
+import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import jwt_decode from "jwt-decode";
 
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
 const Hesap = () => {
   const navigation = useNavigation();
+
+  const handleDeleteAccount = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      const userId = await AsyncStorage.getItem("userId");
+
+      await axios.delete(`${API_URL}/users/${userId}/delete`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      await AsyncStorage.clear(); // logout
+      navigation.navigate("Login");
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      Alert.alert("Hata", "Hesap silinirken bir hata oluştu.");
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -53,7 +79,12 @@ const Hesap = () => {
         >
           <Text style={styles.optionText}>Ad Soyad Değiştir</Text>
         </TouchableOpacity>
-
+        <TouchableOpacity
+          onPress={handleDeleteAccount}
+          style={styles.deleteButton}
+        >
+          <Text style={styles.deleteText}>Hesabımı Sil</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );

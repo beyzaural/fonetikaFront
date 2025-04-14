@@ -35,6 +35,8 @@ const Dersler = ({ navigation }) => {
         });
 
         setCourses(res.data);
+        console.log(courses);
+        
       } catch (error) {
         console.error("Failed to fetch courses:", error);
       }

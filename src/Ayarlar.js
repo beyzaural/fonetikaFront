@@ -44,9 +44,6 @@ const Ayarlar = ({ navigation }) => {
           <Text style={styles.settingText}>Tercihler</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Hesap</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Bildirimler</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.settingItem}>

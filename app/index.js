@@ -20,6 +20,7 @@ import KursKelime from "../src/KursKelime";
 import Geneltekrar from "../src/Geneltekrar";
 import OTPVerification from "../src/OTPVerification";
 import EmailVerification from "../src/EmailVerification";
+import EmailOTPVerification from "../src/EmailOTPVerification";
 import LoginOTPVerification from "../src/LoginOTPVerification";
 import GoalSelection from "../src/GoalSelection";
 import Profile from "../src/Profile";

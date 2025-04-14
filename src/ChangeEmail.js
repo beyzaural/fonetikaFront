@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import BottomNavBar from "./BottomNavBar";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -120,7 +121,22 @@ const ChangeEmail = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>E-posta Değiştir</Text>
+      <View style={styles.topContainer}>
+        <TouchableOpacity
+          style={styles.backButtonContainer}
+          onPress={() => navigation.goBack()}
+        >
+          <View style={styles.backButton}>
+            <Image
+              source={require("../assets/images/backspace.png")}
+              style={styles.backIcon}
+            />
+          </View>
+        </TouchableOpacity>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>Mailini Değiştir</Text>
+        </View>
+      </View>
 
       {step === 1 && (
         <>
@@ -182,6 +198,7 @@ const ChangeEmail = ({ navigation }) => {
       )}
 
       {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };
@@ -189,8 +206,44 @@ const ChangeEmail = ({ navigation }) => {
 export default ChangeEmail;
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 30 },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  topContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+  },
+  backButtonContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 10,
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+  },
+  titleContainer: {
+    flex: 1,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "left",
+  },
   label: { fontSize: 18, marginBottom: 10 },
   emailText: {
     fontSize: 18,

@@ -66,6 +66,7 @@ const Register = ({ navigation }) => {
   const [searchText, setSearchText] = useState("");
 
   const handleRegister = async () => {
+    console.log(API_URL);
     if (!username || !email || !password || !gender || !phone) {
       Alert.alert("Hata", "Lütfen tüm alanları doldurun.");
       return;
@@ -100,6 +101,8 @@ const Register = ({ navigation }) => {
     }
 
     try {
+      
+
       const fullPhoneNumber = `${countryCode}${phone}`;
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",

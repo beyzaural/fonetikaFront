@@ -7,18 +7,17 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const OTPVerification = ({ navigation, route }) => {
+const EmailOTPVerification = ({ navigation, route }) => {
+  const { email } = route.params;
   const [otp, setOtp] = useState("");
-  const { phone, tempToken, email, otpSessionToken, isLogin } = route.params;
   const [resendDisabled, setResendDisabled] = useState(true);
-  const [timer, setTimer] = useState(120); // 30 seconds cooldown
+  const [timer, setTimer] = useState(120);
 
   useEffect(() => {
     let countdown;
@@ -37,37 +36,55 @@ const OTPVerification = ({ navigation, route }) => {
     return () => clearInterval(countdown);
   }, [resendDisabled]);
 
-  const handleVerifyOTP = async () => {
+  const handleVerifyEmailOTP = async () => {
     if (otp.length !== 6) {
       Alert.alert("Error", "Please enter a 6-digit OTP.");
       return;
     }
 
     try {
-      let endpoint = isLogin ? "/auth/validate-otp" : "/auth/verify-phone";
-      let requestBody = isLogin
-        ? { otpSessionToken, otp } // Login OTP verification
-        : { phone, otp }; // Registration OTP verification
-
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      // Step 1: Verify email OTP
+      const verifyResponse = await fetch(`${API_URL}/auth/verify-email-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
+        body: JSON.stringify({ email, otp }),
       });
 
-      const data = await response.json();
-      console.log("OTP Verification Response:", data);
+      const verifyData = await verifyResponse.json();
 
-      if (response.ok) {
-        if (isLogin) {
-          Alert.alert("Success", "OTP verified successfully!");
-          navigation.navigate("Home");
+      if (verifyResponse.ok && verifyData.success) {
+        // Step 2: Get tempToken to call finalize-registration
+        const tempToken = await AsyncStorage.getItem("tempToken");
+        if (!tempToken) {
+          Alert.alert("Error", "Temporary token not found.");
+          return;
+        }
+
+        const decoded = JSON.parse(atob(tempToken.split(".")[1]));
+        const userId = decoded.userId;
+
+        // Step 3: Finalize registration (enable user, create courses, etc.)
+        const finalizeResponse = await fetch(
+          `${API_URL}/auth/finalize-registration?userId=${userId}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${tempToken}`,
+            },
+          }
+        );
+
+        const finalizeData = await finalizeResponse.json();
+
+        if (finalizeResponse.ok && finalizeData.success) {
+          // Done ✅
+          navigation.navigate("GoalSelection");
         } else {
-          await AsyncStorage.setItem("tempToken", tempToken);
-          navigation.navigate("EmailOTPVerification", { email });
+          Alert.alert("Error", finalizeData.message || "Finalize failed.");
         }
       } else {
-        Alert.alert("Error", data.message || "OTP verification failed.");
+        Alert.alert("Error", verifyData.message || "OTP verification failed.");
       }
     } catch (error) {
       Alert.alert("Error", "An error occurred. Please try again.");
@@ -77,39 +94,35 @@ const OTPVerification = ({ navigation, route }) => {
 
   const handleResendOTP = async () => {
     setResendDisabled(true);
-    setTimer(120); // Reset timer to 2 minutes
+    setTimer(120);
 
     try {
-      const response = await fetch(`${API_URL}/auth/resend-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
+      const response = await fetch(
+        `${API_URL}/auth/resend-verification-email`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email }),
+        }
+      );
 
-      if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
-      }
-
-      const data = await response.json(); // ✅ Parse JSON safely
+      const data = await response.json();
       if (data.success) {
-        Alert.alert("Success", data.message);
+        Alert.alert("Success", "OTP resent to your email.");
       } else {
         Alert.alert("Error", data.message || "Failed to resend OTP.");
       }
     } catch (error) {
-      Alert.alert("Error", "An error occurred while resending OTP.");
-      console.error("OTP Resend Error:", error);
+      Alert.alert("Error", "Resend failed.");
+      console.error(error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>
-        {isLogin ? "Verify Your Login" : "Verify Your Phone Number"}
-      </Text>
+      <Text style={styles.titleText}>Email Verification</Text>
       <Text style={styles.subtitleText}>
-        Please enter the 6-digit OTP sent to your{" "}
-        {isLogin ? "email/phone" : "phone"}.
+        Enter the 6-digit OTP sent to {email}.
       </Text>
 
       <TextInput
@@ -122,7 +135,7 @@ const OTPVerification = ({ navigation, route }) => {
         value={otp}
       />
 
-      <Pressable onPress={handleVerifyOTP} style={styles.button}>
+      <Pressable onPress={handleVerifyEmailOTP} style={styles.button}>
         <Text style={styles.buttonText}>Verify</Text>
       </Pressable>
 
@@ -142,7 +155,7 @@ const OTPVerification = ({ navigation, route }) => {
   );
 };
 
-export default OTPVerification;
+export default EmailOTPVerification;
 
 const styles = StyleSheet.create({
   container: {
@@ -180,6 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: "center",
+    marginBottom: 15,
   },
   resendButton: {
     backgroundColor: "#000",

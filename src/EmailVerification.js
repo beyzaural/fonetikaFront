@@ -9,32 +9,41 @@ import {
 } from "react-native";
 
 import Constants from "expo-constants";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import jwtDecode from "jwt-decode";
 
 const EmailVerification = ({ navigation, route }) => {
-  const { tempToken, email } = route.params;
-  const [isVerified, setIsVerified] = useState(false);
+  const { email } = route.params;
+  const [tempToken, setTempToken] = useState(null);
   const [resendDisabled, setResendDisabled] = useState(true);
   const [timer, setTimer] = useState(120); // 2 minutes cooldown
 
   useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        await checkVerificationStatus();
-      } catch (error) {
-        console.error("Error in verification polling:", error);
+    const loadToken = async () => {
+      const storedToken = await AsyncStorage.getItem("tempToken");
+      if (!storedToken) {
+        Alert.alert(
+          "Hata",
+          "Kimlik doğrulama eksik. Lütfen tekrar kayıt olun."
+        );
+        navigation.navigate("Register"); // veya giriş ekranı
+      } else {
+        setTempToken(storedToken);
       }
+    };
+    loadToken();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      checkVerificationStatus(); // checks every 5 seconds
     }, 5000);
 
-    if (isVerified) {
-      finalizeRegistration();
-      clearInterval(interval); // Ensure interval is cleared
-    }
-
     return () => clearInterval(interval); // Clean up on unmount
-  }, [isVerified]);
+  }, []);
 
   useEffect(() => {
     let countdown;
@@ -66,6 +75,8 @@ const EmailVerification = ({ navigation, route }) => {
   };
 
   const checkVerificationStatus = async () => {
+    if (!tempToken) return;
+
     try {
       const response = await fetch(
         `${API_URL}/auth/check-verification?email=${email}`,
@@ -85,7 +96,8 @@ const EmailVerification = ({ navigation, route }) => {
       const data = await response.json();
 
       if (data?.data?.verified) {
-        setIsVerified(true);
+        console.log("✅ Email verified! Proceeding to finalize...");
+        finalizeRegistration(); // ✅ direkt burada çağır
       }
     } catch (error) {
       console.error("Error checking verification status:", error);
@@ -144,9 +156,10 @@ const EmailVerification = ({ navigation, route }) => {
       );
 
       const data = await response.json();
-      console.log("Finalize Registration Response:", data); // Debug
+      console.log("Finalize Registration Response:", data);
       if (data.success) {
-        navigation.navigate("Home");
+        await AsyncStorage.removeItem("tempToken"); // optional cleanup
+        navigation.navigate("GoalSelection");
       } else {
         console.error("Finalize Registration Failed:", data.message);
       }
