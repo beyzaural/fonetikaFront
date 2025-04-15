@@ -8,28 +8,50 @@ const BottomNavBar = ({ navigation }) => {
         onPress={() => navigation.navigate("Home")}
         style={styles.navItem}
       >
-        <Image source={require("../assets/icons/home.png")} style={styles.navIcon} />
+        <Image
+          source={require("../assets/icons/home.png")}
+          style={styles.navIcon}
+        />
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => navigation.navigate("Profile")}
         style={styles.navItem}
       >
-        <Image source={require("../assets/icons/profile.png")} style={styles.navIcon} />
+        <Image
+          source={require("../assets/icons/profile.png")}
+          style={styles.navIcon}
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => navigation.navigate("YanlisDogruSozcukler")}
+        style={styles.navItem}
+      >
+        <Image
+          source={require("../assets/icons/book.png")} // ikonunu buraya koy
+          style={styles.navIcon}
+        />
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => navigation.navigate("Ayarlar")}
         style={styles.navItem}
       >
-        <Image source={require("../assets/icons/settings.png")} style={styles.navIcon} />
+        <Image
+          source={require("../assets/icons/settings.png")}
+          style={styles.navIcon}
+        />
       </TouchableOpacity>
 
       <TouchableOpacity
         onPress={() => navigation.navigate("Dersler")}
         style={styles.navItem}
       >
-        <Image source={require("../assets/icons/fitness.png")} style={styles.navIcon} />
+        <Image
+          source={require("../assets/icons/fitness.png")}
+          style={styles.navIcon}
+        />
       </TouchableOpacity>
     </View>
   );

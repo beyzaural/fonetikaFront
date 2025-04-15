@@ -33,6 +33,7 @@ import FAQ from "../src/FAQ";
 import Hesap from "../src/Hesap";
 import ChangeEmail from "../src/ChangeEmail";
 import ChangeName from "../src/ChangeName";
+import YanlisDogruSozcukler from "../src/YanlisDogruSozcukler";
 
 const Stack = createStackNavigator();
 
@@ -126,6 +127,12 @@ export default function Index() {
           component={Home}
           options={{ headerShown: false }} // Hide header for Home
         />
+        <Stack.Screen
+          name="YanlisDogruSozcukler"
+          component={YanlisDogruSozcukler}
+          options={{ headerShown: false }} // Hide header for Home
+        />
+
         <Stack.Screen
           name="Profile"
           component={Profile}
