@@ -18,11 +18,25 @@ const ProgressBar = ({ weeklyLoginDays = [] }) => {
                 key={index}
                 style={[
                   styles.dayBox,
-                  { backgroundColor: isLogged ? "#b0eac2" : "#f2f2f2" },
+                  { backgroundColor: isLogged ? "#FF3B30" : "#f2f2f2" },
                 ]}
               >
-                <Text style={styles.dayText}>{day}</Text>
-                <Text style={styles.statusText}>{isLogged ? "✓" : "—"}</Text>
+                <Text
+                  style={[
+                    styles.dayText,
+                    { color: isLogged ? "#ffffff" : "#000000" },
+                  ]}
+                >
+                  {day}
+                </Text>
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: isLogged ? "#ffffff" : "#000000" },
+                  ]}
+                >
+                  {isLogged ? "✓" : "—"}
+                </Text>
               </View>
             );
           })}
@@ -50,13 +64,11 @@ const styles = StyleSheet.create({
   },
   dayText: {
     fontSize: 12,
-    color: "#555",
     fontWeight: "bold",
   },
   statusText: {
     fontSize: 18,
     marginTop: 5,
-    color: "#333",
   },
 });
 
