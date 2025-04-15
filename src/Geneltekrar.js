@@ -12,6 +12,8 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import jwtDecode from "jwt-decode";
 
 const Geneltekrar = ({ navigation }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -25,7 +27,11 @@ const Geneltekrar = ({ navigation }) => {
   useEffect(() => {
     const fetchMistakes = async () => {
       try {
-        const userId = "test-user"; // TODO: Gerçek userId
+        const userId = await getUserIdFromToken();
+        if (!userId) {
+          console.warn("User ID not found in token.");
+          return;
+        }
         const res = await axios.get(
           `http://localhost:8080/api/mispronounced-words/user/${userId}`
         );
@@ -58,6 +64,19 @@ const Geneltekrar = ({ navigation }) => {
 
     fetchMistakes();
   }, []);
+
+  const getUserIdFromToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        const decoded = jwtDecode(token);
+        return decoded.sub || decoded.userId; // Token içindeki alan adınıza göre güncelleyin
+      }
+    } catch (e) {
+      console.error("Token decoding failed:", e);
+    }
+    return null;
+  };
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const sendAudioToBackend = async (uri) => {

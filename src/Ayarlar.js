@@ -43,27 +43,6 @@ const Ayarlar = ({ navigation }) => {
         <TouchableOpacity style={styles.settingItem}>
           <Text style={styles.settingText}>Tercihler</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Bildirimler</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Kurslar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Duolingo for Schools</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Sosyal Hesaplar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Gizlilik Ayarları</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Abonelik Seçimi</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.settingItem}>
-          <Text style={styles.settingText}>Aboneliği Tekrar Aktifleştir</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.settingItem}
           onPress={() => navigation.navigate("Destek")}

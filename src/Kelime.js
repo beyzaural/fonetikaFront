@@ -13,6 +13,8 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import jwtDecode from "jwt-decode";
 
 const AUDIO_UPLOAD_URL = "http://localhost:8080/api/speech/process";
 
@@ -29,6 +31,19 @@ const Kelime = ({ navigation }) => {
   useEffect(() => {
     fetchRandomWord(null);
   }, []);
+
+  const getUserIdFromToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        const decoded = jwtDecode(token);
+        return decoded.sub || decoded.userId; // Backend token'da neyi encode ettiyse
+      }
+    } catch (e) {
+      console.error("Token decoding error:", e);
+    }
+    return null;
+  };
 
   const fetchRandomWord = (lastWordId = null) => {
     axios
@@ -158,9 +173,8 @@ const Kelime = ({ navigation }) => {
         return updatedWords;
       });
 
-      // ❌ Eğer yanlış söylenmişse, backend'e MispronouncedWord kaydı at
       if (!data.correct) {
-        const userId = "test-user"; // TODO: Gerçek userId ile değiştir
+        const userId = await getUserIdFromToken();
         const wordId = words[currentIndex]?.id;
 
         await axios.post(
