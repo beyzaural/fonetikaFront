@@ -45,6 +45,24 @@ const Kelime = ({ navigation }) => {
     return null;
   };
 
+  const playOriginalAudio = async () => {
+    const currentWord = words[currentIndex];
+    if (!currentWord?.audioPath) {
+      alert("Bu kelime için ses kaydı bulunamadı.");
+      return;
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: currentWord.audioPath },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing original audio:", error);
+      Alert.alert("Hata", "Orijinal ses çalınamadı.");
+    }
+  };
+
   const fetchRandomWord = (lastWordId = null) => {
     axios
       .get(`http://localhost:8080/api/words/random`, {
@@ -258,6 +276,12 @@ const Kelime = ({ navigation }) => {
             ) : (
               <Text style={styles.wordText}>Yükleniyor...</Text>
             )}
+            <TouchableOpacity
+              onPress={playOriginalAudio}
+              style={styles.listenButton}
+            >
+              <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.navigationContainer}>
