@@ -38,15 +38,24 @@ const Home = ({ navigation, route }) => {
           await axios.post(
             "http://localhost:8080/api/progress/app-usage/log",
             null,
+            { params: { userId: "test-user" } }
+          );
+          console.log("✅ Günlük giriş kaydedildi");
+
+          // ⬇️ LOG sonrası login günlerini al
+          const res = await axios.get(
+            "http://localhost:8080/api/progress/app-usage",
             {
               params: { userId: "test-user" },
             }
           );
-          console.log("✅ Günlük giriş kaydedildi");
+          setWeeklyLoginDays(res.data);
+          console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
         } catch (error) {
-          console.error("❌ Giriş logu kaydedilemedi:", error);
+          console.error("❌ Giriş logu ya da login günleri alınamadı:", error);
         }
       };
+
       logDailyUsage();
     }, [])
   );
