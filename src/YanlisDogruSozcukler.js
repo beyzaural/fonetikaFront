@@ -57,19 +57,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     paddingHorizontal: 20,
     paddingTop: 30,
-    paddingBottom: 100,
+    paddingBottom: 60,
   },
   topRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 20,
+    marginBottom: 80,
   },
   backIcon: {
     width: 40,
     height: 40,
   },
-
+  heartIcon: {
+    top: 20,
+    right: 20,
+    width: 40,
+    height: 40,
+  },
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -85,7 +90,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: "#ccc",
     marginBottom: 10,
-    marginTop: 10,
   },
   headerText: {
     fontSize: 16,
@@ -112,7 +116,7 @@ const styles = StyleSheet.create({
   },
   heartIcon: {
     position: "absolute",
-    bottom: 20, // başlık altına hizalar
+    top: 70, // başlık altına hizalar
     right: 20, // sağ boşluk
     width: 100,
     height: 100,
