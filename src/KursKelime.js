@@ -1,3 +1,6 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Alert } from "react-native";
 import {
   StyleSheet,
   Text,
@@ -7,90 +10,216 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
-import React, { useState, useEffect } from "react";
 import { FontAwesome } from "@expo/vector-icons";
-import { Audio } from "expo-av"; // Import Audio from expo-av
+import { Audio } from "expo-av";
 import Constants from "expo-constants";
-const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import axios from "axios";
 import BottomNavBar from "./BottomNavBar";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import jwtDecode from "jwt-decode";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const KursKelime = ({ navigation, route }) => {
-  const { courseId } = route.params;
+const AUDIO_UPLOAD_URL = "http://localhost:8080/api/speech/process";
+
+const KursKelime = ({ navigation }) => {
   const [words, setWords] = useState([]);
-  const [isRecording, setIsRecording] = useState(false); // Track if recording is in progress
-  const [recording, setRecording] = useState(null); // Store the Recording object
-  const [audioUri, setAudioUri] = useState(null); // Store the URI of the saved audio file
-  const [showFeedback, setShowFeedback] = useState(false); // Show feedback modal
-  const [definition, setDefinition] = useState(""); // Phonetic feedback
-
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recording, setRecording] = useState(null);
+  const [audioUri, setAudioUri] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
+
+  // Fetch random word from backend
   useEffect(() => {
-    const fetchWords = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (!token) return;
-
-      const res = await axios.get(
-        `${API_URL}/api/words/vowel-course/${courseId}`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
-      setWords(res.data);
-    };
-
-    fetchWords();
+    fetchRandomWord(null);
   }, []);
 
-  // Handle microphone press (start/stop recording)
+  const getUserIdFromToken = async () => {
+    try {
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        const decoded = jwtDecode(token);
+        return decoded.sub || decoded.userId; // Backend token'da neyi encode ettiyse
+      }
+    } catch (e) {
+      console.error("Token decoding error:", e);
+    }
+    return null;
+  };
+
+  const playOriginalAudio = async () => {
+    const currentWord = words[currentIndex];
+    if (!currentWord?.audioPath) {
+      alert("Bu kelime için ses kaydı bulunamadı.");
+      return;
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: currentWord.audioPath },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing original audio:", error);
+      Alert.alert("Hata", "Orijinal ses çalınamadı.");
+    }
+  };
+
+  const fetchRandomWord = (lastWordId = null) => {
+    axios
+      .get(`http://localhost:8080/api/words/random`, {
+        params: { lastWordId, userId: getUserIdFromToken },
+      })
+      .then((res) => {
+        const w = res.data;
+        const enrichedWord = {
+          ...w,
+          definition: w.phoneticWriting || "",
+          tahmin: "Sanırım “a:bey” dediniz.",
+          instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+          kelime: w.phoneticWriting || "",
+          ipucu:
+            "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
+        };
+
+        setWords((prevWords) => {
+          const updatedWords = [...prevWords, enrichedWord];
+          if (prevWords.length === 0) {
+            setCurrentIndex(0);
+          } else {
+            setCurrentIndex(updatedWords.length - 1);
+          }
+          return updatedWords;
+        });
+      })
+      .catch((err) => {
+        console.error("Random kelime alınamadı", err);
+      });
+  };
+
   const handleMicrophonePress = async () => {
     if (recording) {
-      // Stop recording
       try {
         await recording.stopAndUnloadAsync();
-        const uri = recording.getURI(); // Get URI of the recorded audio
-        setAudioUri(uri); // Save URI for further processing or playback
-        setRecording(null); // Clear the recording object
+        const uri = recording.getURI();
+        console.log("Recording saved at:", uri);
+        setAudioUri(uri);
+        setRecording(null);
         setIsRecording(false);
-        setShowFeedback(true); // Show feedback after recording stops
-        setDefinition(words[currentIndex].definition); // Show phonetic definition
+        sendAudioToBackend(uri); // Send m4a file to backend
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
     } else {
-      // Start recording
       try {
+        if (recording !== null) {
+          await recording.stopAndUnloadAsync();
+          setRecording(null);
+        }
+
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
           alert("Microphone permission is required to record audio.");
           return;
         }
+
         await Audio.setAudioModeAsync({
           allowsRecordingIOS: true,
           playsInSilentModeIOS: true,
         });
-        const { recording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY // Use high-quality audio settings
+
+        const { recording: newRecording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
         );
-        setRecording(recording); // Save the recording object
-        setIsRecording(true); // Indicate that recording is in progress
+
+        setRecording(newRecording);
+        setIsRecording(true);
       } catch (error) {
         console.error("Failed to start recording:", error);
       }
     }
   };
 
-  // Play the recorded audio
+  // Utility: Convert a blob URL into a temporary File object with m4a name/type.
+  const createTemporaryFile = async (blobUri) => {
+    const response = await fetch(blobUri);
+    const blob = await response.blob();
+    // This File object only renames the file and sets the MIME type; it doesn't convert audio format.
+    return new File([blob], "recording.m4a", { type: "audio/m4a" });
+  };
+
+  // Send the audio file to the backend. The backend should perform any necessary conversion.
+  const sendAudioToBackend = async (uri) => {
+    try {
+      let fileData;
+      if (uri.startsWith("blob:")) {
+        fileData = await createTemporaryFile(uri);
+      } else {
+        fileData = {
+          uri,
+          name: "recording.m4a",
+          type: "audio/m4a",
+        };
+      }
+
+      const formData = new FormData();
+      formData.append("file", fileData);
+      formData.append("expected_word", words[currentIndex]?.word || "");
+
+      const response = await fetch(AUDIO_UPLOAD_URL, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      console.log("✅ Backend full response:", data);
+
+      setFeedback(data.feedback);
+      setWords((prevWords) => {
+        const updatedWords = [...prevWords];
+        updatedWords[currentIndex].transcribedText = data.transcribedText;
+        console.log("Beklenen:", words[currentIndex]?.word);
+        console.log("Transkript:", data.transcribedText);
+        console.log(
+          "Eşleşti mi:",
+          data.transcribedText.toLowerCase() ===
+            words[currentIndex]?.word.toLowerCase()
+        );
+        console.log("Backend isCorrect:", data.correct);
+        updatedWords[currentIndex].isCorrect = data.correct;
+        return updatedWords;
+      });
+
+      if (!data.correct) {
+        const userId = await getUserIdFromToken();
+        const wordId = words[currentIndex]?.id;
+
+        const res = await axios.get(
+          `${API_URL}/api/words/vowel-course/${courseId}`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+
+        console.log("❌ MispronouncedWord kaydı eklendi.");
+      }
+
+      setShowFeedback(true);
+    } catch (error) {
+      console.error("❌ Error sending audio:", error);
+      Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
+    }
+  };
+
   const playAudio = async () => {
     if (!audioUri) {
       alert("Henüz bir kayıt yapılmadı!");
       return;
     }
-
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioUri },
@@ -102,29 +231,34 @@ const KursKelime = ({ navigation, route }) => {
   };
 
   const handleNextWord = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % words.length);
     setShowFeedback(false);
     setIsRecording(false);
+
+    if (currentIndex < words.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      const lastId = words[currentIndex]?.id || null;
+      fetchRandomWord(lastId);
+    }
   };
 
   const handlePreviousWord = () => {
-    setCurrentIndex(
-      (prevIndex) => (prevIndex - 1 + words.length) % words.length
-    );
-    setShowFeedback(false);
-    setIsRecording(false);
+    if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setShowFeedback(false);
+      setIsRecording(false);
+    }
   };
 
   return (
     <ImageBackground
-      source={require("../assets/images/kelime_back.png")}
+      source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
       <View style={styles.container}>
-        {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Ders", { courseId: courseId })}
+          onPress={() => navigation.navigate("Home")}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -132,47 +266,49 @@ const KursKelime = ({ navigation, route }) => {
           />
         </TouchableOpacity>
 
-        {/* Top Container */}
         <View style={styles.topContainer}>
-          <Text style={styles.okuText}>{"Aşağıdaki kelimeyi okuyunuz"}</Text>
+          <View style={styles.wordContainer}>
+            {words[currentIndex] ? (
+              <>
+                <Text style={styles.wordText}>{words[currentIndex].word}</Text>
+                <Text style={styles.phoneticText}>
+                  {words[currentIndex].definition}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.wordText}>Yükleniyor...</Text>
+            )}
+            <TouchableOpacity
+              onPress={playOriginalAudio}
+              style={styles.listenButton}
+            >
+              <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+            </TouchableOpacity>
+          </View>
 
-          {words.length > 0 && (
-            <View style={styles.wordContainer}>
-              <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-              <Text style={styles.phoneticText}>
-                {words[currentIndex].definition}
-              </Text>
-            </View>
-          )}
+          <View style={styles.navigationContainer}>
+            <TouchableOpacity
+              style={styles.prevButton}
+              onPress={handlePreviousWord}
+            >
+              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleMicrophonePress}>
+              <FontAwesome
+                name="microphone"
+                size={100}
+                color={isRecording ? "red" : "#FF3B30"}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.nextButton}
+              onPress={handleNextWord}
+            >
+              <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Bottom Container */}
-        <View style={styles.bottomContainer}>
-          <TouchableOpacity onPress={handleMicrophonePress}>
-            <FontAwesome
-              name="microphone"
-              size={90}
-              color={isRecording ? "red" : "#880000"} // Change color based on recording state
-            />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-            <Text style={styles.listenButtonText}>Dinle</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Navigation Arrows */}
-        <TouchableOpacity
-          style={styles.prevButton}
-          onPress={handlePreviousWord}
-        >
-          <FontAwesome name="arrow-left" size={50} color="#880000" />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.nextButton} onPress={handleNextWord}>
-          <FontAwesome name="arrow-right" size={50} color="#880000" />
-        </TouchableOpacity>
-
-        {/* Feedback Popup */}
         <Modal
           animationType="slide"
           transparent={true}
@@ -181,20 +317,63 @@ const KursKelime = ({ navigation, route }) => {
         >
           <View style={styles.feedbackContainer}>
             <View style={styles.feedbackContent}>
-              <Text style={styles.feedbackTitle}>Kelime Okunuşu</Text>
-              <Text style={styles.feedbackText}>{definition}</Text>
+              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+              {words.length > 0 && words[currentIndex] ? (
+                <>
+                  <Text style={styles.tahminText}>
+                    Sanırım “{words[currentIndex]?.transcribedText || "..."}”
+                    dediniz.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    {words[currentIndex]?.isCorrect
+                      ? "✅ Doğru söylediniz!"
+                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
+                  </Text>
+                  <Text style={styles.kelimeText}>
+                    {words[currentIndex].kelime.split("").map((char, index) => {
+                      const isRed =
+                        (words[currentIndex].word === "Kamuflaj" &&
+                          char === "u") ||
+                        (words[currentIndex].word === "Ağabey" &&
+                          char === "i") ||
+                        (words[currentIndex].word === "Sahi" && char === ":");
+                      return (
+                        <Text
+                          key={index}
+                          style={isRed ? styles.redText : styles.blackText}
+                        >
+                          {char}
+                        </Text>
+                      );
+                    })}
+                  </Text>
+
+                  {words[currentIndex].ipucu !== "" && (
+                    <Text style={styles.ipucuText}>
+                      <Text style={styles.ipucuBold}>İpucu: </Text>
+                      {words[currentIndex].ipucu}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <Text>Yükleniyor...</Text>
+              )}
+
+              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+                <Text style={styles.listenButtonText}>Dinle</Text>
+              </TouchableOpacity>
+
               <TouchableOpacity
                 style={styles.closeButton}
                 onPress={() => setShowFeedback(false)}
               >
-                <Text style={styles.closeButtonText}>Close</Text>
+                <Text style={styles.closeButtonText}>Kapat</Text>
               </TouchableOpacity>
             </View>
           </View>
         </Modal>
-
-        <BottomNavBar navigation={navigation} />
       </View>
+      <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
 };
@@ -216,81 +395,58 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   backIcon: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
   },
   topContainer: {
-    backgroundColor: "transparent",
-    height: "70%",
-    justifyContent: "center",
+    marginTop: 30,
+    height: "100%",
     alignItems: "center",
   },
-  okuText: {
-    marginTop: 40,
-    marginBottom: 10,
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "black",
-  },
   wordContainer: {
-    backgroundColor: "#880000",
+    backgroundColor: "#F9F4F1",
     width: "80%",
-    height: "75%",
+    height: 430,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 6,
+    marginTop: 40,
+    marginBottom: 40,
+  },
+  navigationContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "80%",
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  prevButton: {
+    padding: 10,
+  },
+  nextButton: {
+    padding: 10,
   },
   wordText: {
     fontSize: 40,
     fontWeight: "bold",
-    color: "white",
+    color: "#FF3B30",
   },
   phoneticText: {
     fontSize: 20,
-    color: "white",
+    color: "#FF8754",
     marginTop: 10,
   },
-  bottomContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   listenButton: {
-    marginTop: 20,
+    backgroundColor: "#FF3B30",
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: "#880000",
     borderRadius: 10,
-    alignItems: "center",
   },
   listenButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  prevButton: {
-    position: "absolute",
-    bottom: 100,
-    left: 30,
-    backgroundColor: "white",
-    borderRadius: 50,
-    padding: 10,
-    elevation: 5,
-  },
-  nextButton: {
-    position: "absolute",
-    bottom: 100,
-    right: 30,
-    backgroundColor: "white",
-    borderRadius: 50,
-    padding: 10,
-    elevation: 5,
   },
   feedbackContainer: {
     flex: 1,
@@ -298,42 +454,25 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   feedbackContent: {
-    height: "45%",
+    height: "50%",
     backgroundColor: "white",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  feedbackTitle: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 10,
-  },
-  feedbackText: {
-    fontSize: 18,
-    color: "black",
-    textAlign: "center",
-  },
-  closeButton: {
-    marginTop: 20,
-    backgroundColor: "black",
-    paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 10,
-  },
-  closeButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+    paddingVertical: 30,
+    justifyContent: "space-between",
   },
   navBar: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
     height: 70,
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
     justifyContent: "space-around",
     alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
   },
   navItem: {
     alignItems: "center",
@@ -341,5 +480,15 @@ const styles = StyleSheet.create({
   navIcon: {
     width: 30,
     height: 30,
+  },
+  redText: {
+    color: "red",
+    fontSize: 23,
+    fontWeight: "bold",
+  },
+  blackText: {
+    color: "black",
+    fontSize: 23,
+    fontWeight: "bold",
   },
 });

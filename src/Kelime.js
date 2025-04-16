@@ -66,7 +66,7 @@ const Kelime = ({ navigation }) => {
   const fetchRandomWord = (lastWordId = null) => {
     axios
       .get(`http://localhost:8080/api/words/random`, {
-        params: { lastWordId, userId: "test-user" },
+        params: { lastWordId, userId: getUserIdFromToken },
       })
       .then((res) => {
         const w = res.data;
