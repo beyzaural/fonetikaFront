@@ -31,6 +31,21 @@ const Home = ({ navigation, route }) => {
     fetchUserData();
   }, []);
 
+  const [dictionTip, setDictionTip] = useState(null);
+  const [showTip, setShowTip] = useState(false);
+  useEffect(() => {
+    axios
+      .get("http://localhost:8080/api/diction-tip")
+      .then((res) => {
+        if (res.data?.message) {
+          setDictionTip(res.data.message);
+          setShowTip(true);
+          setTimeout(() => setShowTip(false), 10000); // 5 saniye sonra kaybol
+        }
+      })
+      .catch((err) => console.error("Günün ipucu alınamadı:", err));
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       const logDailyUsage = async () => {
@@ -84,6 +99,18 @@ const Home = ({ navigation, route }) => {
       source={require("../assets/images/green.png")} // Reference your image here
       style={styles.imageBackground}
     >
+      {showTip && dictionTip && (
+        <View style={styles.tipPopup}>
+          <Text style={styles.tipText}>{dictionTip}</Text>
+          <TouchableOpacity
+            onPress={() => setShowTip(false)}
+            style={styles.closeButton}
+          >
+            <Text style={styles.closeText}>X</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* Welcome Text */}
       <Text style={styles.welcomeText}>Hoşgeldin</Text>
       <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
@@ -274,5 +301,34 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     marginBottom: 5,
+  },
+  tipPopup: {
+    backgroundColor: "#fffbe6",
+    padding: 12,
+    borderRadius: 10,
+    margin: 20,
+    marginTop: 40,
+    position: "absolute",
+    top: 10,
+    left: 20,
+    right: 20,
+    zIndex: 999,
+    flexDirection: "row",
+    alignItems: "center",
+    elevation: 5,
+  },
+  tipText: {
+    flex: 1,
+    fontSize: 14,
+    color: "#333",
+    fontWeight: "500",
+  },
+  closeButton: {
+    marginLeft: 10,
+  },
+  closeText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FF3B30",
   },
 });
