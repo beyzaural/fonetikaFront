@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
   Alert,
+  Image,
 } from "react-native";
 import Constants from "expo-constants";
 import { Audio } from "expo-av";
@@ -147,7 +148,10 @@ const Sohbet = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.navigate("Home")}
         >
-          <FontAwesome name="arrow-left" size={24} color="#333" />
+          <Image
+            source={require("../assets/images/backspace.png")} // 👈 Kelime ekranındaki ile aynı dosya
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
         <Text style={styles.headerText}>Sohbet</Text>
       </View>
@@ -249,8 +253,15 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    left: 20,
+    top: 20,
+    left: 10,
+    zIndex: 10,
   },
+  backIcon: {
+    width: 40,
+    height: 40,
+  },
+
   headerText: {
     fontSize: 24,
     textAlign: "center",
