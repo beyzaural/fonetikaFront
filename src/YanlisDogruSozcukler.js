@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -47,6 +47,19 @@ const YanlisDogruSozcukler = ({ navigation }) => {
           </View>
         ))}
       </ScrollView>
+      {/* 🎓 Sabit Fonetik Notu Kutusu */}
+      <View style={styles.persistentNote}>
+        <Text style={styles.notifTitle}>Fonetik Notu</Text>
+        <Text style={styles.notifText}>
+          é : kapalı e, ağız çok açılmadan söylenir.
+        </Text>
+        <Text style={styles.notifText}>
+          e: açık e’dir. Ses daha net çıkar ve ağız daha fazla açılır.
+        </Text>
+        <Text style={styles.notifText}>
+          “:” işareti, harfin uzatılarak okunması gerektiğini belirtir.
+        </Text>
+      </View>
     </View>
   );
 };
@@ -57,7 +70,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#ffffff",
     paddingHorizontal: 20,
     paddingTop: 30,
-    paddingBottom: 60,
+    paddingBottom: 150,
+    minHeight: "100%",
   },
   topRow: {
     flexDirection: "row",
@@ -121,6 +135,39 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     zIndex: 5,
+  },
+
+  notifTitle: {
+    fontWeight: "bold",
+    fontSize: 18,
+    color: "#6CA3AD",
+    marginBottom: 8,
+  },
+  notifText: {
+    fontSize: 13,
+    color: "black",
+    margin: 2,
+  },
+  closeNotif: {
+    position: "absolute",
+    top: 5,
+    right: 10,
+  },
+  closeText: {
+    fontSize: 20,
+    color: "#FF8F00",
+  },
+
+  persistentNote: {
+    backgroundColor: "rgba(255, 255, 255, 0.9)", // saydam beyaz
+    borderTopWidth: 2,
+    borderTopColor: "#ddd",
+    padding: 12,
+    position: "absolute",
+    bottom: 30,
+    left: 10,
+    right: 10,
+    zIndex: 0,
   },
 });
 

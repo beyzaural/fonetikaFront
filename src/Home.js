@@ -139,7 +139,7 @@ const Home = ({ navigation, route }) => {
                 style={styles.chatIcon}
               />
               <Text style={styles.cardText}>Sohbet</Text>
-              <Text style={styles.cardSubText}>%74 tamamlandı</Text>
+              <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
           {/* Kelime Card (Clickable) */}
@@ -158,7 +158,7 @@ const Home = ({ navigation, route }) => {
                 style={styles.chatIcon}
               />
               <Text style={styles.cardText}>Kelime</Text>
-              <Text style={styles.cardSubText}>%59 tamamlandı</Text>
+              <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
 
@@ -177,7 +177,7 @@ const Home = ({ navigation, route }) => {
                 style={styles.chatIcon}
               />
               <Text style={styles.cardText}>Geçmiş</Text>
-              <Text style={styles.cardSubText}>%60 tamamlandı</Text>
+              <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
           <TouchableOpacity
@@ -195,7 +195,7 @@ const Home = ({ navigation, route }) => {
                 style={styles.chatIcon}
               />
               <Text style={styles.cardText}>Paragraf</Text>
-              <Text style={styles.cardSubText}>%45 tamamlandı</Text>
+              <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "white",
-    marginTop: 60,
+    marginTop: 70,
     marginLeft: 20,
   },
   nameText: {
@@ -233,8 +233,8 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 20,
     color: "white",
-    marginTop: 30,
-    marginBottom: 10,
+    marginTop: 25,
+    marginBottom: 5,
     marginLeft: 20,
   },
   scrollContainer: {
@@ -303,11 +303,11 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   tipPopup: {
-    backgroundColor: "#fffbe6",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     padding: 12,
     borderRadius: 10,
     margin: 20,
-    marginTop: 40,
+    marginTop: 10,
     position: "absolute",
     top: 10,
     left: 20,
