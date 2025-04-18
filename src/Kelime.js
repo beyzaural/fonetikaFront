@@ -278,9 +278,12 @@ const Kelime = ({ navigation }) => {
             )}
             <TouchableOpacity
               onPress={playOriginalAudio}
-              style={styles.listenButton}
+              style={styles.speakerIconWrapper}
             >
-              <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+              <Image
+                source={require("../assets/icons/speaker.png")}
+                style={styles.speakerIcon}
+              />
             </TouchableOpacity>
           </View>
 
@@ -435,6 +438,13 @@ const styles = StyleSheet.create({
     color: "#FF8754",
     marginTop: 10,
   },
+  speakerIcon: {
+    marginTop: 20,
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
+  },
+
   listenButton: {
     backgroundColor: "#FF3B30",
     paddingVertical: 10,
