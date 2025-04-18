@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import {
   StyleSheet,
   Text,
@@ -39,8 +41,7 @@ const Home = ({ navigation, route }) => {
       .then((res) => {
         if (res.data?.message) {
           setDictionTip(res.data.message);
-          setShowTip(true);
-          setTimeout(() => setShowTip(false), 10000); // 5 saniye sonra kaybol
+          checkTipShownToday(); // sadece burada çağrılır
         }
       })
       .catch((err) => console.error("Günün ipucu alınamadı:", err));
@@ -93,6 +94,22 @@ const Home = ({ navigation, route }) => {
 
     fetchLoginDays();
   }, []);
+  const checkTipShownToday = async () => {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
+    const lastShownDate = await AsyncStorage.getItem("lastTipDate");
+
+    if (lastShownDate !== today) {
+      // Henüz bugün gösterilmedi
+      setShowTip(true);
+      await AsyncStorage.setItem("lastTipDate", today);
+
+      // Otomatik kaybolma
+      setTimeout(() => setShowTip(false), 10000);
+    } else {
+      // Bugün zaten gösterildi
+      setShowTip(false);
+    }
+  };
 
   return (
     <ImageBackground
@@ -109,6 +126,18 @@ const Home = ({ navigation, route }) => {
             <Text style={styles.closeText}>X</Text>
           </TouchableOpacity>
         </View>
+      )}
+      {/* 💬 Info Icon - sağ üstte sabit */}
+      {!showTip && dictionTip && (
+        <TouchableOpacity
+          onPress={() => setShowTip(true)}
+          style={styles.infoIconWrapper}
+        >
+          <Image
+            source={require("../assets/icons/info.png")} // 💡 kendi info ikonun burada olmalı
+            style={styles.infoIcon}
+          />
+        </TouchableOpacity>
       )}
 
       {/* Welcome Text */}
@@ -331,5 +360,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: "#FF3B30",
+  },
+  infoIconWrapper: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    zIndex: 1000,
+    padding: 8,
+    borderRadius: 30,
+  },
+
+  infoIcon: {
+    width: 28,
+    height: 28,
+    tintColor: "black",
   },
 });
