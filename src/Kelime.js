@@ -232,12 +232,27 @@ const Kelime = ({ navigation }) => {
     setShowFeedback(false);
     setIsRecording(false);
 
-    if (currentIndex < words.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      const lastId = words[currentIndex]?.id || null;
-      fetchRandomWord(lastId);
-    }
+    const isCurrentWrong = words[currentIndex]?.isCorrect === false;
+
+    setWords((prevWords) => {
+      let updated = [...prevWords];
+
+      // ❌ Eğer kelime yanlış telaffuz edildiyse, listeden çıkar
+      if (isCurrentWrong) {
+        updated.splice(currentIndex, 1); // mevcut kelimeyi çıkar
+        setCurrentIndex((prev) => Math.max(0, prev - 1)); // indexi bir geri al
+      } else {
+        if (currentIndex < updated.length - 1) {
+          setCurrentIndex(currentIndex + 1);
+        }
+      }
+
+      return updated;
+    });
+
+    // Yeni kelime çek (yanlış da olsa hep yeni kelime çekiyoruz)
+    const lastId = words[currentIndex]?.id || null;
+    fetchRandomWord(lastId);
   };
 
   const handlePreviousWord = () => {
@@ -294,13 +309,22 @@ const Kelime = ({ navigation }) => {
             >
               <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={handleMicrophonePress}>
-              <FontAwesome
-                name="microphone"
-                size={100}
-                color={isRecording ? "red" : "#FF3B30"}
-              />
-            </TouchableOpacity>
+
+            <View style={{ alignItems: "center" }}>
+              <TouchableOpacity onPress={handleMicrophonePress}>
+                <FontAwesome
+                  name="microphone"
+                  size={100}
+                  color={isRecording ? "black" : "#FF3B30"}
+                />
+              </TouchableOpacity>
+              <Text style={styles.micInfoText}>
+                {isRecording
+                  ? "Bitirmek için tekrar basın"
+                  : "Kaydetmek için mikrofona basın"}
+              </Text>
+            </View>
+
             <TouchableOpacity
               style={styles.nextButton}
               onPress={handleNextWord}
@@ -419,14 +443,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "80%",
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 40,
   },
   prevButton: {
-    padding: 10,
+    padding: 5,
   },
   nextButton: {
-    padding: 10,
+    padding: 5,
   },
   wordText: {
     fontSize: 40,
@@ -498,5 +522,12 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 23,
     fontWeight: "bold",
+  },
+  micInfoText: {
+    fontSize: 14,
+    color: "#6CA3AD",
+    marginTop: 10,
+    fontStyle: "italic",
+    textAlign: "center",
   },
 });
