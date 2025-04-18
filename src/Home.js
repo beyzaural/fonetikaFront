@@ -112,17 +112,18 @@ const Home = ({ navigation, route }) => {
       )}
 
       {/* Welcome Text */}
-      <Text style={styles.welcomeText}>Hoşgeldin</Text>
-      <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
-
-      {/* ✅ Yeni ProgressBar sadece login günlerini gösterir */}
-      <ProgressBar weeklyLoginDays={weeklyLoginDays} />
-
-      {/* Subtitle */}
-      <Text style={styles.subtitle}>Derslerin</Text>
-
-      {/* Cards Container */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <Text style={styles.welcomeText}>Hoşgeldin</Text>
+        <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
+
+        {/* ✅ Yeni ProgressBar sadece login günlerini gösterir */}
+        <ProgressBar weeklyLoginDays={weeklyLoginDays} />
+
+        {/* Subtitle */}
+        <Text style={styles.subtitle}>Derslerin</Text>
+
+        {/* Cards Container */}
+
         <View style={styles.cardsContainer}>
           <TouchableOpacity
             style={styles.card}
