@@ -52,6 +52,7 @@ const Geneltekrar = ({ navigation }) => {
               word: wordData.word,
               phonetic: wordData.phoneticWriting,
               ipucu: "'Bu kelimeyi daha önce yanlış telaffuz ettiniz.'",
+              audioPath: wordData.audioPath,
             };
           })
         );
@@ -64,6 +65,24 @@ const Geneltekrar = ({ navigation }) => {
 
     fetchMistakes();
   }, []);
+
+  const playOriginalAudio = async () => {
+    const currentWord = enrichedMistakes[currentIndex];
+    if (!currentWord?.audioPath) {
+      alert("Bu kelime için ses kaydı bulunamadı.");
+      return;
+    }
+
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: currentWord.audioPath },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing original audio:", error);
+      alert("Doğru telaffuz sesi çalınamadı.");
+    }
+  };
 
   const getUserIdFromToken = async () => {
     try {
@@ -78,15 +97,27 @@ const Geneltekrar = ({ navigation }) => {
     return null;
   };
 
+  // Utility: Convert a blob URL into a temporary File object with m4a name/type.
+  const createTemporaryFile = async (blobUri) => {
+    const response = await fetch(blobUri);
+    const blob = await response.blob();
+    // This File object only renames the file and sets the MIME type; it doesn't convert audio format.
+    return new File([blob], "recording.m4a", { type: "audio/m4a" });
+  };
   const [currentIndex, setCurrentIndex] = useState(0);
   const sendAudioToBackend = async (uri) => {
-    const userId = "test-user"; // ✅ Bu satır en başta olmalı
+    const userId = await getUserIdFromToken(); // ✅ Bu satır en başta olmalı
     try {
-      const fileData = {
-        uri,
-        name: "recording.m4a",
-        type: "audio/m4a",
-      };
+      let fileData;
+      if (uri.startsWith("blob:")) {
+        fileData = await createTemporaryFile(uri);
+      } else {
+        fileData = {
+          uri,
+          name: "recording.m4a",
+          type: "audio/m4a",
+        };
+      }
 
       const formData = new FormData();
       formData.append("file", fileData);
@@ -140,7 +171,7 @@ const Geneltekrar = ({ navigation }) => {
           return prev;
         });
 
-        setShowFeedback(false);
+        setShowFeedback(true);
         return;
       }
 
@@ -257,6 +288,12 @@ const Geneltekrar = ({ navigation }) => {
             ) : (
               <Text style={styles.wordText}>Yükleniyor...</Text>
             )}
+            <TouchableOpacity
+              onPress={playOriginalAudio}
+              style={styles.listenButton}
+            >
+              <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+            </TouchableOpacity>
           </View>
 
           {/* Navigation Arrows and Microphone Button in a Row */}
