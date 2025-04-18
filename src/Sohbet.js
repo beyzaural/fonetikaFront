@@ -152,13 +152,19 @@ const Sohbet = ({ navigation }) => {
         <Text style={styles.headerText}>Sohbet</Text>
       </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderItem}
-        keyExtractor={(_, index) => index.toString()}
-        contentContainerStyle={styles.chatContainer}
-      />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderItem}
+          keyExtractor={(_, index) => index.toString()}
+          style={styles.chatList}
+          contentContainerStyle={styles.chatContainer}
+        />
+      </KeyboardAvoidingView>
 
       {loading && (
         <ActivityIndicator
@@ -174,17 +180,17 @@ const Sohbet = ({ navigation }) => {
           <TouchableOpacity onPress={handleRestartConversation}>
             <FontAwesome
               name="refresh"
-              size={50}
-              style={{ paddingTop: 30 }}
+              size={40}
+              style={{ paddingTop: 20 }}
               color="#FF3B30"
             />
           </TouchableOpacity>
           <Text style={styles.iconText}>Yenile</Text>
         </View>
-        <TouchableOpacity onPress={handleMicPress} style={{ paddingTop: 30 }}>
+        <TouchableOpacity onPress={handleMicPress} style={{ paddingTop: 20 }}>
           <FontAwesome
             name="microphone"
-            size={100}
+            size={85}
             color={isRecording ? "black" : "#FF3B30"}
           />
         </TouchableOpacity>
@@ -192,8 +198,8 @@ const Sohbet = ({ navigation }) => {
           <TouchableOpacity onPress={handleEndConversation}>
             <FontAwesome
               name="times"
-              size={60}
-              style={{ paddingTop: 30 }}
+              size={50}
+              style={{ paddingTop: 20 }}
               color="#FF3B30"
             />
           </TouchableOpacity>
@@ -232,7 +238,7 @@ export default Sohbet;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#E3EFF0",
   },
   topContainer: {
     backgroundColor: "#E3EFF0",
@@ -262,19 +268,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   chatContainer: {
-    flex: 1,
-    //marginTop: 10,
-    backgroundColor: "#E3EFF0",
-    //borderTopLeftRadius: 35,
-    //borderTopRightRadius: 35,
+    flexGrow: 1, // FlatList’in içeriği kadar uzamasını sağlar
     padding: 12,
-    // Add shadow
-    /*shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4, // For Android*/
+    paddingBottom: 130, // mikrofon paneline çarpmaması için yeterli boşluk
+    backgroundColor: "#E3EFF0",
   },
+
   message: {
     padding: 12,
     marginVertical: 5,
@@ -299,7 +298,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   microphoneContainer: {
-    flex: 1,
+    //flex: 1,
     bottom: 0,
     flexDirection: "row",
     justifyContent: "space-around",
@@ -309,17 +308,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 10,
     paddingBottom: 20, // Prevent overlap with SafeArea
-    borderTopLeftRadius: 35, // Added rounded top-left corner
-    borderTopRightRadius: 35, // Added rounded top-right corner
     shadowColor: "#000", // Optional: Shadow for better aesthetics
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
-    elevation: 4, 
+    elevation: 4,
   },
 
   iconButtonWithText: {
     alignItems: "center",
+    marginHorizontal: 8,
   },
   iconText: {
     fontSize: 14,
@@ -361,5 +359,8 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+  },
+  chatList: {
+    backgroundColor: "#E3EFF0", // bu sayede yüklenirken de bu renk görünür
   },
 });

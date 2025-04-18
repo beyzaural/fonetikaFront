@@ -149,7 +149,7 @@ const Home = ({ navigation, route }) => {
         <ProgressBar weeklyLoginDays={weeklyLoginDays} />
 
         {/* Subtitle */}
-        <Text style={styles.subtitle}>Derslerin</Text>
+        <Text style={styles.subtitle}> </Text>
 
         {/* Cards Container */}
 
