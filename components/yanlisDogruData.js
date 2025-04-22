@@ -61,6 +61,13 @@ const yanlisDogruData = [
   { yanlis: "Nâlet", dogru: "Lâ:nét" },
   { yanlis: "Menu", dogru: "Mönü" },
   { yanlis: "Röpörtaj", dogru: "Röportaj" },
+  { yanlis: "Asvalt", dogru: "Asfalt" },
+  { yanlis: "Şarter", dogru: "Şalter" },
+  { yanlis: "Aşşağı", dogru: "Aşa:" },
+  { yanlis: "Şarz", dogru: "Şarj" },
+  { yanlis: "Parağraf", dogru: "Paragraf" },
+  { yanlis: "Bilader", dogru: "Birader" },
+  { yanlis: "Karnıbahar", dogru: "Karnabahar" },
 ];
 
 export default yanlisDogruData;
