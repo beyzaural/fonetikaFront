@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -65,6 +66,7 @@ const ChangeName = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
+       
         <TouchableOpacity
           style={styles.backButtonContainer}
           onPress={() => navigation.goBack()}

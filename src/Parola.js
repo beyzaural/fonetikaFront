@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  Image,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "./utils/auth";
-
 
 const Parola = ({ navigation }) => {
   const [step, setStep] = useState(1);
@@ -113,6 +113,15 @@ const Parola = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate("Dersler")}
+      >
+        <Image
+          source={require("../assets/images/backspace.png")}
+          style={styles.backIcon}
+        />
+      </TouchableOpacity>
       <Text style={styles.title}>Şifre Değiştir</Text>
 
       {step === 1 && (

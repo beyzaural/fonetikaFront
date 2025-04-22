@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TextInput,
+  Image,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -111,7 +112,7 @@ const ChangeEmail = ({ navigation }) => {
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
       Alert.alert("Başarılı", "E-posta adresiniz güncellendi.");
-      navigation.goBack();
+      navigation.navigate("Login");
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {
@@ -122,6 +123,7 @@ const ChangeEmail = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
+        
         <TouchableOpacity
           style={styles.backButtonContainer}
           onPress={() => navigation.goBack()}

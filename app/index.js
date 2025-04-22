@@ -33,6 +33,7 @@ import FAQ from "../src/FAQ";
 import Hesap from "../src/Hesap";
 import ChangeEmail from "../src/ChangeEmail";
 import ChangeName from "../src/ChangeName";
+import Startup from "../src/Startup";
 import YanlisDogruSozcukler from "../src/YanlisDogruSozcukler";
 
 const Stack = createStackNavigator();
@@ -40,7 +41,12 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Startup">
+        <Stack.Screen
+          name="Startup"
+          component={Startup}
+          options={{ headerShown: false }} // Hide header for Login
+        />
         <Stack.Screen
           name="Login"
           component={Login}

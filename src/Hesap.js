@@ -23,7 +23,19 @@ const Hesap = () => {
   const handleDeleteAccount = async () => {
     try {
       const token = await AsyncStorage.getItem("token");
-      const userId = await AsyncStorage.getItem("userId");
+
+      if (!token) {
+        Alert.alert("Hata", "Giriş yapmamışsınız.");
+        return;
+      }
+
+      const decoded = jwt_decode(token); // Get payload
+      const userId = decoded.userId || decoded.sub || decoded.id; // depends on your backend
+
+      if (!userId) {
+        Alert.alert("Hata", "Kullanıcı kimliği JWT'den alınamadı.");
+        return;
+      }
 
       await axios.delete(`${API_URL}/users/${userId}/delete`, {
         headers: {
@@ -34,11 +46,13 @@ const Hesap = () => {
       await AsyncStorage.clear(); // logout
       navigation.navigate("Login");
     } catch (error) {
-      console.error("Error deleting account:", error);
+      console.error(
+        "Error deleting account:",
+        error.response?.data || error.message
+      );
       Alert.alert("Hata", "Hesap silinirken bir hata oluştu.");
     }
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
