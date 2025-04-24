@@ -54,10 +54,13 @@ const ChangeName = ({ navigation }) => {
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
 
+      await AsyncStorage.setItem("token", data.accessToken); // 👈 SAVE updated token
+
       Alert.alert("Başarılı", "İsim güncellendi.");
       navigation.goBack();
     } catch (e) {
       Alert.alert("Hata", e.message);
+      console.log("hata");
     } finally {
       setLoading(false);
     }
@@ -66,7 +69,6 @@ const ChangeName = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
-       
         <TouchableOpacity
           style={styles.backButtonContainer}
           onPress={() => navigation.goBack()}

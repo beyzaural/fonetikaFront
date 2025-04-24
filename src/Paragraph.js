@@ -5,8 +5,10 @@ import {
   View,
   TouchableOpacity,
   Image,
+  Alert,
   ActivityIndicator,
 } from "react-native";
+import axios from "axios";
 
 import { FontAwesome } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -16,6 +18,8 @@ import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Modal } from "react-native";
 import BottomNavBar from "./BottomNavBar";
+import jwtDecode from "jwt-decode";
+import { getUserIdFromToken } from "./utils/auth";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -123,6 +127,25 @@ const Paragraph = () => {
 
       const data = await response.json();
       console.log("✅ Backend:", data);
+
+      const transcribed = data.transcribedText || "";
+      const spokenWordCount = transcribed
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+
+      const token = await AsyncStorage.getItem("token");
+      if (token) {
+        const decoded = jwtDecode(token);
+        const userId = decoded.sub || decoded.userId;
+
+        await axios.post(`${API_URL}/api/progress/add`, null, {
+          params: {
+            userId,
+            count: spokenWordCount,
+          },
+        });
+      }
 
       setFeedback(data.feedback);
       setTranscribedText(data.transcribedText);

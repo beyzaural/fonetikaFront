@@ -22,12 +22,14 @@ const Home = ({ navigation, route }) => {
   const [userName, setUserName] = useState("");
   const dailyGoal = route.params?.dailyGoal; // Get dailyGoal from route.params
   const [weeklyLoginDays, setWeeklyLoginDays] = useState([]);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const userInfo = await getUserInfo(); // Fetch user info from token
+      const userInfo = await getUserInfo();
       if (userInfo?.username) {
-        setUserName(userInfo.username); // Use 'username' instead of 'name'
+        setUserName(userInfo.username);
+        setUserId(userInfo.userId); // 👈 ADD THIS
       }
     };
     fetchUserData();
@@ -54,7 +56,7 @@ const Home = ({ navigation, route }) => {
           await axios.post(
             "http://localhost:8080/api/progress/app-usage/log",
             null,
-            { params: { userId: "test-user" } }
+            { params: { userId } }
           );
           console.log("✅ Günlük giriş kaydedildi");
 
@@ -62,7 +64,7 @@ const Home = ({ navigation, route }) => {
           const res = await axios.get(
             "http://localhost:8080/api/progress/app-usage",
             {
-              params: { userId: "test-user" },
+              params: { userId },
             }
           );
           setWeeklyLoginDays(res.data);
@@ -73,7 +75,7 @@ const Home = ({ navigation, route }) => {
       };
 
       logDailyUsage();
-    }, [])
+    }, [userId])
   );
 
   useEffect(() => {
@@ -82,7 +84,7 @@ const Home = ({ navigation, route }) => {
         const res = await axios.get(
           "http://localhost:8080/api/progress/app-usage",
           {
-            params: { userId: "test-user" },
+            params: { userId },
           }
         );
         setWeeklyLoginDays(res.data); // örnek: ["Mon", "Wed", "Fri"]
@@ -93,7 +95,7 @@ const Home = ({ navigation, route }) => {
     };
 
     fetchLoginDays();
-  }, []);
+  }, [userId]);
   const checkTipShownToday = async () => {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
     const lastShownDate = await AsyncStorage.getItem("lastTipDate");

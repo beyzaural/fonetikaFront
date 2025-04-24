@@ -13,8 +13,10 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwtDecode from "jwt-decode";
+import { getUserIdFromToken } from "./utils/auth";
+import Constants from "expo-constants";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
 
 const AUDIO_UPLOAD_URL = "http://localhost:8080/api/speech/process";
 
@@ -31,19 +33,6 @@ const Kelime = ({ navigation }) => {
   useEffect(() => {
     fetchRandomWord(null);
   }, []);
-
-  const getUserIdFromToken = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        const decoded = jwtDecode(token);
-        return decoded.sub || decoded.userId; // Backend token'da neyi encode ettiyse
-      }
-    } catch (e) {
-      console.error("Token decoding error:", e);
-    }
-    return null;
-  };
 
   const playOriginalAudio = async () => {
     const currentWord = words[currentIndex];
@@ -189,6 +178,10 @@ const Kelime = ({ navigation }) => {
         console.log("Backend isCorrect:", data.correct);
         updatedWords[currentIndex].isCorrect = data.correct;
         return updatedWords;
+      });
+      const userId = await getUserIdFromToken();
+      await axios.post(`${API_URL}/api/progress/add`, null, {
+        params: { userId, count: 1 },
       });
 
       if (!data.correct) {

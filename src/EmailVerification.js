@@ -158,7 +158,9 @@ const EmailVerification = ({ navigation, route }) => {
       const data = await response.json();
       console.log("Finalize Registration Response:", data);
       if (data.success) {
-        await AsyncStorage.removeItem("tempToken"); // optional cleanup
+        await AsyncStorage.setItem("token", data.data.accessToken);
+        await AsyncStorage.setItem("refreshToken", data.data.refreshToken);
+
         navigation.navigate("GoalSelection");
       } else {
         console.error("Finalize Registration Failed:", data.message);

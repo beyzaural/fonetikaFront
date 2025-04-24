@@ -77,6 +77,7 @@ const Sohbet = ({ navigation }) => {
   };
 
   const handleEndConversation = () => {
+    
     setShowFeedback(true);
   };
 

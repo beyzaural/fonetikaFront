@@ -12,8 +12,10 @@ import {
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import jwtDecode from "jwt-decode";
+import { getUserIdFromToken } from "./utils/auth";
+import Constants from "expo-constants";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl;
 
 const Geneltekrar = ({ navigation }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -84,19 +86,6 @@ const Geneltekrar = ({ navigation }) => {
     }
   };
 
-  const getUserIdFromToken = async () => {
-    try {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        const decoded = jwtDecode(token);
-        return decoded.sub || decoded.userId; // Token içindeki alan adınıza göre güncelleyin
-      }
-    } catch (e) {
-      console.error("Token decoding failed:", e);
-    }
-    return null;
-  };
-
   // Utility: Convert a blob URL into a temporary File object with m4a name/type.
   const createTemporaryFile = async (blobUri) => {
     const response = await fetch(blobUri);
@@ -136,6 +125,11 @@ const Geneltekrar = ({ navigation }) => {
 
       const data = await response.json();
       console.log("✅ Geneltekrar backend response:", data);
+
+      const userId = await getUserIdFromToken(); // or from token manually
+      await axios.post(`${API_URL}/api/progress/add`, null, {
+        params: { userId, count: 1 },
+      });
 
       const wordId = enrichedMistakes[currentIndex]?.wordId;
 
