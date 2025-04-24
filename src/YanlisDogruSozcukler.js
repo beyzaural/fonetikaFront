@@ -34,8 +34,8 @@ const YanlisDogruSozcukler = ({ navigation }) => {
       />
       {/* Başlıklar */}
       <View style={styles.header}>
-        <Text style={styles.headerText}>Yanlış</Text>
-        <Text style={styles.headerText}>Doğru</Text>
+        <Text style={styles.headerText}>Yanlış Okunuş</Text>
+        <Text style={styles.headerText}>Doğru Okunuş</Text>
       </View>
 
       {/* Liste */}
@@ -77,18 +77,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 75,
+    marginBottom: 40,
   },
   backIcon: {
     width: 40,
     height: 40,
   },
-  heartIcon: {
-    top: 20,
-    right: 20,
-    width: 40,
-    height: 40,
-  },
+
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -124,16 +119,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "black",
   },
-  heartWrapper: {
-    //alignItems: "center",
-    marginBottom: 20,
-  },
+
   heartIcon: {
     position: "absolute",
-    top: 70, // başlık altına hizalar
+    bottom: 150, // başlık altına hizalar
     right: 20, // sağ boşluk
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     zIndex: 5,
   },
 

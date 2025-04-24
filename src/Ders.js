@@ -8,16 +8,14 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import * as Progress from "react-native-progress";
-import BottomNavBar from "./BottomNavBar"; // Import the progress bar
+import BottomNavBar from "./BottomNavBar";
 
 const Ders = ({ navigation, route }) => {
-  const progress = 0.35; // Example progress value (50%)
-  const { courseId, phoneme } = route.params;
+  const { courseId, phoneme } = route?.params || {};
 
   return (
     <ImageBackground
-      source={require("../assets/images/ders_back.png")}
+      source={require("../assets/images/beyazblue.png")}
       style={styles.imageBackground}
     >
       {/* Back Arrow */}
@@ -32,23 +30,10 @@ const Ders = ({ navigation, route }) => {
       </TouchableOpacity>
 
       <View style={styles.bottomContainer}>
-        <Text style={styles.title}>İlerlemen:</Text>
-
-        {/* Progress Bar */}
-        <View style={styles.progressContainer}>
-          <Progress.Bar
-            progress={progress}
-            width={300}
-            height={10}
-            color="#880000"
-            borderRadius={5}
-            borderColor="#e0e0e0"
-            unfilledColor="#e0e0e0"
-          />
-          <Text style={styles.progressText}>{`${Math.round(
-            progress * 100
-          )}%`}</Text>
-        </View>
+        <Text style={styles.title}>Ders Seçenekleri</Text>
+        <Text style={styles.subtitle}>
+          {phoneme.toUpperCase()} harfi için bir eğitim modülü seç:
+        </Text>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
@@ -60,6 +45,7 @@ const Ders = ({ navigation, route }) => {
           >
             <Text style={styles.buttonText}>Kelime Çalış</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
@@ -74,8 +60,12 @@ const Ders = ({ navigation, route }) => {
         </View>
 
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {/* Your content goes here */}
+          <Text style={styles.tip}>
+            💡 İpucu: Hedeflediğin sesi öğrenmenin en iyi yolu bol tekrar
+            yapmaktır.
+          </Text>
         </ScrollView>
+
         <BottomNavBar navigation={navigation} />
       </View>
     </ImageBackground>
@@ -96,7 +86,6 @@ const styles = StyleSheet.create({
     top: 20,
     left: 20,
     zIndex: 100,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: 25,
     padding: 5,
   },
@@ -110,67 +99,51 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingVertical: 30,
-    paddingHorizontal: 15,
+    paddingHorizontal: 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
-    marginBottom: 10,
-    color: "#333",
+    color: "#222",
+    textAlign: "center",
+    marginBottom: 5,
   },
-  progressContainer: {
-    alignItems: "center",
-    marginTop: 30,
-    marginBottom: 20,
-  },
-  progressText: {
+  subtitle: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#880000",
-    marginTop: 5,
+    color: "#555",
+    textAlign: "center",
+    marginBottom: 30,
   },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 20,
-    marginTop: 15,
+    marginBottom: 10,
   },
   button: {
-    width: "90%",
-    paddingVertical: 15,
-    backgroundColor: "#D4D4D4", // Light grey color
-    borderRadius: 10,
-    marginBottom: 20,
-    // marginTop:10,
-
+    width: "100%",
+    paddingVertical: 16,
+    backgroundColor: "#E3EFF0",
+    borderRadius: 15,
+    marginBottom: 15,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "white",
   },
   buttonText: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#333",
   },
   scrollContainer: {
     flexGrow: 1,
     alignItems: "center",
-    marginTop: 20,
+    justifyContent: "center",
   },
-  navBar: {
-    height: 70,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-  },
-  navItem: {
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 30,
-    height: 30,
-    marginBottom: 5,
+  tip: {
+    fontSize: 15,
+    color: "#666",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 10,
   },
 });

@@ -3,7 +3,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import axios from "axios";
 import BottomNavBar from "./BottomNavBar";
-
 import {
   StyleSheet,
   Text,
@@ -18,7 +17,8 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const Dersler = ({ navigation }) => {
-  const [courses, setCourses] = useState("");
+  const [courses, setCourses] = useState([]);
+
   useEffect(() => {
     const fetchCourses = async () => {
       try {
@@ -34,9 +34,9 @@ const Dersler = ({ navigation }) => {
           },
         });
 
-        setCourses(res.data);
-        console.log(courses);
-        
+        const groupedCourses = groupCourses(res.data);
+        setCourses(groupedCourses);
+        console.log(groupedCourses);
       } catch (error) {
         console.error("Failed to fetch courses:", error);
       }
@@ -45,21 +45,43 @@ const Dersler = ({ navigation }) => {
     fetchCourses();
   }, []);
 
+  // Aynı sesi temsil eden kursları gruplandır
+  const groupCourses = (courses) => {
+    const phonemeGroups = {
+      "ı/i": ["ı", "i"],
+      "o/ö": ["o", "ö"],
+    };
+
+    const grouped = {};
+    courses.forEach((course) => {
+      const name = course.courseName.toLowerCase();
+      let groupKey = Object.keys(phonemeGroups).find((key) =>
+        phonemeGroups[key].includes(name)
+      );
+      if (!groupKey) groupKey = name;
+
+      if (!grouped[groupKey]) {
+        grouped[groupKey] = {
+          ...course,
+          courseName: groupKey,
+        };
+      }
+    });
+
+    return Object.values(grouped);
+  };
+
   const getImageForCourse = (name) => {
     const lower = name.toLowerCase();
-    switch (lower) {
-      case "a":
-        return require("../assets/images/a.png");
-      case "e":
-        return require("../assets/images/e.png");
-      case "i":
-      case "ı":
-        return require("../assets/images/ı.png");
 
-      case "o":
-      case "ö":
-        return require("../assets/images/o.png");
-    }
+    if (["ı/i"].includes(lower)) return require("../assets/images/ı.png");
+    if (["o/ö"].includes(lower)) return require("../assets/images/o.png");
+    if (lower === "a") return require("../assets/images/a.png"); // özel eşleştirme
+    if (lower === "e") return require("../assets/images/e.png");
+  };
+
+  const getTitleForCourse = (name) => {
+    return `${name} harfi`;
   };
 
   return (
@@ -106,7 +128,7 @@ const Dersler = ({ navigation }) => {
                   />
                   <View>
                     <Text style={styles.cardTitle}>
-                      {course.courseName.toUpperCase()} Harfi
+                      {getTitleForCourse(course.courseName)}
                     </Text>
                     <Text style={styles.cardDifficulty}>
                       Zorluk: {course.difficulty || "Bilinmiyor"}
@@ -121,31 +143,28 @@ const Dersler = ({ navigation }) => {
     </View>
   );
 };
+
 export default Dersler;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "white",
   },
-
   topContainer: {
-    flex: 3, // Top section takes up 3 parts of the screen
+    flex: 3,
   },
-
   imageBackground: {
     flex: 1,
-    // marginTop: 20,
     justifyContent: "flex-start",
     alignItems: "flex-start",
-    overflow: "hidden", // Ensures the image respects the border radius
+    overflow: "hidden",
   },
-
   imageStyle: {
     width: "100%",
     height: "100%",
-    resizeMode: "cover", // Ensures the image covers the top section
+    resizeMode: "cover",
   },
-
   backButton: {
     position: "absolute",
     top: 20,
@@ -155,20 +174,17 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     padding: 5,
   },
-
   backIcon: {
     width: 40,
     height: 40,
   },
-
   bottomContainer: {
-    flex: 5, // Bottom section takes up 5 parts of the screen
+    flex: 5,
     backgroundColor: "white",
-    marginTop: -30, // Brings the bottom container to overlap the image
+    marginTop: -30,
     paddingVertical: 10,
     paddingHorizontal: 15,
   },
-
   title: {
     fontSize: 28,
     fontWeight: "bold",
@@ -176,13 +192,11 @@ const styles = StyleSheet.create({
     marginLeft: 20,
     color: "#333",
   },
-
   scrollContainer: {
     flexGrow: 1,
     alignItems: "center",
     marginTop: 20,
   },
-
   card: {
     width: "95%",
     height: 130,
@@ -196,26 +210,22 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
-
   cardContent: {
     flexDirection: "row",
     alignItems: "center",
     padding: 15,
   },
-
   cardImage: {
     width: 100,
     height: 100,
     marginRight: 15,
     borderRadius: 10,
   },
-
   cardTitle: {
     fontSize: 22,
     fontWeight: "bold",
     color: "#333",
   },
-
   cardDifficulty: {
     fontSize: 16,
     color: "#555",
