@@ -17,13 +17,29 @@ import { LinearGradient } from "expo-linear-gradient";
 import { getUserInfo } from "./utils/auth";
 import BottomNavBar from "./BottomNavBar";
 import ProgressBar from "./ProgressBar";
+import GoalRing from "./GoalRing";
 
 const Home = ({ navigation, route }) => {
   const [userName, setUserName] = useState("");
-  const dailyGoal = route.params?.dailyGoal; // Get dailyGoal from route.params
+  const [userDailyGoal, setUserDailyGoal] = useState(null);
   const [weeklyLoginDays, setWeeklyLoginDays] = useState([]);
   const [userId, setUserId] = useState(null);
+  const [userProgress, setUserProgress] = useState(null);
 
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!userId) return;
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/api/progress/${userId}`
+        );
+        setUserProgress(res.data);
+      } catch (err) {
+        console.error("❌ Kullanıcı ilerlemesi alınamadı:", err);
+      }
+    };
+    fetchProgress();
+  }, [userId]);
   useEffect(() => {
     const fetchUserData = async () => {
       const userInfo = await getUserInfo();
@@ -34,6 +50,22 @@ const Home = ({ navigation, route }) => {
     };
     fetchUserData();
   }, []);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      if (!userId) return;
+      try {
+        const res = await axios.get(`http://localhost:8080/users/profile`, {
+          params: { userId },
+        });
+        setUserDailyGoal(res.data.dailyGoal);
+      } catch (err) {
+        console.error("❌ Kullanıcı bilgisi alınamadı:", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, [userId]);
 
   const [dictionTip, setDictionTip] = useState(null);
   const [showTip, setShowTip] = useState(false);
@@ -113,6 +145,15 @@ const Home = ({ navigation, route }) => {
     }
   };
 
+  const today = Number(userProgress?.todayCount);
+  const goal = Number(userDailyGoal);
+  const progress = !isNaN(today) && !isNaN(goal) && goal > 0 ? today / goal : 0;
+  console.log("🎯 dailyGoal:", Number(userDailyGoal));
+  console.log(
+    "📊 progress:",
+    Number(userProgress?.todayCount) / Number(userProgress?.dailyGoal)
+  );
+
   return (
     <ImageBackground
       source={require("../assets/images/green.png")} // Reference your image here
@@ -147,8 +188,15 @@ const Home = ({ navigation, route }) => {
         <Text style={styles.welcomeText}>Hoşgeldin</Text>
         <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
 
-        {/* ✅ Yeni ProgressBar sadece login günlerini gösterir */}
-        <ProgressBar weeklyLoginDays={weeklyLoginDays} />
+        <View style={styles.progressInfoContainer}>
+          {userProgress && <GoalRing progress={progress} goal={goal} />}
+
+          <View style={styles.streakContainer}>
+            <Text style={styles.streakText}>
+              🔥 {userProgress?.streak || 0} Günlük Seri
+            </Text>
+          </View>
+        </View>
 
         {/* Subtitle */}
         <Text style={styles.subtitle}> </Text>
@@ -376,5 +424,36 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     tintColor: "black",
+  },
+  progressInfoContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 20,
+    marginTop: 10,
+  },
+
+  progressCircle: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ccc",
+    marginRight: 10,
+  },
+
+  progressCircleText: {
+    color: "white",
+    fontWeight: "bold",
+  },
+
+  streakContainer: {
+    justifyContent: "center",
+  },
+
+  streakText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
   },
 });
