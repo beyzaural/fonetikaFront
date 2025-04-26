@@ -41,7 +41,7 @@ const Stack = createStackNavigator();
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Startup">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
           name="Startup"
           component={Startup}
