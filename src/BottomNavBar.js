@@ -14,15 +14,7 @@ const BottomNavBar = ({ navigation }) => {
         />
       </TouchableOpacity>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate("Profile")}
-        style={styles.navItem}
-      >
-        <Image
-          source={require("../assets/icons/profile.png")}
-          style={styles.navIcon}
-        />
-      </TouchableOpacity>
+     
 
       <TouchableOpacity
         onPress={() => navigation.navigate("YanlisDogruSozcukler")}

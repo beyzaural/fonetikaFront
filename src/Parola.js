@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "./utils/auth";
+import { LinearGradient } from "expo-linear-gradient";
+import BottomNavBar from "./BottomNavBar";
 
 const Parola = ({ navigation }) => {
   const [step, setStep] = useState(1);
@@ -19,17 +21,15 @@ const Parola = ({ navigation }) => {
   const [resetToken, setResetToken] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
   const [loading, setLoading] = useState(false);
 
-  // Auto-load email from local storage
   useEffect(() => {
     const loadEmail = async () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
 
       const payload = JSON.parse(atob(token.split(".")[1]));
-      setEmail(payload.email); // 🔐 Artık doğru değer burada
+      setEmail(payload.email);
     };
     loadEmail();
   }, []);
@@ -101,7 +101,6 @@ const Parola = ({ navigation }) => {
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
 
-      // ✅ Clear stored token
       await logout();
       navigation.reset({ index: 0, routes: [{ name: "Login" }] });
     } catch (e) {
@@ -113,88 +112,250 @@ const Parola = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate("Dersler")}
-      >
-        <Image
-          source={require("../assets/images/backspace.png")}
-          style={styles.backIcon}
-        />
-      </TouchableOpacity>
-      <Text style={styles.title}>Şifre Değiştir</Text>
-
-      {step === 1 && (
-        <>
-          <Text style={styles.label}>E-posta: {email}</Text>
-          <TouchableOpacity style={styles.button} onPress={handleSendOtp}>
-            <Text style={styles.buttonText}>OTP Gönder</Text>
-          </TouchableOpacity>
-        </>
-      )}
-
-      {step === 2 && (
-        <>
-          <Text style={styles.label}>OTP'yi Girin</Text>
-          <TextInput
-            style={styles.input}
-            value={otp}
-            onChangeText={setOtp}
-            keyboardType="numeric"
+      <LinearGradient
+        colors={["#f8f8f8", "#ffffff"]}
+        style={styles.backgroundGradient}
+      />
+      {/* Top Section */}
+      <View style={styles.topContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
           />
-          <TouchableOpacity style={styles.button} onPress={handleVerifyOtp}>
-            <Text style={styles.buttonText}>Doğrula</Text>
-          </TouchableOpacity>
-        </>
-      )}
+        </TouchableOpacity>
+        <Text style={styles.title}>Şifre Değiştir</Text>
+      </View>
 
-      {step === 3 && (
-        <>
-          <Text style={styles.label}>Yeni Şifrenizi Girin</Text>
-          <TextInput
-            style={styles.input}
-            value={newPassword}
-            onChangeText={setNewPassword}
-            secureTextEntry
-          />
-          <Text style={styles.label}>Yeni Şifre (Tekrar)</Text>
-          <TextInput
-            style={styles.input}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry
-          />
-          <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-            <Text style={styles.buttonText}>Şifreyi Güncelle</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      {/* Content */}
+      <View style={styles.contentContainer}>
+        {step === 1 && (
+          <>
+            <Text style={styles.label}>E-posta:</Text>
+            <View style={styles.emailContainer}>
+              <Text style={styles.emailText}>{email}</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={handleSendOtp}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>OTP Gönder</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
 
-      {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
+        {step === 2 && (
+          <>
+            <Text style={styles.label}>OTP'yi Girin</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={otp}
+                onChangeText={setOtp}
+                keyboardType="numeric"
+                placeholder="OTP kodunu giriniz"
+                placeholderTextColor="#666"
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={handleVerifyOtp}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Doğrula</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <Text style={styles.label}>Yeni Şifrenizi Girin</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                secureTextEntry
+                placeholder="Yeni şifrenizi giriniz"
+                placeholderTextColor="#666"
+              />
+            </View>
+            <Text style={styles.label}>Yeni Şifre (Tekrar)</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                placeholder="Yeni şifrenizi tekrar giriniz"
+                placeholderTextColor="#666"
+              />
+            </View>
+            <TouchableOpacity
+              style={styles.buttonContainer}
+              onPress={handleResetPassword}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Şifreyi Güncelle</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#fff" },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 30 },
-  label: { fontSize: 18, marginBottom: 10 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
+  container: {
+    flex: 1,
+    backgroundColor: "white",
+  },
+  backgroundGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+  },
+  topContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(214, 213, 179, 0.2)",
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
-    padding: 12,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginLeft: 15,
+  },
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
+  label: {
     fontSize: 16,
+    color: "#333",
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  emailContainer: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
+  },
+  emailText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  inputContainer: {
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: "#FF3B30",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
+  input: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    color: "#333",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
   },
-  buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  buttonContainer: {
+    marginTop: 10,
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#0a7ea4",
+  },
+  buttonGradient: {
+    padding: 15,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
 });
 
 export default Parola;

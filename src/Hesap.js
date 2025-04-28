@@ -14,9 +14,12 @@ import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwt_decode from "jwt-decode";
+import Icon from "react-native-vector-icons/FontAwesome5";
+import BottomNavBar from "./BottomNavBar";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
+
 const Hesap = () => {
   const navigation = useNavigation();
 
@@ -29,8 +32,8 @@ const Hesap = () => {
         return;
       }
 
-      const decoded = jwt_decode(token); // Get payload
-      const userId = decoded.userId || decoded.sub || decoded.id; // depends on your backend
+      const decoded = jwt_decode(token);
+      const userId = decoded.userId || decoded.sub || decoded.id;
 
       if (!userId) {
         Alert.alert("Hata", "Kullanıcı kimliği JWT'den alınamadı.");
@@ -43,7 +46,7 @@ const Hesap = () => {
         },
       });
 
-      await AsyncStorage.clear(); // logout
+      await AsyncStorage.clear();
       navigation.navigate("Login");
     } catch (error) {
       console.error(
@@ -53,107 +56,150 @@ const Hesap = () => {
       Alert.alert("Hata", "Hesap silinirken bir hata oluştu.");
     }
   };
+
   return (
     <View style={styles.container}>
+      {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
-          style={styles.backButtonContainer}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <View style={styles.backButton}>
-            <Image
-              source={require("../assets/images/backspace.png")}
-              style={styles.backIcon}
-            />
-          </View>
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Hesap Ayarları</Text>
-        </View>
+        <Text style={styles.title}>Hesap Ayarları</Text>
       </View>
 
-      <ScrollView style={styles.optionsContainer}>
+      {/* Settings List */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TouchableOpacity
-          style={styles.option}
+          style={styles.card}
           onPress={() => navigation.navigate("Parola")}
         >
-          <Text style={styles.optionText}>Şifreyi Değiştir</Text>
+          <View style={styles.cardContent}>
+            <Icon name="key" size={30} color="#333" style={styles.icon} />
+            <View>
+              <Text style={styles.cardTitle}>Şifreyi Değiştir</Text>
+              <Text style={styles.cardSubtitle}>Hesap şifrenizi güncelleyin</Text>
+            </View>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.option}
+          style={styles.card}
           onPress={() => navigation.navigate("ChangeEmail")}
         >
-          <Text style={styles.optionText}>E-posta Adresini Değiştir</Text>
+          <View style={styles.cardContent}>
+            <Icon name="envelope" size={30} color="#333" style={styles.icon} />
+            <View>
+              <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
+              <Text style={styles.cardSubtitle}>E-posta adresinizi güncelleyin</Text>
+            </View>
+          </View>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.option}
+          style={styles.card}
           onPress={() => navigation.navigate("ChangeName")}
         >
-          <Text style={styles.optionText}>Ad Soyad Değiştir</Text>
+          <View style={styles.cardContent}>
+            <Icon name="user-edit" size={30} color="#333" style={styles.icon} />
+            <View>
+              <Text style={styles.cardTitle}>Ad Soyad Değiştir</Text>
+              <Text style={styles.cardSubtitle}>İsminizi güncelleyin</Text>
+            </View>
+          </View>
         </TouchableOpacity>
+
         <TouchableOpacity
+          style={styles.card}
           onPress={handleDeleteAccount}
-          style={styles.deleteButton}
         >
-          <Text style={styles.deleteText}>Hesabımı Sil</Text>
+          <View style={styles.cardContent}>
+            <Icon name="trash-alt" size={30} color="#FF3B30" style={styles.icon} />
+            <View>
+              <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>Hesabımı Sil</Text>
+              <Text style={styles.cardSubtitle}>Hesabınızı kalıcı olarak silin</Text>
+            </View>
+          </View>
         </TouchableOpacity>
       </ScrollView>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };
 
-export default Hesap;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
   },
   topContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
   },
-  backButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
-  },
   backButton: {
     width: 40,
     height: 40,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   backIcon: {
     width: 20,
     height: 20,
   },
-  titleContainer: {
-    flex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    textAlign: "left",
+    marginLeft: 15,
   },
-  optionsContainer: {
+  scrollContainer: {
     flexGrow: 1,
+    padding: 20,
   },
-  option: {
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+  card: {
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  optionText: {
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  icon: {
+    marginRight: 15,
+  },
+  cardTitle: {
     fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 5,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#666",
   },
 });
+
+export default Hesap;

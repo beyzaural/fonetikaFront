@@ -12,6 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
+import { LinearGradient } from "expo-linear-gradient";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -47,7 +48,7 @@ const ChangeName = ({ navigation }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name: username }), // Send username as 'name' to match backend
+        body: JSON.stringify({ name: username }),
       });
 
       const data = await response.json();
@@ -67,97 +68,157 @@ const ChangeName = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <LinearGradient
+        colors={["#f8f8f8", "#ffffff"]}
+        style={styles.backgroundGradient}
+      />
+      {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
-          style={styles.backButtonContainer}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <View style={styles.backButton}>
-            <Image
-              source={require("../assets/images/backspace.png")}
-              style={styles.backIcon}
-            />
-          </View>
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Kullanıcı Adını Güncelle</Text>
-        </View>
+        <Text style={styles.title}>Kullanıcı Adını Güncelle</Text>
       </View>
 
-      <Text style={styles.label}>Kullanıcı Adı</Text>
-      <TextInput
-        value={username}
-        onChangeText={setUsername}
-        style={styles.input}
-        placeholder="Kullanıcı adınız"
-      />
+      {/* Content */}
+      <View style={styles.contentContainer}>
+        <Text style={styles.label}>Kullanıcı Adı</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
+            style={styles.input}
+            placeholder="Kullanıcı adınız"
+            placeholderTextColor="#666"
+          />
+        </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleChangeName}>
-        <Text style={styles.buttonText}>Güncelle</Text>
-      </TouchableOpacity>
-
-      {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
+        <TouchableOpacity
+          style={styles.buttonContainer}
+          onPress={handleChangeName}
+          disabled={loading}
+        >
+          <LinearGradient
+            colors={["#0a7ea4", "#0a7ea4"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.buttonGradient}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Güncelle</Text>
+            )}
+          </LinearGradient>
+        </TouchableOpacity>
+      </View>
       <BottomNavBar navigation={navigation} />
     </View>
   );
 };
 
-export default ChangeName;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
+  },
+  backgroundGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   topContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
-  },
-  backButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(214, 213, 179, 0.2)",
   },
   backButton: {
     width: 40,
     height: 40,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
   },
   backIcon: {
     width: 20,
     height: 20,
   },
-  titleContainer: {
-    flex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    textAlign: "left",
+    marginLeft: 15,
   },
-  label: { fontSize: 18, marginBottom: 10 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
+  label: {
     fontSize: 16,
+    color: "#333",
+    marginBottom: 8,
+    fontWeight: "500",
+  },
+  inputContainer: {
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: "#FF3B30",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
+  input: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    color: "#333",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
   },
-  buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  buttonContainer: {
+    marginTop: 10,
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#0a7ea4",
+  },
+  buttonGradient: {
+    padding: 15,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
 });
+
+export default ChangeName;

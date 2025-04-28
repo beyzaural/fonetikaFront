@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import BottomNavBar from "./BottomNavBar";
+import { LinearGradient } from "expo-linear-gradient";
 
 const FAQ = () => {
   const navigation = useNavigation();
@@ -31,88 +32,113 @@ const FAQ = () => {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <LinearGradient
+        colors={["#f8f8f8", "#ffffff"]}
+        style={styles.backgroundGradient}
+      />
+      {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
-          style={styles.backButtonContainer}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <View style={styles.backButton}>
-            <Image
-              source={require("../assets/images/backspace.png")}
-              style={styles.backIcon}
-            />
-          </View>
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Sık Sorulan Sorular</Text>
-        </View>
+        <Text style={styles.title}>Sık Sorulan Sorular</Text>
       </View>
 
-      {faqs.map((item, index) => (
-        <View key={index} style={styles.faqItem}>
-          <Text style={styles.question}>{item.question}</Text>
-          <Text style={styles.answer}>{item.answer}</Text>
-        </View>
-      ))}
+      {/* Content */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        {faqs.map((item, index) => (
+          <View key={index} style={styles.card}>
+            <Text style={styles.question}>{item.question}</Text>
+            <Text style={styles.answer}>{item.answer}</Text>
+          </View>
+        ))}
+      </ScrollView>
       <BottomNavBar navigation={navigation} />
-    </ScrollView>
+    </View>
   );
 };
-
-export default FAQ;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "white",
+  },
+  backgroundGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   topContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
-  },
-  backButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(214, 213, 179, 0.2)",
   },
   backButton: {
     width: 40,
     height: 40,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
   },
   backIcon: {
     width: 20,
     height: 20,
   },
-  titleContainer: {
-    flex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    textAlign: "left",
+    marginLeft: 15,
   },
-  faqItem: {
-    marginBottom: 25,
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 20,
+  },
+  card: {
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   question: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#333",
+    marginBottom: 10,
   },
   answer: {
-    fontSize: 16,
-    color: "#555",
-    marginTop: 8,
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
   },
 });
+
+export default FAQ;

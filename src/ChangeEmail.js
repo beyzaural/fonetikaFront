@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TextInput,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
   ActivityIndicator,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
+import { LinearGradient } from "expo-linear-gradient";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -20,35 +21,40 @@ const ChangeEmail = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [oldEmail, setOldEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
-  const [otpOld, setOtpOld] = useState("");
-  const [otpNew, setOtpNew] = useState("");
+  const [oldOtp, setOldOtp] = useState("");
+  const [newOtp, setNewOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
 
   useEffect(() => {
-    const loadUserInfo = async () => {
+    const load = async () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) return;
       const payload = JSON.parse(atob(token.split(".")[1]));
       setOldEmail(payload.email);
       setToken(token);
+    
     };
-    loadUserInfo();
+    load();
   }, []);
 
   const sendOtpToOld = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/auth/email/send-old-otp`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ email: oldEmail }),
       });
 
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
-      Alert.alert("OTP Gönderildi", `${oldEmail} adresinize OTP gönderildi.`);
-      setStep(2);
+
+      Alert.alert("Başarılı", "OTP e-posta adresinize gönderildi.");
+      setStep(1.5);
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {
@@ -57,16 +63,47 @@ const ChangeEmail = ({ navigation }) => {
   };
 
   const verifyOldOtp = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/auth/email/verify-old`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: oldEmail, otp: otpOld }),
+        headers: {
+          "Content-Type": "application/json",
+      
+        },
+        body: JSON.stringify({ 
+          email: oldEmail,
+          otp: oldOtp 
+        }),
       });
+
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
-      Alert.alert("Doğrulandı", "Eski e-posta doğrulandı.");
+
+      setStep(2);
+    } catch (e) {
+      Alert.alert("Hata", e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendOtpToNew = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_URL}/auth/email/send-new-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          
+        },
+        body: JSON.stringify({ email: newEmail }),
+      });
+
+      const data = await response.json();
+      if (!data.success) throw new Error(data.message);
+
+      Alert.alert("Başarılı", "OTP yeni e-posta adresinize gönderildi.");
       setStep(3);
     } catch (e) {
       Alert.alert("Hata", e.message);
@@ -75,44 +112,27 @@ const ChangeEmail = ({ navigation }) => {
     }
   };
 
-  const sendOtpToNewEmail = async () => {
-    setLoading(true);
+  const verifyOtp = async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/email/send-new-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: newEmail }),
-      });
-      const data = await response.json();
-      if (!data.success) throw new Error(data.message);
-      Alert.alert("OTP Gönderildi", "Yeni e-posta adresinize OTP gönderildi.");
-      setStep(4);
-    } catch (e) {
-      Alert.alert("Hata", e.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const verifyNewOtpAndChangeEmail = async () => {
-    setLoading(true);
-    try {
+      setLoading(true);
       const response = await fetch(`${API_URL}/auth/email/verify-new`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
+        body: JSON.stringify({ 
           oldEmail,
           newEmail,
-          otp: otpNew,
+          otp: newOtp,
         }),
       });
+
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
+
       Alert.alert("Başarılı", "E-posta adresiniz güncellendi.");
-      navigation.navigate("Login");
+      navigation.goBack();
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {
@@ -122,151 +142,273 @@ const ChangeEmail = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <LinearGradient
+        colors={["#f8f8f8", "#ffffff"]}
+        style={styles.backgroundGradient}
+      />
+      {/* Top Section */}
       <View style={styles.topContainer}>
-        
         <TouchableOpacity
-          style={styles.backButtonContainer}
+          style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <View style={styles.backButton}>
-            <Image
-              source={require("../assets/images/backspace.png")}
-              style={styles.backIcon}
-            />
-          </View>
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-        <View style={styles.titleContainer}>
-          <Text style={styles.title}>Mailini Değiştir</Text>
-        </View>
+        <Text style={styles.title}>Mailini Değiştir</Text>
       </View>
 
-      {step === 1 && (
-        <>
-          <Text style={styles.label}>Mevcut E-posta:</Text>
-          <Text style={styles.emailText}>{oldEmail}</Text>
-          <TouchableOpacity style={styles.button} onPress={sendOtpToOld}>
-            <Text style={styles.buttonText}>OTP Gönder</Text>
-          </TouchableOpacity>
-        </>
-      )}
+      {/* Content */}
+      <View style={styles.contentContainer}>
+        {step === 1 && (
+          <>
+            <Text style={styles.label}>Mevcut E-posta:</Text>
+            <View style={styles.emailContainer}>
+              <Text style={styles.emailText}>{oldEmail}</Text>
+            </View>
+            <TouchableOpacity 
+              style={styles.buttonContainer} 
+              onPress={sendOtpToOld}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>OTP Gönder</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
 
-      {step === 2 && (
-        <>
-          <Text style={styles.label}>Eski E-posta OTP</Text>
-          <TextInput
-            value={otpOld}
-            onChangeText={setOtpOld}
-            style={styles.input}
-            keyboardType="numeric"
-          />
-          <TouchableOpacity style={styles.button} onPress={verifyOldOtp}>
-            <Text style={styles.buttonText}>Doğrula</Text>
-          </TouchableOpacity>
-        </>
-      )}
+        {step === 1.5 && (
+          <>
+            <Text style={styles.label}>Mevcut E-posta için OTP'yi Girin:</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                style={styles.input}
+                value={oldOtp}
+                onChangeText={setOldOtp}
+                keyboardType="numeric"
+                placeholder="OTP kodunu giriniz"
+                placeholderTextColor="#666"
+              />
+            </View>
+            <TouchableOpacity 
+              style={styles.buttonContainer} 
+              onPress={verifyOldOtp}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Doğrula</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
 
-      {step === 3 && (
-        <>
-          <Text style={styles.label}>Yeni E-posta</Text>
-          <TextInput
-            value={newEmail}
-            onChangeText={setNewEmail}
-            style={styles.input}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
-          <TouchableOpacity style={styles.button} onPress={sendOtpToNewEmail}>
-            <Text style={styles.buttonText}>Devam Et</Text>
-          </TouchableOpacity>
-        </>
-      )}
+        {step === 2 && (
+          <>
+            <Text style={styles.label}>Yeni E-posta:</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                value={newEmail}
+                onChangeText={setNewEmail}
+                style={styles.input}
+                placeholder="Yeni e-posta adresiniz"
+                placeholderTextColor="#666"
+                autoCapitalize="none"
+                keyboardType="email-address"
+              />
+            </View>
+            <TouchableOpacity 
+              style={styles.buttonContainer} 
+              onPress={sendOtpToNew}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>OTP Gönder</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
 
-      {step === 4 && (
-        <>
-          <Text style={styles.label}>Yeni E-posta OTP</Text>
-          <TextInput
-            value={otpNew}
-            onChangeText={setOtpNew}
-            style={styles.input}
-            keyboardType="numeric"
-          />
-          <TouchableOpacity
-            style={styles.button}
-            onPress={verifyNewOtpAndChangeEmail}
-          >
-            <Text style={styles.buttonText}>E-posta Güncelle</Text>
-          </TouchableOpacity>
-        </>
-      )}
-
-      {loading && <ActivityIndicator size="large" style={{ marginTop: 20 }} />}
+        {step === 3 && (
+          <>
+            <Text style={styles.label}>OTP'yi Girin</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                value={newOtp}
+                onChangeText={setNewOtp}
+                style={styles.input}
+                placeholder="OTP kodunu giriniz"
+                placeholderTextColor="#666"
+              />
+            </View>
+            <TouchableOpacity 
+              style={styles.buttonContainer} 
+              onPress={verifyOtp}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={["#0a7ea4", "#0a7ea4"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.buttonGradient}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Doğrula</Text>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
       <BottomNavBar navigation={navigation} />
     </View>
   );
 };
 
-export default ChangeEmail;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "white",
+  },
+  backgroundGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   topContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
     paddingTop: 50,
     paddingHorizontal: 20,
     paddingBottom: 15,
-  },
-  backButtonContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 10,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(214, 213, 179, 0.2)",
   },
   backButton: {
     width: 40,
     height: 40,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderRadius: 8,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
   },
   backIcon: {
     width: 20,
     height: 20,
   },
-  titleContainer: {
-    flex: 1,
-  },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
-    textAlign: "left",
+    marginLeft: 15,
   },
-  label: { fontSize: 18, marginBottom: 10 },
-  emailText: {
-    fontSize: 18,
-    marginBottom: 20,
+  contentContainer: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
+  label: {
+    fontSize: 16,
     color: "#333",
+    marginBottom: 8,
     fontWeight: "500",
   },
-  input: {
+  emailContainer: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    padding: 12,
+    borderColor: "rgba(214, 213, 179, 0.3)",
+  },
+  emailText: {
     fontSize: 16,
+    color: "#333",
+  },
+  inputContainer: {
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: "#FF3B30",
-    padding: 14,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 10,
+  input: {
+    backgroundColor: "white",
+    borderRadius: 12,
+    padding: 15,
+    fontSize: 16,
+    color: "#333",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(214, 213, 179, 0.3)",
   },
-  buttonText: { color: "white", fontSize: 16, fontWeight: "bold" },
+  buttonContainer: {
+    marginTop: 10,
+    borderRadius: 12,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#0a7ea4",
+  },
+  buttonGradient: {
+    padding: 15,
+    alignItems: "center",
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
 });
+
+export default ChangeEmail;
