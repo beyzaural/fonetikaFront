@@ -224,7 +224,7 @@ const Paragraph = () => {
             style={styles.backIcon}
           />
         </TouchableOpacity>
-        <Text style={styles.titleText}>Paragraf Okuma</Text>
+        <Text style={styles.titleText}>Cümle Okuma</Text>
       </View>
 
       <View style={styles.microphoneContainer}>

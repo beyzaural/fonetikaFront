@@ -84,26 +84,22 @@ const Home = ({ navigation, route }) => {
   useFocusEffect(
     useCallback(() => {
       const logDailyUsage = async () => {
-        try {
-          await axios.post(
-            "http://localhost:8080/api/progress/app-usage/log",
-            null,
-            { params: { userId } }
-          );
-          console.log("✅ Günlük giriş kaydedildi");
+        await axios.post(
+          "http://localhost:8080/api/progress/app-usage/log",
+          null,
+          { params: { userId } }
+        );
+        console.log("✅ Günlük giriş kaydedildi");
 
-          // ⬇️ LOG sonrası login günlerini al
-          const res = await axios.get(
-            "http://localhost:8080/api/progress/app-usage",
-            {
-              params: { userId },
-            }
-          );
-          setWeeklyLoginDays(res.data);
-          console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
-        } catch (error) {
-          console.error("❌ Giriş logu ya da login günleri alınamadı:", error);
-        }
+        // ⬇️ LOG sonrası login günlerini al
+        const res = await axios.get(
+          "http://localhost:8080/api/progress/app-usage",
+          {
+            params: { userId },
+          }
+        );
+        setWeeklyLoginDays(res.data);
+        console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
       };
 
       logDailyUsage();
@@ -112,18 +108,15 @@ const Home = ({ navigation, route }) => {
 
   useEffect(() => {
     const fetchLoginDays = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:8080/api/progress/app-usage",
-          {
-            params: { userId },
-          }
-        );
-        setWeeklyLoginDays(res.data); // örnek: ["Mon", "Wed", "Fri"]
-        console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
-      } catch (error) {
-        console.error("❌ Haftalık login verisi alınamadı", error);
-      }
+      t;
+      const res = await axios.get(
+        "http://localhost:8080/api/progress/app-usage",
+        {
+          params: { userId },
+        }
+      );
+      setWeeklyLoginDays(res.data); // örnek: ["Mon", "Wed", "Fri"]
+      console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
     };
 
     fetchLoginDays();
@@ -274,7 +267,7 @@ const Home = ({ navigation, route }) => {
                 source={require("../assets/icons/file-2.png")} // Reference the chat icon here
                 style={styles.chatIcon}
               />
-              <Text style={styles.cardText}>Paragraf</Text>
+              <Text style={styles.cardText}>Cümle</Text>
               <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
@@ -295,7 +288,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "white",
-    marginTop: 70,
+    marginTop: 60,
     marginLeft: 20,
   },
   nameText: {
@@ -313,7 +306,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 20,
     color: "white",
-    marginTop: 25,
+    //marginTop: 25,
     marginBottom: 5,
     marginLeft: 20,
   },
@@ -438,7 +431,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#ccc",
+    backgroundColor: "white",
     marginRight: 10,
   },
 
