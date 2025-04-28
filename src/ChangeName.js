@@ -12,12 +12,12 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const ChangeName = ({ navigation }) => {
-  const [name, setName] = useState("");
-  const [surname, setSurname] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
 
@@ -28,15 +28,14 @@ const ChangeName = ({ navigation }) => {
       setToken(t);
 
       const payload = JSON.parse(atob(t.split(".")[1]));
-      if (payload.name) setName(payload.name);
-      if (payload.surname) setSurname(payload.surname);
+      if (payload.username) setUsername(payload.username);
     };
     load();
   }, []);
 
   const handleChangeName = async () => {
-    if (!name || !surname) {
-      Alert.alert("Hata", "Lütfen isim ve soyisim giriniz.");
+    if (!username) {
+      Alert.alert("Hata", "Lütfen kullanıcı adınızı giriniz.");
       return;
     }
 
@@ -48,15 +47,15 @@ const ChangeName = ({ navigation }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name: username }), // Send username as 'name' to match backend
       });
 
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
 
-      await AsyncStorage.setItem("token", data.accessToken); // 👈 SAVE updated token
+      await AsyncStorage.setItem("token", data.accessToken);
 
-      Alert.alert("Başarılı", "İsim güncellendi.");
+      Alert.alert("Başarılı", "Kullanıcı adı güncellendi.");
       navigation.goBack();
     } catch (e) {
       Alert.alert("Hata", e.message);
@@ -81,16 +80,16 @@ const ChangeName = ({ navigation }) => {
           </View>
         </TouchableOpacity>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>İsmini Güncelle</Text>
+          <Text style={styles.title}>Kullanıcı Adını Güncelle</Text>
         </View>
       </View>
 
-      <Text style={styles.label}>İsim</Text>
+      <Text style={styles.label}>Kullanıcı Adı</Text>
       <TextInput
-        value={name}
-        onChangeText={setName}
+        value={username}
+        onChangeText={setUsername}
         style={styles.input}
-        placeholder="Adınız"
+        placeholder="Kullanıcı adınız"
       />
 
       <TouchableOpacity style={styles.button} onPress={handleChangeName}>
