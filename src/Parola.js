@@ -48,7 +48,7 @@ const Parola = ({ navigation }) => {
 
       const data = await response.json();
       if (!data.success) throw new Error(data.message);
-      Alert.alert("Başarılı", "OTP e-posta adresinize gönderildi.");
+      Alert.alert("Başarılı", "Kod e-posta adresinize gönderildi.");
       setStep(2);
     } catch (e) {
       Alert.alert("Hata", e.message);
@@ -152,7 +152,7 @@ const Parola = ({ navigation }) => {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>OTP Gönder</Text>
+                  <Text style={styles.buttonText}>Kodu Gönder</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>
@@ -161,14 +161,14 @@ const Parola = ({ navigation }) => {
 
         {step === 2 && (
           <>
-            <Text style={styles.label}>OTP'yi Girin</Text>
+            <Text style={styles.label}>Kodu Girin</Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
                 value={otp}
                 onChangeText={setOtp}
                 keyboardType="numeric"
-                placeholder="OTP kodunu giriniz"
+                placeholder="Mailinize gönderilen kodu giriniz"
                 placeholderTextColor="#666"
               />
             </View>

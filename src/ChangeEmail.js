@@ -33,7 +33,6 @@ const ChangeEmail = ({ navigation }) => {
       const payload = JSON.parse(atob(token.split(".")[1]));
       setOldEmail(payload.email);
       setToken(token);
-    
     };
     load();
   }, []);
@@ -69,11 +68,10 @@ const ChangeEmail = ({ navigation }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-      
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           email: oldEmail,
-          otp: oldOtp 
+          otp: oldOtp,
         }),
       });
 
@@ -95,7 +93,6 @@ const ChangeEmail = ({ navigation }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          
         },
         body: JSON.stringify({ email: newEmail }),
       });
@@ -121,7 +118,7 @@ const ChangeEmail = ({ navigation }) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           oldEmail,
           newEmail,
           otp: newOtp,
@@ -168,8 +165,8 @@ const ChangeEmail = ({ navigation }) => {
             <View style={styles.emailContainer}>
               <Text style={styles.emailText}>{oldEmail}</Text>
             </View>
-            <TouchableOpacity 
-              style={styles.buttonContainer} 
+            <TouchableOpacity
+              style={styles.buttonContainer}
               onPress={sendOtpToOld}
               disabled={loading}
             >
@@ -182,7 +179,7 @@ const ChangeEmail = ({ navigation }) => {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>OTP Gönder</Text>
+                  <Text style={styles.buttonText}>Kod Gönder</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>
@@ -191,19 +188,21 @@ const ChangeEmail = ({ navigation }) => {
 
         {step === 1.5 && (
           <>
-            <Text style={styles.label}>Mevcut E-posta için OTP'yi Girin:</Text>
+            <Text style={styles.label}>
+              Mevcut e-posta'nıza gönderilen kodu girin:
+            </Text>
             <View style={styles.inputContainer}>
               <TextInput
                 style={styles.input}
                 value={oldOtp}
                 onChangeText={setOldOtp}
                 keyboardType="numeric"
-                placeholder="OTP kodunu giriniz"
+                placeholder="Size gönderilen kodu giriniz"
                 placeholderTextColor="#666"
               />
             </View>
-            <TouchableOpacity 
-              style={styles.buttonContainer} 
+            <TouchableOpacity
+              style={styles.buttonContainer}
               onPress={verifyOldOtp}
               disabled={loading}
             >
@@ -237,8 +236,8 @@ const ChangeEmail = ({ navigation }) => {
                 keyboardType="email-address"
               />
             </View>
-            <TouchableOpacity 
-              style={styles.buttonContainer} 
+            <TouchableOpacity
+              style={styles.buttonContainer}
               onPress={sendOtpToNew}
               disabled={loading}
             >
@@ -251,7 +250,7 @@ const ChangeEmail = ({ navigation }) => {
                 {loading ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.buttonText}>OTP Gönder</Text>
+                  <Text style={styles.buttonText}>Kod Gönder</Text>
                 )}
               </LinearGradient>
             </TouchableOpacity>
@@ -260,18 +259,20 @@ const ChangeEmail = ({ navigation }) => {
 
         {step === 3 && (
           <>
-            <Text style={styles.label}>OTP'yi Girin</Text>
+            <Text style={styles.label}>
+              Yeni e-posta adresinize gönderilen kodu girin
+            </Text>
             <View style={styles.inputContainer}>
               <TextInput
                 value={newOtp}
                 onChangeText={setNewOtp}
                 style={styles.input}
-                placeholder="OTP kodunu giriniz"
+                placeholder="Mailinize gönderilen kodu giriniz"
                 placeholderTextColor="#666"
               />
             </View>
-            <TouchableOpacity 
-              style={styles.buttonContainer} 
+            <TouchableOpacity
+              style={styles.buttonContainer}
               onPress={verifyOtp}
               disabled={loading}
             >
