@@ -76,18 +76,23 @@ const EmailOTPVerification = ({ navigation, route }) => {
         );
 
         const finalizeData = await finalizeResponse.json();
-
         if (finalizeResponse.ok && finalizeData.success) {
-          // Done ✅
-          navigation.navigate("GoalSelection");
+          // ✅ Save real token for future auth-required screens
+          await AsyncStorage.setItem("token", finalizeData.data.accessToken);
+          await AsyncStorage.setItem(
+            "refreshToken",
+            finalizeData.data.refreshToken
+          );
+
+          navigation.navigate("Record");
         } else {
-          Alert.alert("Error", finalizeData.message || "Finalize failed.");
+          Alert.alert("Error", finalizeData.message || "Hata.");
         }
       } else {
-        Alert.alert("Error", verifyData.message || "OTP verification failed.");
+        Alert.alert("Error", verifyData.message || "Kod doğrulanamadı.");
       }
     } catch (error) {
-      Alert.alert("Error", "An error occurred. Please try again.");
+      Alert.alert("Hata", "Lütfen tekrar deneyin");
       console.error(error);
     }
   };
@@ -108,12 +113,12 @@ const EmailOTPVerification = ({ navigation, route }) => {
 
       const data = await response.json();
       if (data.success) {
-        Alert.alert("Success", "OTP resent to your email.");
+        Alert.alert("Başarılı", "Kod tekrar gönderildi.");
       } else {
-        Alert.alert("Error", data.message || "Failed to resend OTP.");
+        Alert.alert("Hata", data.message || "Kod gönderilemedi.");
       }
     } catch (error) {
-      Alert.alert("Error", "Resend failed.");
+      Alert.alert("Hata", "Kod gönderilemedi.");
       console.error(error);
     }
   };

@@ -161,7 +161,7 @@ const EmailVerification = ({ navigation, route }) => {
         await AsyncStorage.setItem("token", data.data.accessToken);
         await AsyncStorage.setItem("refreshToken", data.data.refreshToken);
 
-        navigation.navigate("GoalSelection");
+        navigation.navigate("Record");
       } else {
         console.error("Finalize Registration Failed:", data.message);
       }
