@@ -17,7 +17,8 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import { getUserIdFromToken } from "./utils/auth";
 
-const Geneltekrar = ({ navigation }) => {
+const KursTekrar = ({ navigation, route }) => {
+  const { phoneme } = route.params;
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
@@ -25,39 +26,49 @@ const Geneltekrar = ({ navigation }) => {
   const [feedback, setFeedback] = useState("");
   const [mistakes, setMistakes] = useState([]);
   const [enrichedMistakes, setEnrichedMistakes] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const sanitizeWord = (word) => {
+    return word
+      .toLowerCase()
+      .replace(/ç/g, "c")
+      .replace(/ğ/g, "g")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ş/g, "s")
+      .replace(/ü/g, "u")
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
 
   useEffect(() => {
     const fetchMistakes = async () => {
       try {
         const userId = await getUserIdFromToken();
-        if (!userId) {
-          console.warn("User ID not found in token.");
-          return;
-        }
+        if (!userId) return;
+
         const res = await axios.get(
-          `${API_URL}/api/mispronounced-words/user-course-phoneme?&phoneme=${phoneme}`,
+          `${API_URL}/api/mispronounced-words/user-course-phoneme`,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            params: { phoneme, userId },
           }
         );
 
         const mistakes = res.data;
 
-        // Her mistake için wordId ile kelime detayını getir
         const enriched = await Promise.all(
           mistakes.map(async (mistake) => {
             const wordRes = await axios.get(
-              `http://localhost:8080/api/words/id/${mistake.wordId}`
+              `${API_URL}/api/words/id/${mistake.wordId}`
             );
             const wordData = wordRes.data;
-
             if (!wordData || !wordData.word) return null;
-
             return {
               ...mistake,
               word: wordData.word,
               phonetic: wordData.phoneticWriting,
               ipucu: "'Bu kelimeyi daha önce yanlış telaffuz ettiniz.'",
+              audioPath: wordData.audioPath,
             };
           })
         );
@@ -69,85 +80,71 @@ const Geneltekrar = ({ navigation }) => {
     };
 
     fetchMistakes();
-  }, []);
+  }, [phoneme]);
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const sendAudioToBackend = async (uri) => {
-    const userId = await getUserIdFromToken(); // ✅ Bu satır en başta olmalı
+  const playOriginalAudio = async () => {
+    const currentWord = enrichedMistakes[currentIndex];
+    if (!currentWord?.audioPath) {
+      alert("Bu kelime için ses kaydı bulunamadı.");
+      return;
+    }
     try {
-      let fileData;
-      if (uri.startsWith("blob:")) {
-        fileData = await createTemporaryFile(uri);
-      } else {
-        fileData = {
-          uri,
-          name: "recording.m4a",
-          type: "audio/m4a",
-        };
-      }
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: currentWord.audioPath },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing original audio:", error);
+    }
+  };
+
+  const sendAudioToBackend = async (uri) => {
+    try {
+      const userId = await getUserIdFromToken();
+      const currentWord = enrichedMistakes[currentIndex];
 
       const formData = new FormData();
-      formData.append("file", fileData);
-      formData.append(
-        "expected_word",
-        enrichedMistakes[currentIndex]?.word || ""
-      );
+      formData.append("file", {
+        uri: uri,
+        type: "audio/wav",
+        name: sanitizeWord(currentWord.word) + ".wav",
+      });
+      formData.append("expected_word", currentWord.word || "");
+      formData.append("word_id", currentWord.wordId || "");
+      formData.append("user_id", userId);
 
-      const response = await fetch("http://localhost:8080/api/speech/process", {
+      const response = await fetch(`${API_URL}/api/speech/evaluate`, {
         method: "POST",
-        headers: {
-          Accept: "application/json",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
         body: formData,
       });
 
-      const data = await response.json();
-      console.log("✅ Geneltekrar backend response:", data);
+      const responseJson = await response.json();
+      console.log("✅ KursTekrar backend response:", responseJson);
 
-      const wordId = enrichedMistakes[currentIndex]?.wordId;
+      await axios.post(`${API_URL}/api/progress/add`, null, {
+        params: { userId, count: 1 },
+      });
 
-      setFeedback(data.feedback);
+      setFeedback(responseJson.feedback);
 
-      if (data.correct) {
+      if (responseJson.correct) {
         await axios.post(
-          "http://localhost:8080/api/mispronounced-words/record-pronunciation",
+          `${API_URL}/api/mispronounced-words/record-pronunciation`,
           {
             userId,
-            wordId,
+            wordId: currentWord.wordId,
             correct: true,
           }
         );
-        console.log("✅ Doğru telaffuz kaydedildi.");
-      }
-
-      const updatedRes = await axios.get(
-        `http://localhost:8080/api/mispronounced-words/user/${userId}`
-      );
-
-      const stillMistaken = updatedRes.data.find(
-        (item) => item.wordId === wordId
-      );
-
-      if (!stillMistaken) {
-        setEnrichedMistakes((prev) =>
-          prev.filter((w, index) => index !== currentIndex)
-        );
-
-        setCurrentIndex((prev) => {
-          if (prev >= enrichedMistakes.length - 1) return 0;
-          return prev;
-        });
-
-        setShowFeedback(false);
-        return;
       }
 
       setEnrichedMistakes((prev) => {
         const updated = [...prev];
         updated[currentIndex] = {
           ...updated[currentIndex],
-          transcribedText: data.transcribedText,
-          isCorrect: data.correct,
+          transcribedText: responseJson.transcribedText,
+          isCorrect: responseJson.correct,
         };
         return updated;
       });
@@ -167,7 +164,7 @@ const Geneltekrar = ({ navigation }) => {
         setAudioUri(uri);
         setRecording(null);
         setIsRecording(false);
-        await sendAudioToBackend(uri); // 🔁 Buraya eklendi
+        await sendAudioToBackend(uri);
       } catch (error) {
         console.error("Error stopping recording:", error);
       }
@@ -175,7 +172,7 @@ const Geneltekrar = ({ navigation }) => {
       try {
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
-          alert("Microphone permission is required to record audio.");
+          alert("Mikrofon izni gerekiyor.");
           return;
         }
         await Audio.setAudioModeAsync({
@@ -256,6 +253,12 @@ const Geneltekrar = ({ navigation }) => {
               <Text style={styles.wordText}>Yükleniyor...</Text>
             )}
           </View>
+          <TouchableOpacity
+            onPress={playOriginalAudio}
+            style={styles.listenButton}
+          >
+            <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+          </TouchableOpacity>
 
           {/* Navigation Arrows and Microphone Button in a Row */}
           <View style={styles.navigationContainer}>
@@ -357,7 +360,7 @@ const Geneltekrar = ({ navigation }) => {
   );
 };
 
-export default Geneltekrar;
+export default KursTekrar;
 
 const styles = StyleSheet.create({
   container: {

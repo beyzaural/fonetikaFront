@@ -18,8 +18,6 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import { getUserIdFromToken } from "./utils/auth";
 
-const AUDIO_UPLOAD_URL = "http://localhost:8080/api/speech/process";
-
 const KursKelime = ({ navigation }) => {
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -34,6 +32,18 @@ const KursKelime = ({ navigation }) => {
     fetchRandomWord(null);
   }, []);
 
+  const sanitizeWord = (word) => {
+    return word
+      .toLowerCase()
+      .replace(/ç/g, "c")
+      .replace(/ğ/g, "g")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ş/g, "s")
+      .replace(/ü/g, "u")
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
   const playOriginalAudio = async () => {
     const currentWord = words[currentIndex];
     if (!currentWord?.audioPath) {
@@ -54,7 +64,7 @@ const KursKelime = ({ navigation }) => {
 
   const fetchRandomWord = (lastWordId = null) => {
     axios
-      .get(`http://localhost:8080/api/words/random`, {
+      .get(`${API_URL}/api/words/random`, {
         params: { lastWordId, userId: getUserIdFromToken },
       })
       .then((res) => {
@@ -62,11 +72,10 @@ const KursKelime = ({ navigation }) => {
         const enrichedWord = {
           ...w,
           definition: w.phoneticWriting || "",
-          tahmin: "Sanırım “a:bey” dediniz.",
-          instruction: "İşaretli harfleri düzeltmeyi deneyebilirsiniz.",
+          tahmin: "",
+          instruction: "",
           kelime: w.phoneticWriting || "",
-          ipucu:
-            "'Bi' sesini kısa, düz ve açık bir 'i' ile bitirin. 'bey' yerine 'bi' demeye odaklanın.",
+          ipucu: "",
         };
 
         setWords((prevWords) => {
@@ -106,7 +115,7 @@ const KursKelime = ({ navigation }) => {
 
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
-          alert("Microphone permission is required to record audio.");
+          alert("Mikrofon erişimi gerekiyor.");
           return;
         }
 
@@ -138,65 +147,56 @@ const KursKelime = ({ navigation }) => {
   // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
-      let fileData;
-      if (uri.startsWith("blob:")) {
-        fileData = await createTemporaryFile(uri);
-      } else {
-        fileData = {
-          uri,
-          name: "recording.m4a",
-          type: "audio/m4a",
-        };
-      }
+      const userId = await getUserIdFromToken();
+      const currentWord = words[currentIndex];
 
       const formData = new FormData();
-      formData.append("file", fileData);
-      formData.append("expected_word", words[currentIndex]?.word || "");
+      formData.append("file", {
+        uri: uri,
+        type: "audio/wav",
+        name: sanitizeWord(currentWord.word) + ".wav",
+      });
+      formData.append("expected_word", currentWord.word || "");
+      formData.append("word_id", currentWord.id || "");
+      formData.append("user_id", userId);
 
-      const response = await fetch(AUDIO_UPLOAD_URL, {
+      const response = await fetch(`${API_URL}/api/speech/evaluate`, {
         method: "POST",
         headers: {
-          Accept: "application/json",
+          "Content-Type": "multipart/form-data",
         },
         body: formData,
       });
 
-      const data = await response.json();
-      console.log("✅ Backend full response:", data);
+      const responseJson = await response.json();
+      console.log("✅ Full backend response:", responseJson);
 
-      setFeedback(data.feedback);
+      if (responseJson.correct) {
+        setFeedback(responseJson.feedbackText);
+      } else {
+        setFeedback(
+          `You said "${responseJson.recognizedWord}", but expected "${currentWord.word}".`
+        );
+      }
+
       setWords((prevWords) => {
         const updatedWords = [...prevWords];
-        updatedWords[currentIndex].transcribedText = data.transcribedText;
-        console.log("Beklenen:", words[currentIndex]?.word);
-        console.log("Transkript:", data.transcribedText);
-        console.log(
-          "Eşleşti mi:",
-          data.transcribedText.toLowerCase() ===
-            words[currentIndex]?.word.toLowerCase()
-        );
-        console.log("Backend isCorrect:", data.correct);
-        updatedWords[currentIndex].isCorrect = data.correct;
+        updatedWords[currentIndex].transcribedText =
+          responseJson.recognizedWord;
+        updatedWords[currentIndex].isCorrect = responseJson.correct;
         return updatedWords;
       });
 
-      const userId = await getUserIdFromToken(); // or from token manually
       await axios.post(`${API_URL}/api/progress/add`, null, {
         params: { userId, count: 1 },
       });
 
-      if (!data.correct) {
-        const userId = await getUserIdFromToken();
-        const wordId = words[currentIndex]?.id;
-
-        const res = await axios.get(
-          `${API_URL}/api/words/vowel-course/${courseId}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-
-        console.log("❌ MispronouncedWord kaydı eklendi.");
+      if (!responseJson.correct) {
+        await axios.post(`${API_URL}/api/mispronounced-words/record`, {
+          userId,
+          wordId: currentWord.id,
+        });
+        console.log("❌ MispronouncedWord kaydedildi.");
       }
 
       setShowFeedback(true);

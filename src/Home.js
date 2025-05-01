@@ -3,6 +3,7 @@ import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 import {
   StyleSheet,
@@ -18,6 +19,10 @@ import { getUserInfo } from "./utils/auth";
 import BottomNavBar from "./BottomNavBar";
 import ProgressBar from "./ProgressBar";
 import GoalRing from "./GoalRing";
+import Icon from "react-native-vector-icons/FontAwesome5"; // flame is available here
+
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl || "http://localhost:8080";
 
 const Home = ({ navigation, route }) => {
   const [userName, setUserName] = useState("");
@@ -30,9 +35,12 @@ const Home = ({ navigation, route }) => {
     const fetchProgress = async () => {
       if (!userId) return;
       try {
-        const res = await axios.get(
-          `http://localhost:8080/api/progress/${userId}`
-        );
+        const token = await AsyncStorage.getItem("token");
+        const res = await axios.get(`${API_URL}/api/progress/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setUserProgress(res.data);
       } catch (err) {
         console.error("❌ Kullanıcı ilerlemesi alınamadı:", err);
@@ -55,8 +63,12 @@ const Home = ({ navigation, route }) => {
     const fetchUserInfo = async () => {
       if (!userId) return;
       try {
-        const res = await axios.get(`http://localhost:8080/users/profile`, {
+        const token = await AsyncStorage.getItem("token");
+        const res = await axios.get(`${API_URL}/users/profile`, {
           params: { userId },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
         setUserDailyGoal(res.data.dailyGoal);
       } catch (err) {
@@ -70,57 +82,26 @@ const Home = ({ navigation, route }) => {
   const [dictionTip, setDictionTip] = useState(null);
   const [showTip, setShowTip] = useState(false);
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/api/diction-tip")
-      .then((res) => {
+    const fetchDictionTip = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        const res = await axios.get(`${API_URL}/api/diction-tip`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         if (res.data?.message) {
           setDictionTip(res.data.message);
-          checkTipShownToday(); // sadece burada çağrılır
+          checkTipShownToday();
         }
-      })
-      .catch((err) => console.error("Günün ipucu alınamadı:", err));
+      } catch (err) {
+        console.error("Günün ipucu alınamadı:", err);
+      }
+    };
+    fetchDictionTip();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      const logDailyUsage = async () => {
-        await axios.post(
-          "http://localhost:8080/api/progress/app-usage/log",
-          null,
-          { params: { userId } }
-        );
-        console.log("✅ Günlük giriş kaydedildi");
-
-        // ⬇️ LOG sonrası login günlerini al
-        const res = await axios.get(
-          "http://localhost:8080/api/progress/app-usage",
-          {
-            params: { userId },
-          }
-        );
-        setWeeklyLoginDays(res.data);
-        console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
-      };
-
-      logDailyUsage();
-    }, [userId])
-  );
-
-  useEffect(() => {
-    const fetchLoginDays = async () => {
-      t;
-      const res = await axios.get(
-        "http://localhost:8080/api/progress/app-usage",
-        {
-          params: { userId },
-        }
-      );
-      setWeeklyLoginDays(res.data); // örnek: ["Mon", "Wed", "Fri"]
-      console.log("🔁 Backend'ten gelen haftalık login günleri:", res.data);
-    };
-
-    fetchLoginDays();
-  }, [userId]);
+  
   const checkTipShownToday = async () => {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
     const lastShownDate = await AsyncStorage.getItem("lastTipDate");
@@ -146,6 +127,11 @@ const Home = ({ navigation, route }) => {
     "📊 progress:",
     Number(userProgress?.todayCount) / Number(userProgress?.dailyGoal)
   );
+  const getStreakColor = (streak) => {
+    if (streak >= 7) return "#4CAF50"; // Green
+    if (streak > 0) return "#FFA500"; // Orange
+    return "#9E9E9E"; // Gray
+  };
 
   return (
     <ImageBackground
@@ -184,9 +170,15 @@ const Home = ({ navigation, route }) => {
         <View style={styles.progressInfoContainer}>
           {userProgress && <GoalRing progress={progress} goal={goal} />}
 
-          <View style={styles.streakContainer}>
-            <Text style={styles.streakText}>
-              🔥 {userProgress?.streak || 0} Günlük Seri
+          <View style={styles.streakWrapper}>
+            <Icon
+              name="fire"
+              style={styles.streakIcon}
+              color={getStreakColor(userProgress?.streak || 0)}
+              solid
+            />
+            <Text style={styles.streakLabel}>
+              {userProgress?.streak || 0} Günlük Seri
             </Text>
           </View>
         </View>
@@ -448,5 +440,28 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "600",
+  },
+  streakWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 20, // matches GoalRing marginLeft
+  },
+
+  streakLabel: {
+    color: "white",
+    fontSize: 18, // larger font size for text
+    fontWeight: "600",
+    marginTop: 6,
+  },
+
+  streakIcon: {
+    fontSize: 40, // larger icon size
+  },
+
+  streakText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "white",
+    marginTop: 2,
   },
 });

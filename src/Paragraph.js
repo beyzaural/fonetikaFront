@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
+  Modal,
   View,
   TouchableOpacity,
   Image,
@@ -16,7 +17,6 @@ import { useFonts } from "expo-font";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Modal } from "react-native";
 import BottomNavBar from "./BottomNavBar";
 import jwtDecode from "jwt-decode";
 import { getUserIdFromToken } from "./utils/auth";
@@ -84,12 +84,6 @@ const Paragraph = () => {
   useEffect(() => {
     fetchParagraph();
   }, []);
-
-  const paragraphs = [
-    "Bugün sabah kahvaltıda bir kahve içtim ve radyoda sevdiğim bir müzik çalıyordu. Öğle saatlerinde bir avukat ile görüşmem gerekti. Ancak randevuma geç kalınca İstanbul trafiğinde bir saat boyunca beklemek zorunda kaldım. Sonunda buluşmaya vardığımda, herkesin toplantıda olduğunu gördüm. Toplantıda, yeni çıkan bir program ve rakip şirket hakkında konuştuk.",
-    "Akşam saatlerinde dışarıda yürüyüş yaparken eski bir dostumla karşılaştım. Uzun süredir görüşemediğimiz için bir kafeye oturup sohbet etmeye karar verdik. Sohbet sırasında geçmiş anılarımızı yad ettik ve birlikte güzel planlar yaptık.",
-    "Bir gün kütüphaneye gidip kitap okumaya karar verdim. Orada saatlerce vakit geçirerek hem yeni şeyler öğrendim hem de çok keyif aldım. Kitapların büyülü dünyasına dalmak bana huzur verdi.",
-  ];
 
   const [currentParagraphIndex, setCurrentParagraphIndex] = useState(0);
 
