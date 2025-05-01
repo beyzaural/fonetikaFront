@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,25 +15,81 @@ import {
 import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
-import { Modal } from "react-native";
 import BottomNavBar from "./BottomNavBar";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
-const API_URL = extra.apiUrl;
-
-const API_BASE = "http://localhost:8080"; // Update if needed
+const API_BASE = extra.apiUrl || "http://localhost:8080";
 
 const Sohbet = ({ navigation }) => {
   const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [showFeedback, setShowFeedback] = useState(false);
+  const [showInput, setShowInput] = useState(false);
+  const [textInputValue, setTextInputValue] = useState("");
+  const [currentQuestionId, setCurrentQuestionId] = useState(null);
 
   const flatListRef = useRef(null);
 
+  useEffect(() => {
+    handleStartQuiz(); // ekran açılınca quiz başlasın
+  }, []);
+
   const scrollToBottom = () => {
     flatListRef.current?.scrollToEnd({ animated: true });
+  };
+
+  const addMessage = (sender, text) => {
+    setMessages((prev) => [...prev, { sender, text }]);
+    setTimeout(scrollToBottom, 100);
+  };
+
+  const handleStartQuiz = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/quiz/next`);
+      const json = await res.json(); // { id, soru }
+
+      setCurrentQuestionId(json.id);
+      addMessage("assistant", json.soru);
+    } catch (error) {
+      console.error("Quiz start error:", error);
+      Alert.alert("Error", "Couldn't load quiz question.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTextSubmit = async () => {
+    if (!textInputValue.trim() || !currentQuestionId) return;
+
+    const userInput = textInputValue.trim();
+    setTextInputValue("");
+    setShowInput(false);
+
+    addMessage("user", userInput);
+
+    try {
+      setLoading(true);
+      const res = await fetch(`${API_BASE}/api/quiz/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          questionId: currentQuestionId,
+          answer: userInput,
+        }),
+      });
+
+      const explanation = await res.text();
+      addMessage("assistant", explanation);
+
+      setTimeout(handleStartQuiz, 2000); // yeni soruyu getir
+    } catch (error) {
+      console.error("Answer submit error:", error);
+      Alert.alert("Error", "Couldn't process your answer.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleMicPress = async () => {
@@ -72,56 +128,39 @@ const Sohbet = ({ navigation }) => {
     }
   };
 
-  const handleRestartConversation = () => {
-    setMessages([]);
-  };
-
-  const handleEndConversation = () => {
-    
-    setShowFeedback(true);
-  };
-
   const handleAudioUpload = async (uri) => {
     try {
       setLoading(true);
 
-      let fileData;
-      if (uri.startsWith("blob:")) {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        fileData = new File([blob], "recording.m4a", { type: "audio/m4a" });
-      } else {
-        fileData = {
-          uri: uri,
-          name: "recording.m4a",
-          type: "audio/m4a",
-        };
-      }
-
       const formData = new FormData();
-      formData.append("file", fileData);
-
-      const chatRes = await fetch(`${API_BASE}/api/chat/conversation`, {
-        method: "POST",
-        body: formData, // ✅ Multipart gönder
+      formData.append("file", {
+        uri,
+        name: "audio.m4a",
+        type: "audio/m4a",
       });
 
-      const chatData = await chatRes.json();
+      const res = await fetch(`${API_BASE}/api/chat/conversation`, {
+        method: "POST",
+        body: formData,
+      });
 
-      addMessage("user", chatData.transcription);
+      const data = await res.json();
 
-      addMessage("assistant", chatData.response);
+      addMessage("user", data.transcription);
+      addMessage("assistant", data.response);
     } catch (error) {
-      console.error("Voice chat failed:", error);
-      Alert.alert("Error", "Something went wrong.");
+      console.error("Voice upload error:", error);
+      Alert.alert("Error", "Couldn't process audio.");
     } finally {
       setLoading(false);
     }
   };
 
-  const addMessage = (sender, text) => {
-    setMessages((prev) => [...prev, { sender, text }]);
-    setTimeout(scrollToBottom, 100);
+  const handleEndConversation = () => {
+    Alert.alert("Sohbet bitti", "Ana ekrana dönmek ister misin?", [
+      { text: "İptal", style: "cancel" },
+      { text: "Evet", onPress: () => navigation.navigate("Home") },
+    ]);
   };
 
   const renderItem = ({ item }) => (
@@ -140,17 +179,15 @@ const Sohbet = ({ navigation }) => {
   );
 
   return (
-    <View
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
-    >
+    <View style={styles.container}>
+      {/* Üst Başlık */}
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.navigate("Home")}
         >
           <Image
-            source={require("../assets/images/backspace.png")} // 👈 Kelime ekranındaki ile aynı dosya
+            source={require("../assets/images/backspace.png")}
             style={styles.backIcon}
           />
         </TouchableOpacity>
@@ -179,18 +216,36 @@ const Sohbet = ({ navigation }) => {
         />
       )}
 
-      {/* Microphone and Icons */}
+      {showInput && (
+        <View style={styles.inputArea}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Cevabını yaz..."
+            value={textInputValue}
+            onChangeText={setTextInputValue}
+            multiline
+          />
+          <TouchableOpacity
+            style={styles.sendButton}
+            onPress={handleTextSubmit}
+          >
+            <FontAwesome name="send" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {/* Alt Iconlar */}
       <View style={styles.microphoneContainer}>
         <View style={styles.iconButtonWithText}>
-          <TouchableOpacity onPress={handleRestartConversation}>
+          <TouchableOpacity onPress={() => setShowInput(true)}>
             <FontAwesome
-              name="refresh"
+              name="keyboard-o"
               size={40}
               style={{ paddingTop: 20 }}
               color="#FF3B30"
             />
           </TouchableOpacity>
-          <Text style={styles.iconText}>Yenile</Text>
+          <Text style={styles.iconText}>Yazılı</Text>
         </View>
         <TouchableOpacity onPress={handleMicPress} style={{ paddingTop: 20 }}>
           <FontAwesome
@@ -211,29 +266,8 @@ const Sohbet = ({ navigation }) => {
           <Text style={styles.iconText}>Bitir</Text>
         </View>
       </View>
+
       <BottomNavBar navigation={navigation} />
-      {/* Feedback Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showFeedback}
-        onRequestClose={() => setShowFeedback(false)}
-      >
-        <View style={styles.feedbackContainer}>
-          <View style={styles.feedbackContent}>
-            <Text style={styles.feedbackTitle}>Conversation Feedback</Text>
-            <Text style={styles.feedbackText}>
-              Great job practicing your conversation skills!
-            </Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => setShowFeedback(false)}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -374,5 +408,31 @@ const styles = StyleSheet.create({
   },
   chatList: {
     backgroundColor: "#E3EFF0", // bu sayede yüklenirken de bu renk görünür
+  },
+  inputArea: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#FFF",
+    borderTopWidth: 1,
+    borderColor: "#ccc",
+  },
+
+  textInput: {
+    flex: 1,
+    height: 50,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    fontSize: 16,
+    backgroundColor: "#f5f5f5",
+  },
+
+  sendButton: {
+    marginLeft: 10,
+    backgroundColor: "#FF3B30",
+    padding: 12,
+    borderRadius: 25,
   },
 });
