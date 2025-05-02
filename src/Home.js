@@ -101,7 +101,6 @@ const Home = ({ navigation, route }) => {
     fetchDictionTip();
   }, []);
 
-  
   const checkTipShownToday = async () => {
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD format
     const lastShownDate = await AsyncStorage.getItem("lastTipDate");
@@ -170,14 +169,14 @@ const Home = ({ navigation, route }) => {
         <View style={styles.progressInfoContainer}>
           {userProgress && <GoalRing progress={progress} goal={goal} />}
 
-          <View style={styles.streakWrapper}>
+          <View style={styles.streakCard}>
             <Icon
               name="fire"
-              style={styles.streakIcon}
-              color={getStreakColor(userProgress?.streak || 0)}
+              style={styles.streakCardIcon}
+              color="#FF3B30"
               solid
             />
-            <Text style={styles.streakLabel}>
+            <Text style={styles.streakCardText}>
               {userProgress?.streak || 0} Günlük Seri
             </Text>
           </View>
@@ -280,7 +279,7 @@ const styles = StyleSheet.create({
     fontSize: 50,
     fontWeight: "bold",
     color: "white",
-    marginTop: 60,
+    marginTop: 55,
     marginLeft: 20,
   },
   nameText: {
@@ -304,7 +303,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flexGrow: 1, // Ensures ScrollView content stretches properly
-    paddingVertical: 20, // Adds vertical padding
+    paddingVertical: 14, // Adds vertical padding
   },
   cardsContainer: {
     flexDirection: "row",
@@ -414,7 +413,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 20,
-    marginTop: 10,
+    marginTop: 5,
   },
 
   progressCircle: {
@@ -444,14 +443,14 @@ const styles = StyleSheet.create({
   streakWrapper: {
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 20, // matches GoalRing marginLeft
+    marginLeft: 90, // matches GoalRing marginLeft
   },
 
   streakLabel: {
     color: "white",
     fontSize: 18, // larger font size for text
     fontWeight: "600",
-    marginTop: 6,
+    marginTop: 8,
   },
 
   streakIcon: {
@@ -463,5 +462,31 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "white",
     marginTop: 2,
+  },
+  streakCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    marginLeft: 20,
+    marginTop: 5,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+
+  streakCardIcon: {
+    fontSize: 28,
+    marginRight: 12,
+  },
+
+  streakCardText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "white",
   },
 });
