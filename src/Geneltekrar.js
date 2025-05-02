@@ -247,24 +247,28 @@ const Geneltekrar = ({ navigation }) => {
         {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            {enrichedMistakes[currentIndex] ? (
+            {enrichedMistakes.length === 0 ? (
+              <Text style={styles.wordText}>
+                Tekrar edilecek kelime bulunamadı.
+              </Text>
+            ) : (
               <>
                 <Text style={styles.wordText}>
-                  {enrichedMistakes[currentIndex].word}
+                  {enrichedMistakes[currentIndex]?.word}
                 </Text>
                 <Text style={styles.phoneticText}>
-                  {enrichedMistakes[currentIndex].phonetic}
+                  {enrichedMistakes[currentIndex]?.phonetic}
                 </Text>
+                <TouchableOpacity
+                  onPress={playOriginalAudio}
+                  style={styles.listenButton}
+                >
+                  <Text style={styles.listenButtonText}>
+                    Doğru Telaffuzu Dinle
+                  </Text>
+                </TouchableOpacity>
               </>
-            ) : (
-              <Text style={styles.wordText}>Yükleniyor...</Text>
             )}
-            <TouchableOpacity
-              onPress={playOriginalAudio}
-              style={styles.listenButton}
-            >
-              <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
-            </TouchableOpacity>
           </View>
 
           {/* Navigation Arrows and Microphone Button in a Row */}

@@ -155,7 +155,7 @@ const Sohbet = ({ navigation }) => {
       setLoading(false);
     }
   };
-
+  i;
   const handleEndConversation = () => {
     Alert.alert("Sohbet bitti", "Ana ekrana dönmek ister misin?", [
       { text: "İptal", style: "cancel" },
