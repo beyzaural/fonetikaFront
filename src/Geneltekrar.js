@@ -261,11 +261,12 @@ const Geneltekrar = ({ navigation }) => {
                 </Text>
                 <TouchableOpacity
                   onPress={playOriginalAudio}
-                  style={styles.listenButton}
+                  style={{ marginTop: 20 }}
                 >
-                  <Text style={styles.listenButtonText}>
-                    Doğru Telaffuzu Dinle
-                  </Text>
+                  <Image
+                    source={require("../assets/icons/speaker.png")}
+                    style={styles.speakerIcon}
+                  />
                 </TouchableOpacity>
               </>
             )}
@@ -485,5 +486,11 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 23,
     fontWeight: "bold",
+  },
+  speakerIcon: {
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30", // isteğe bağlı renk
+    marginTop: 10,
   },
 });

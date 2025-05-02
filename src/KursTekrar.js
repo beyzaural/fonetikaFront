@@ -480,4 +480,10 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: "bold",
   },
+  speakerIcon: {
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30", // isteğe bağlı renk
+    marginTop: 10,
+  },
 });
