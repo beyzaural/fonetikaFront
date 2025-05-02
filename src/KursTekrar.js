@@ -18,7 +18,7 @@ const API_URL = extra.apiUrl;
 import { getUserIdFromToken } from "./utils/auth";
 
 const KursTekrar = ({ navigation, route }) => {
-  const { phoneme } = route.params;
+  const { courseId, phoneme } = route?.params || {};
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
@@ -229,7 +229,12 @@ const KursTekrar = ({ navigation, route }) => {
         {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() =>
+            navigation.navigate("Ders", {
+              courseId: courseId,
+              phoneme: phoneme,
+            })
+          }
         >
           <Image
             source={require("../assets/images/backspace.png")}

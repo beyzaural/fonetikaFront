@@ -40,7 +40,10 @@ const Ders = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
-              navigation.navigate("KursKelime", { courseId: courseId })
+              navigation.navigate("KursKelime", {
+                courseId: courseId,
+                phoneme: phoneme,
+              })
             }
           >
             <Text style={styles.buttonText}>Kelime Çalış</Text>

@@ -18,7 +18,8 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import { getUserIdFromToken } from "./utils/auth";
 
-const KursKelime = ({ navigation }) => {
+const KursKelime = ({ navigation, route }) => {
+  const { courseId, phoneme } = route?.params || {};
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -249,7 +250,12 @@ const KursKelime = ({ navigation }) => {
       <View style={styles.container}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() =>
+            navigation.navigate("Ders", {
+              courseId: courseId,
+              phoneme: phoneme,
+            })
+          }
         >
           <Image
             source={require("../assets/images/backspace.png")}
