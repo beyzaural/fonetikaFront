@@ -50,6 +50,7 @@ const Dersler = ({ navigation }) => {
     const phonemeGroups = {
       "ı/i": ["ı", "i"],
       "o/ö": ["o", "ö"],
+      "u/ü": ["u", "ü"],
     };
 
     const grouped = {};
@@ -78,6 +79,7 @@ const Dersler = ({ navigation }) => {
     if (["o/ö"].includes(lower)) return require("../assets/images/o.png");
     if (lower === "a") return require("../assets/images/a.png"); // özel eşleştirme
     if (lower === "e") return require("../assets/images/e.png");
+    if (["u/ü"].includes(lower)) return require("../assets/images/u.png"); // 👈 varsa ikonun
   };
 
   const getTitleForCourse = (name) => {
