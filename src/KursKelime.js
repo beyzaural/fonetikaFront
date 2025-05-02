@@ -277,9 +277,12 @@ const KursKelime = ({ navigation, route }) => {
             )}
             <TouchableOpacity
               onPress={playOriginalAudio}
-              style={styles.listenButton}
+              style={{ marginTop: 20 }}
             >
-              <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+              <Image
+                source={require("../assets/icons/speaker.png")}
+                style={styles.speakerIcon}
+              />
             </TouchableOpacity>
           </View>
 
@@ -487,5 +490,11 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 23,
     fontWeight: "bold",
+  },
+  speakerIcon: {
+    marginTop: 20,
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
   },
 });
