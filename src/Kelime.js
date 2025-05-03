@@ -163,9 +163,9 @@ const Kelime = ({ navigation }) => {
   // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
-      const userId = await getUserIdFromToken(); // 🔥 You forgot this! Must load it
+      const userId = await getUserIdFromToken();
       const currentWord = words[currentIndex];
-
+  
       const formData = new FormData();
       formData.append("file", {
         uri: uri,
@@ -175,7 +175,7 @@ const Kelime = ({ navigation }) => {
       formData.append("expected_word", currentWord.word || "");
       formData.append("word_id", currentWord.id || "");
       formData.append("user_id", userId);
-
+  
       const response = await fetch(`${API_URL}/api/speech/evaluate`, {
         method: "POST",
         headers: {
@@ -183,46 +183,57 @@ const Kelime = ({ navigation }) => {
         },
         body: formData,
       });
-
+  
       const responseJson = await response.json();
       console.log("✅ Full backend response:", responseJson);
-
-      if (responseJson.correct) {
-        setFeedback(responseJson.feedbackText); 
-      } else {
-        setFeedback(responseJson.feedbackText); 
-      }
-      
-
-      // Save feedback for modal
+  
+      // ✅ Format feedback from subwordFeedbackList
+      const formattedFeedback =
+        responseJson.subwordFeedbackList?.length > 0
+          ? responseJson.subwordFeedbackList
+              .map(
+                (f) => `🔸 "${f.subword}" (${f.vowelIpa}): ${f.feedbackMessage}`
+              )
+              .join("\n")
+          : "Tebrikler! Tüm sesleri doğru söylediniz.";
+  
+      setFeedback(formattedFeedback);
+  
+      // ✅ Save response data to current word
       setWords((prevWords) => {
         const updatedWords = [...prevWords];
-        updatedWords[currentIndex].transcribedText =
-          responseJson.recognizedWord;
-        updatedWords[currentIndex].isCorrect = responseJson.correct;
+        updatedWords[currentIndex] = {
+          ...updatedWords[currentIndex],
+          transcribedText: responseJson.recognizedWord,
+          isCorrect: responseJson.wordCorrect === true || responseJson.wordCorrect === "true",
+          feedbackList: responseJson.subwordFeedbackList,
+          highlightIndices: responseJson.highlightIndices,
+        };        
         return updatedWords;
       });
-
-      // Progress Update
+  
+      // ✅ Progress update
       await axios.post(`${API_URL}/api/progress/add`, null, {
         params: { userId, count: 1 },
       });
-
-      // Save mispronounced if needed
-      if (!responseJson.correct) {
+  
+      // ✅ Save mispronunciation if needed
+      if (responseJson.wordCorrect === false || responseJson.wordCorrect === "false") {
         await axios.post(`${API_URL}/api/mispronounced-words/record`, {
           userId,
           wordId: currentWord.id,
         });
         console.log("❌ MispronouncedWord recorded.");
       }
-
+         
+  
       setShowFeedback(true);
     } catch (error) {
       console.error("❌ Error sending audio:", error);
       Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
     }
   };
+  
 
   const playAudio = async () => {
     if (!audioUri) {
@@ -365,6 +376,19 @@ const Kelime = ({ navigation }) => {
                       ? "✅ Doğru söylediniz!"
                       : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
                   </Text>
+                    {/* ⚡ Display feedback if available */}
+                    {feedback !== "" && (
+                    <Text
+                      style={{
+                        marginTop: 10,
+                        fontSize: 14,
+                        color: "#333",
+                        whiteSpace: "pre-line", // for newline formatting
+                      }}
+                    >
+                      {feedback}
+                    </Text>
+                  )}
                   <Text style={styles.kelimeText}>
                     {words[currentIndex].kelime.split("").map((char, index) => {
                       const isRed =

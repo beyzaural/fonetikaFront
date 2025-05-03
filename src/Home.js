@@ -64,6 +64,8 @@ const Home = ({ navigation, route }) => {
       if (!userId) return;
       try {
         const token = await AsyncStorage.getItem("token");
+        console.log("🧪 Raw token:", token);
+        console.log("🧪 User id:", userId);
         const res = await axios.get(`${API_URL}/users/profile`, {
           params: { userId },
           headers: {
