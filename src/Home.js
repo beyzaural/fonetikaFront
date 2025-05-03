@@ -260,7 +260,7 @@ const Home = ({ navigation, route }) => {
                 source={require("../assets/icons/file-2.png")} // Reference the chat icon here
                 style={styles.chatIcon}
               />
-              <Text style={styles.cardText}>Cümle</Text>
+              <Text style={styles.cardText}>Mesleki Terimler</Text>
               <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
