@@ -25,6 +25,7 @@ const CategoryWordMain = ({ navigation, route }) => {
         <Text style={styles.header}>{field} Kelime Modülü</Text>
 
         <TouchableOpacity
+
           style={styles.button}
           onPress={() => navigation.navigate("CategoryRandomStudy", { field })}
         >
@@ -37,6 +38,8 @@ const CategoryWordMain = ({ navigation, route }) => {
         >
           <Text style={styles.buttonText}>Tüm {field} Kelimelerini Gör</Text>
         </TouchableOpacity>
+
+
       </View>
       <BottomNavBar navigation={navigation} />
     </ImageBackground>

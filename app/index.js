@@ -10,7 +10,9 @@ import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
 import Merhaba from "../src/Merhaba";
 import Register from "../src/Register";
+
 import WordCategory from "../src/WordCategory";
+
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import KursTekrar from "../src/KursTekrar";
@@ -36,6 +38,7 @@ import ChangeName from "../src/ChangeName";
 import Startup from "../src/Startup";
 import CategoryWordMain from "../src/CategoryWordMain";
 import YanlisDogruSozcukler from "../src/YanlisDogruSozcukler";
+
 import CategoryWordCard from "../src/CategoryWordCard";
 import CategoryWordList from "../src/CategoryWordList";
 import CategoryRandomStudy from "../src/CategoryRandomStudy";
@@ -162,6 +165,7 @@ export default function Index() {
           component={CategoryRandomStudy}
           options={{ headerShown: false }} // Hide header for Home
         />
+
         <Stack.Screen
           name="Profile"
           component={Profile}
