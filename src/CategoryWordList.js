@@ -6,13 +6,14 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  ImageBackground,
+  Image,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import axios from "axios";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
+import Icon from "react-native-vector-icons/FontAwesome5";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -36,19 +37,30 @@ const CategoryWordList = ({ navigation, route }) => {
   }, []);
 
   return (
-    <ImageBackground
-      source={require("../assets/images/bluedalga.png")}
-      style={styles.imageBackground}
-    >
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>{field} Kelimeleri</Text>
+    <View style={styles.container}>
+      {/* Top Section */}
+      <View style={styles.topContainer}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
+        </TouchableOpacity>
+        <Text style={styles.title}>{field} Kelimeleri</Text>
+      </View>
+
+      {/* Word List */}
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         {loading ? (
           <ActivityIndicator size="large" color="#FF3B30" />
         ) : (
           words.map((word, index) => (
             <TouchableOpacity
               key={index}
-              style={styles.wordButton}
+              style={styles.card}
               onPress={() =>
                 navigation.navigate("CategoryWordCard", {
                   wordText: word.word,
@@ -56,47 +68,117 @@ const CategoryWordList = ({ navigation, route }) => {
                 })
               }
             >
-              <Text style={styles.wordText}>Çalış: {word.word}</Text>
+              <View style={styles.cardContent}>
+                <Icon name="book" size={30} color="#333" style={styles.icon} />
+                <View>
+                  <Text style={styles.cardTitle}>{word.word}</Text>
+                  <Text style={styles.cardSubtitle}>Kelimeyi çalış</Text>
+                </View>
+              </View>
             </TouchableOpacity>
           ))
         )}
       </ScrollView>
+
+      <View style={styles.tipBox}>
+        <Text style={styles.tipText}>
+          💡 Her kelimeyi dikkatlice çalışın ve telaffuzunu öğrenin.
+        </Text>
+      </View>
+
       <BottomNavBar navigation={navigation} />
-    </ImageBackground>
+    </View>
   );
 };
 
 export default CategoryWordList;
 
 const styles = StyleSheet.create({
-  imageBackground: { flex: 1 },
   container: {
-    paddingVertical: 60,
-    paddingHorizontal: 20,
+    flex: 1,
+    backgroundColor: "white",
+  },
+  topContainer: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    backgroundColor: "#E3EFF0",
   },
-  header: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#FF3B30",
-    marginBottom: 30,
-  },
-  wordButton: {
-    backgroundColor: "#FFF",
-    paddingVertical: 12,
-    paddingHorizontal: 25,
-    borderRadius: 15,
-    marginBottom: 15,
-    width: "100%",
+  backButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
+    elevation: 3,
+  },
+  backIcon: {
+    width: 20,
+    height: 20,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginLeft: 15,
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 20,
+  },
+  card: {
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  icon: {
+    marginRight: 15,
+  },
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 5,
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
+  tipBox: {
+    backgroundColor: "#F9F4F1",
+    padding: 12,
+    marginHorizontal: 20,
+    marginBottom: 15,
+    borderRadius: 12,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
     elevation: 2,
   },
-  wordText: {
-    fontSize: 18,
-    color: "#333",
+  tipText: {
+    fontSize: 14,
+    color: "#444",
+    fontStyle: "italic",
     textAlign: "center",
   },
 });

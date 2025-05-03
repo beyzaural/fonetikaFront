@@ -1,16 +1,21 @@
 // WordCard.js
 import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
+  Text,
   TouchableOpacity,
+  StyleSheet,
+  Image,
+  ImageBackground,
   ActivityIndicator,
   Alert,
+  Modal,
 } from "react-native";
-import { Audio } from "expo-av";
-import Constants from "expo-constants";
 import axios from "axios";
+import Constants from "expo-constants";
+import { Audio } from "expo-av";
+import BottomNavBar from "./BottomNavBar";
+import { FontAwesome } from "@expo/vector-icons";
 import { getUserIdFromToken } from "./utils/auth";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
@@ -18,31 +23,32 @@ const API_URL = extra.apiUrl;
 
 const CategoryWordCard = ({ navigation, route }) => {
   const { wordText, field } = route.params;
-
   const [wordData, setWordData] = useState(null);
   const [recording, setRecording] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [recordedUri, setRecordedUri] = useState(null);
   const [feedback, setFeedback] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   useEffect(() => {
-    const endpoint = `${API_URL}/api/${field.toLowerCase()}-words/${wordText}`;
-    axios
-      .get(endpoint)
-      .then((res) => {
-        if (res.data) {
-          setWordData(res.data);
-        } else {
-          Alert.alert("Hata", "Kelime bulunamadı.");
-        }
-      })
-      .catch((err) => {
-        console.error("Kelime alınamadı:", err);
-        Alert.alert("Hata", "Kelime getirilemedi.");
-      })
-      .finally(() => setIsLoading(false));
-  }, []);
+    const fetchWordData = async () => {
+      setIsLoading(true);
+      try {
+        const res = await axios.get(
+          `${API_URL}/api/${field.toLowerCase()}-words/${wordText}`
+        );
+        setWordData(res.data);
+      } catch (err) {
+        console.error("Kelime verisi alınamadı:", err);
+        Alert.alert("Hata", "Kelime verisi alınamadı.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchWordData();
+  }, [wordText, field]);
 
   const startRecording = async () => {
     try {
@@ -74,12 +80,35 @@ const CategoryWordCard = ({ navigation, route }) => {
     }
   };
 
-  const playAudio = async () => {
+  const playOriginalAudio = async () => {
+    if (!wordData?.audioPath) {
+      alert("Bu kelime için ses kaydı bulunamadı.");
+      return;
+    }
+
     try {
-      const { sound } = await Audio.Sound.createAsync({ uri: recordedUri });
-      await sound.playAsync();
-    } catch (err) {
-      console.error("Ses çalınamadı:", err);
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: wordData.audioPath },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing original audio:", error);
+      Alert.alert("Hata", "Orijinal ses çalınamadı.");
+    }
+  };
+
+  const playAudio = async () => {
+    if (!recordedUri) {
+      alert("Henüz bir kayıt yapılmadı!");
+      return;
+    }
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: recordedUri },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing audio:", error);
     }
   };
 
@@ -93,7 +122,7 @@ const CategoryWordCard = ({ navigation, route }) => {
         name: "audio.wav",
         type: "audio/wav",
       });
-      formData.append("expectedWord", wordText);
+      formData.append("expectedWord", wordData.word);
       formData.append("userId", userId);
       formData.append("word_id", wordData.id);
 
@@ -102,6 +131,7 @@ const CategoryWordCard = ({ navigation, route }) => {
       });
 
       setFeedback(res.data);
+      setShowFeedback(true);
     } catch (err) {
       console.error("Kayıt gönderilemedi:", err);
       Alert.alert("Hata", "Ses kaydı gönderilirken hata oluştu.");
@@ -119,62 +149,100 @@ const CategoryWordCard = ({ navigation, route }) => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.wordText}>{wordData.word}</Text>
-      <Text style={styles.pronText}>{wordData.phoneticWriting}</Text>
-
-      {!recording && (
-        <TouchableOpacity style={styles.button} onPress={startRecording}>
-          <Text style={styles.buttonText}>🎙️ Kayıt Başlat</Text>
+    <ImageBackground
+      source={require("../assets/images/bluedalga.png")}
+      style={styles.imageBackground}
+    >
+      <View style={styles.container}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Image
+            source={require("../assets/images/backspace.png")}
+            style={styles.backIcon}
+          />
         </TouchableOpacity>
-      )}
-      {recording && (
-        <TouchableOpacity style={styles.button} onPress={stopRecording}>
-          <Text style={styles.buttonText}>🛑 Durdur</Text>
-        </TouchableOpacity>
-      )}
 
-      {recordedUri && (
-        <>
-          <TouchableOpacity style={styles.button} onPress={playAudio}>
-            <Text style={styles.buttonText}>▶️ Sesini Dinle</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: "#2196F3" }]}
-            onPress={submitRecording}
-            disabled={isSubmitting}
-          >
-            <Text style={styles.buttonText}>📤 Gönder ve Değerlendir</Text>
-          </TouchableOpacity>
-        </>
-      )}
-
-      {feedback && (
-        <View style={styles.feedbackBox}>
-          <Text style={styles.feedbackText}>
-            {feedback.success
-              ? "✅ Doğru telaffuz ettiniz!"
-              : `❌ Galiba "${feedback.transcribedWord}" dediniz.`}
-          </Text>
-          {!feedback.success && (
+        <View style={styles.topContainer}>
+          <View style={styles.wordContainer}>
+            <Text style={styles.wordText}>{wordData.word}</Text>
+            <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
             <TouchableOpacity
-              style={styles.button}
-              onPress={() => setRecordedUri(null)}
+              onPress={playOriginalAudio}
+              style={styles.speakerIconWrapper}
             >
-              <Text style={styles.buttonText}>🔁 Tekrar Dene</Text>
+              <Image
+                source={require("../assets/icons/speaker.png")}
+                style={styles.speakerIcon}
+              />
             </TouchableOpacity>
-          )}
-        </View>
-      )}
+          </View>
 
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.backText}>◀️ Geri Dön</Text>
-      </TouchableOpacity>
-    </View>
+          <View style={styles.navigationContainer}>
+            <View style={{ alignItems: "center" }}>
+              <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+                <FontAwesome
+                  name="microphone"
+                  size={100}
+                  color={recording ? "black" : "#FF3B30"}
+                />
+              </TouchableOpacity>
+              <Text style={styles.micInfoText}>
+                {recording
+                  ? "Bitirmek için tekrar basın"
+                  : "Kaydetmek için mikrofona basın"}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showFeedback}
+          onRequestClose={() => setShowFeedback(false)}
+        >
+          <View style={styles.feedbackContainer}>
+            <View style={styles.feedbackContent}>
+              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+              {feedback && (
+                <>
+                  <Text style={styles.tahminText}>
+                    Sanırım "{feedback.transcribedWord}" dediniz.
+                  </Text>
+                  <Text style={styles.instructionText}>
+                    {feedback.success
+                      ? "✅ Doğru söylediniz!"
+                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
+                  </Text>
+                  <Text style={styles.kelimeText}>
+                    {wordData.phoneticWriting.split("").map((char, index) => (
+                      <Text key={index} style={styles.blackText}>
+                        {char}
+                      </Text>
+                    ))}
+                  </Text>
+                </>
+              )}
+
+              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+                <Text style={styles.listenButtonText}>Dinle</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowFeedback(false)}
+              >
+                <Text style={styles.closeButtonText}>Kapat</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
+        <BottomNavBar navigation={navigation} />
+      </View>
+    </ImageBackground>
   );
 };
 
@@ -183,50 +251,130 @@ export default CategoryWordCard;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
   },
-  wordText: {
-    fontSize: 32,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  pronText: {
-    fontSize: 20,
-    color: "#666",
-    marginBottom: 20,
-  },
-  button: {
-    backgroundColor: "#FF3B30",
-    padding: 14,
-    borderRadius: 12,
-    marginVertical: 8,
-    width: "80%",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  feedbackBox: {
-    marginTop: 20,
-    padding: 14,
-    borderRadius: 10,
-    backgroundColor: "#FFF3F3",
-  },
-  feedbackText: {
-    fontSize: 16,
-    color: "#333",
+  imageBackground: {
+    flex: 1,
+    resizeMode: "cover",
   },
   backButton: {
+    position: "absolute",
+    top: 20,
+    left: 10,
+    zIndex: 10,
+  },
+  backIcon: {
+    width: 40,
+    height: 40,
+  },
+  topContainer: {
+    marginTop: 30,
+    height: "100%",
+    alignItems: "center",
+  },
+  wordContainer: {
+    backgroundColor: "#F9F4F1",
+    width: "80%",
+    height: 430,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 40,
+    marginBottom: 40,
+  },
+  navigationContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "80%",
+    marginTop: 10,
+    marginBottom: 40,
+  },
+  wordText: {
+    fontSize: 40,
+    fontWeight: "bold",
+    color: "#FF3B30",
+  },
+  phoneticText: {
+    fontSize: 20,
+    color: "#FF8754",
+    marginTop: 10,
+  },
+  speakerIcon: {
+    marginTop: 20,
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30",
+  },
+  speakerIconWrapper: {
     marginTop: 20,
   },
-  backText: {
+  micInfoText: {
+    fontSize: 14,
+    color: "#6CA3AD",
+    marginTop: 10,
+    fontStyle: "italic",
+    textAlign: "center",
+  },
+  listenButton: {
+    backgroundColor: "#FF3B30",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  listenButtonText: {
+    color: "white",
     fontSize: 16,
-    color: "#2196F3",
+    fontWeight: "bold",
+  },
+  feedbackContainer: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  feedbackContent: {
+    height: "50%",
+    backgroundColor: "white",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 30,
+    justifyContent: "space-between",
+  },
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
+  },
+  tahminText: {
+    fontSize: 18,
+    color: "#333",
+    marginBottom: 10,
+  },
+  instructionText: {
+    fontSize: 18,
+    color: "#333",
+    marginBottom: 20,
+  },
+  kelimeText: {
+    fontSize: 23,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
+  },
+  blackText: {
+    color: "black",
+  },
+  closeButton: {
+    backgroundColor: "#FF3B30",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   centered: {
     flex: 1,
