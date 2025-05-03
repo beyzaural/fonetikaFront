@@ -36,13 +36,15 @@ import ChangeName from "../src/ChangeName";
 import Startup from "../src/Startup";
 import HukukKelime from "../src/HukukKelime";
 import YanlisDogruSozcukler from "../src/YanlisDogruSozcukler";
+import HukukWordCard from "../src/HukukWordCard";
+import HukukWordList from "../src/HukukWordList";
 
 const Stack = createStackNavigator();
 
 export default function Index() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Home">
         <Stack.Screen
           name="Startup"
           component={Startup}
@@ -144,7 +146,16 @@ export default function Index() {
           component={HukukKelime}
           options={{ headerShown: false }} // Hide header for Home
         />
-
+        <Stack.Screen
+          name="HukukWordCard"
+          component={HukukWordCard}
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen
+          name="HukukWordList"
+          component={HukukWordList}
+          options={{ headerShown: false }} // Hide header for Home
+        />
         <Stack.Screen
           name="Profile"
           component={Profile}
