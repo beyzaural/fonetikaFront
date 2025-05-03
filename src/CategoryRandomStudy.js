@@ -28,9 +28,12 @@ const CategoryRandomStudy = ({ navigation, route }) => {
   const [recording, setRecording] = useState(null);
   const [recordedUri, setRecordedUri] = useState(null);
   const [feedback, setFeedback] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [words, setWords] = useState([]);
+  const [isRecording, setIsRecording] = useState(false);
 
   const fetchRandomWord = async () => {
     setIsLoading(true);
@@ -38,6 +41,7 @@ const CategoryRandomStudy = ({ navigation, route }) => {
       const userId = await getUserIdFromToken();
       const endpoint = `${API_URL}/api/${field.toLowerCase()}-words/random`;
       const res = await axios.get(endpoint, { params: { userId } });
+      setWords(prevWords => [...prevWords, res.data]);
       setWordData(res.data);
       setFeedback(null);
       setRecordedUri(null);
@@ -50,39 +54,76 @@ const CategoryRandomStudy = ({ navigation, route }) => {
     }
   };
 
+  const handleMicrophonePress = async () => {
+    if (recording) {
+      try {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        setRecordedUri(uri);
+        setRecording(null);
+        setIsRecording(false);
+      } catch (err) {
+        console.error("Kayıt durdurulamadı:", err);
+      }
+    } else {
+      try {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) return;
+
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+        );
+        setRecording(recording);
+        setIsRecording(true);
+      } catch (err) {
+        console.error("Kayıt başlatılamadı:", err);
+      }
+    }
+  };
+
+  const handleNextWord = async () => {
+    setShowFeedback(false);
+    setIsRecording(false);
+    setRecordedUri(null);
+
+    if (currentIndex < words.length - 1) {
+      const nextWord = words[currentIndex + 1];
+      if (nextWord) {
+        setCurrentIndex(prevIndex => prevIndex + 1);
+        setWordData(nextWord);
+      }
+    } else {
+      setIsLoading(true);
+      try {
+        await fetchRandomWord();
+        setCurrentIndex(prevIndex => prevIndex + 1);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
+  const handlePreviousWord = () => {
+    if (currentIndex > 0) {
+      const prevWord = words[currentIndex - 1];
+      if (prevWord) {
+        setCurrentIndex(prevIndex => prevIndex - 1);
+        setWordData(prevWord);
+        setShowFeedback(false);
+        setIsRecording(false);
+        setRecordedUri(null);
+      }
+    }
+  };
+
   useEffect(() => {
     fetchRandomWord();
   }, []);
-
-  const startRecording = async () => {
-    try {
-      const { granted } = await Audio.requestPermissionsAsync();
-      if (!granted) return;
-
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      setRecording(recording);
-    } catch (err) {
-      console.error("Kayıt başlatılamadı:", err);
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setRecordedUri(uri);
-      setRecording(null);
-    } catch (err) {
-      console.error("Kayıt durdurulamadı:", err);
-    }
-  };
 
   const playOriginalAudio = async () => {
     if (!wordData?.audioPath) {
@@ -170,37 +211,43 @@ const CategoryRandomStudy = ({ navigation, route }) => {
 
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            <Text style={styles.wordText}>{wordData.word}</Text>
-            <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
-            <TouchableOpacity
-              onPress={playOriginalAudio}
-              style={styles.speakerIconWrapper}
-            >
-              <Image
-                source={require("../assets/icons/speaker.png")}
-                style={styles.speakerIcon}
-              />
-            </TouchableOpacity>
+            {wordData && (
+              <>
+                <Text style={styles.wordText}>{wordData.word}</Text>
+                <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
+                <Text style={styles.meaningText}>{wordData.meaning}</Text>
+                <TouchableOpacity
+                  onPress={playOriginalAudio}
+                  style={styles.speakerIconWrapper}
+                >
+                  <Image
+                    source={require("../assets/icons/speaker.png")}
+                    style={styles.speakerIcon}
+                  />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           <View style={styles.navigationContainer}>
             <TouchableOpacity
               style={styles.prevButton}
-              onPress={() => setRecordedUri(null)}
+              onPress={handlePreviousWord}
+              disabled={currentIndex === 0}
             >
-              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
+              <FontAwesome name="arrow-left" size={50} color={currentIndex === 0 ? "#CCCCCC" : "#FF3B30"} />
             </TouchableOpacity>
 
             <View style={{ alignItems: "center" }}>
-              <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+              <TouchableOpacity onPress={handleMicrophonePress}>
                 <FontAwesome
                   name="microphone"
                   size={100}
-                  color={recording ? "black" : "#FF3B30"}
+                  color={isRecording ? "black" : "#FF3B30"}
                 />
               </TouchableOpacity>
               <Text style={styles.micInfoText}>
-                {recording
+                {isRecording
                   ? "Bitirmek için tekrar basın"
                   : "Kaydetmek için mikrofona basın"}
               </Text>
@@ -208,8 +255,7 @@ const CategoryRandomStudy = ({ navigation, route }) => {
 
             <TouchableOpacity
               style={styles.nextButton}
-              onPress={submitRecording}
-              disabled={!recordedUri || isSubmitting}
+              onPress={handleNextWord}
             >
               <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
             </TouchableOpacity>
@@ -323,6 +369,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#FF8754",
     marginTop: 10,
+  },
+  meaningText: {
+    fontSize: 16,
+    color: "#6CA3AD",
+    marginTop: 10,
+    textAlign: "center",
+    fontStyle: "italic",
+    paddingHorizontal: 20,
   },
   speakerIcon: {
     marginTop: 20,

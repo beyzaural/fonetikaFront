@@ -27,6 +27,16 @@ const fields = [
     description: "Eğitimle ilgili ifadeleri öğren",
     icon: "graduation-cap",
   },
+  {
+    name: "Medya",
+    description: "Medya diline özel sözcükler",
+    icon: "newspaper",
+  },
+  {
+    name: "Sanat",
+    description: "Sanatsal terimlerle çalış",
+    icon: "palette",
+  },
 ];
 
 const WordCategory = () => {
@@ -55,15 +65,16 @@ const WordCategory = () => {
             key={index}
             style={styles.card}
             onPress={() => {
-              if (field.name === "Hukuk") {
-                navigation.navigate("CategoryWordMain", { field: field.name });
-              } else {
-                navigation.navigate("Kelime", { field: field.name });
-              }
+              navigation.navigate("CategoryWordMain", { field: field.name });
             }}
           >
             <View style={styles.cardContent}>
-              <Icon name={field.icon} size={30} color="#333" style={styles.icon} />
+              <Icon
+                name={field.icon}
+                size={30}
+                color="#333"
+                style={styles.icon}
+              />
               <View>
                 <Text style={styles.cardTitle}>{field.name}</Text>
                 <Text style={styles.cardSubtitle}>{field.description}</Text>

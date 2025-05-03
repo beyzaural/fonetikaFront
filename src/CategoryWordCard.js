@@ -166,17 +166,22 @@ const CategoryWordCard = ({ navigation, route }) => {
 
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            <Text style={styles.wordText}>{wordData.word}</Text>
-            <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
-            <TouchableOpacity
-              onPress={playOriginalAudio}
-              style={styles.speakerIconWrapper}
-            >
-              <Image
-                source={require("../assets/icons/speaker.png")}
-                style={styles.speakerIcon}
-              />
-            </TouchableOpacity>
+            {wordData && (
+              <>
+                <Text style={styles.wordText}>{wordData.word}</Text>
+                <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
+                <Text style={styles.meaningText}>{wordData.meaning}</Text>
+                <TouchableOpacity
+                  onPress={playOriginalAudio}
+                  style={styles.speakerIconWrapper}
+                >
+                  <Image
+                    source={require("../assets/icons/speaker.png")}
+                    style={styles.speakerIcon}
+                  />
+                </TouchableOpacity>
+              </>
+            )}
           </View>
 
           <View style={styles.navigationContainer}>
@@ -298,6 +303,14 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: "#FF8754",
     marginTop: 10,
+  },
+  meaningText: {
+    fontSize: 16,
+    color: "#6CA3AD",
+    marginTop: 10,
+    textAlign: "center",
+    fontStyle: "italic",
+    paddingHorizontal: 20,
   },
   speakerIcon: {
     marginTop: 20,
