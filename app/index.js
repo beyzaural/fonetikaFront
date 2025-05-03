@@ -10,7 +10,7 @@ import Login from "../src/Login";
 import Fonetika from "../src/Fonetika";
 import Merhaba from "../src/Merhaba";
 import Register from "../src/Register";
-import Paragraph from "../src/Paragraph";
+import WordCategory from "../src/WordCategory";
 import Dersler from "../src/Dersler";
 import Tekrar from "../src/Tekrar";
 import KursTekrar from "../src/KursTekrar";
@@ -34,10 +34,11 @@ import Hesap from "../src/Hesap";
 import ChangeEmail from "../src/ChangeEmail";
 import ChangeName from "../src/ChangeName";
 import Startup from "../src/Startup";
-import HukukKelime from "../src/HukukKelime";
+import CategoryWordMain from "../src/CategoryWordMain";
 import YanlisDogruSozcukler from "../src/YanlisDogruSozcukler";
-import HukukWordCard from "../src/HukukWordCard";
-import HukukWordList from "../src/HukukWordList";
+import CategoryWordCard from "../src/CategoryWordCard";
+import CategoryWordList from "../src/CategoryWordList";
+import CategoryRandomStudy from "../src/CategoryRandomStudy";
 
 const Stack = createStackNavigator();
 
@@ -142,18 +143,23 @@ export default function Index() {
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
-          name="HukukKelime"
-          component={HukukKelime}
+          name="CategoryWordMain"
+          component={CategoryWordMain}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
-          name="HukukWordCard"
-          component={HukukWordCard}
+          name="CategoryWordCard"
+          component={CategoryWordCard}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
-          name="HukukWordList"
-          component={HukukWordList}
+          name="CategoryWordList"
+          component={CategoryWordList}
+          options={{ headerShown: false }} // Hide header for Home
+        />
+        <Stack.Screen
+          name="CategoryRandomStudy"
+          component={CategoryRandomStudy}
           options={{ headerShown: false }} // Hide header for Home
         />
         <Stack.Screen
@@ -182,8 +188,8 @@ export default function Index() {
           options={{ headerShown: false }} // Hide header for Fonetika
         />
         <Stack.Screen
-          name="Paragraph"
-          component={Paragraph}
+          name="WordCategory"
+          component={WordCategory}
           options={{ headerShown: false }} // Hide header for Fonetika
         />
         <Stack.Screen

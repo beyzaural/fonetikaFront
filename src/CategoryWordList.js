@@ -1,4 +1,4 @@
-// HukukWordList.js
+// WordList.js
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,28 +8,29 @@ import {
   StyleSheet,
   ImageBackground,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const HukukWordList = () => {
-  const navigation = useNavigation();
+const CategoryWordList = ({ navigation, route }) => {
+  const { field } = route.params;
   const [words, setWords] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     axios
-      .get(`${API_URL}/api/hukuk-words/all`)
+      .get(`${API_URL}/api/${field.toLowerCase()}-words/all`)
       .then((res) => {
         setWords(res.data || []);
       })
       .catch((err) => {
         console.error("Kelime listesi alınamadı:", err);
+        Alert.alert("Hata", "Kelime listesi alınamadı.");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -40,7 +41,7 @@ const HukukWordList = () => {
       style={styles.imageBackground}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.header}>Hukuk Kelimeleri</Text>
+        <Text style={styles.header}>{field} Kelimeleri</Text>
         {loading ? (
           <ActivityIndicator size="large" color="#FF3B30" />
         ) : (
@@ -49,7 +50,10 @@ const HukukWordList = () => {
               key={index}
               style={styles.wordButton}
               onPress={() =>
-                navigation.navigate("HukukWordCard", { wordText: word.word })
+                navigation.navigate("CategoryWordCard", {
+                  wordText: word.word,
+                  field: field,
+                })
               }
             >
               <Text style={styles.wordText}>Çalış: {word.word}</Text>
@@ -62,7 +66,7 @@ const HukukWordList = () => {
   );
 };
 
-export default HukukWordList;
+export default CategoryWordList;
 
 const styles = StyleSheet.create({
   imageBackground: { flex: 1 },

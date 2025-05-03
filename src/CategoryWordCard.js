@@ -1,23 +1,24 @@
+// WordCard.js
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
-  Image,
   ActivityIndicator,
   Alert,
 } from "react-native";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
 import axios from "axios";
-import { useRoute, useNavigation } from "@react-navigation/native";
 import { getUserIdFromToken } from "./utils/auth";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const HukukWordCard = () => {
+const CategoryWordCard = ({ navigation, route }) => {
+  const { wordText, field } = route.params;
+
   const [wordData, setWordData] = useState(null);
   const [recording, setRecording] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,13 +26,10 @@ const HukukWordCard = () => {
   const [feedback, setFeedback] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const route = useRoute();
-  const navigation = useNavigation();
-  const { wordText } = route.params;
-
   useEffect(() => {
+    const endpoint = `${API_URL}/api/${field.toLowerCase()}-words/${wordText}`;
     axios
-      .get(`${API_URL}/api/hukuk-words/${wordText}`)
+      .get(endpoint)
       .then((res) => {
         if (res.data) {
           setWordData(res.data);
@@ -97,8 +95,7 @@ const HukukWordCard = () => {
       });
       formData.append("expectedWord", wordText);
       formData.append("userId", userId);
-
-      formData.append("word_id", wordData.id); 
+      formData.append("word_id", wordData.id);
 
       const res = await axios.post(`${API_URL}/api/speech/evaluate`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -181,7 +178,7 @@ const HukukWordCard = () => {
   );
 };
 
-export default HukukWordCard;
+export default CategoryWordCard;
 
 const styles = StyleSheet.create({
   container: {

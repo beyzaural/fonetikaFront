@@ -31,7 +31,7 @@ const fields = [
   },
 ];
 
-const Paragraph = () => {
+const WordCategory = () => {
   const navigation = useNavigation();
 
   return (
@@ -58,7 +58,7 @@ const Paragraph = () => {
             style={[styles.card, { backgroundColor: field.color }]}
             onPress={() => {
               if (field.name === "Hukuk") {
-                navigation.navigate("HukukKelime", { field: field.name });
+                navigation.navigate("CategoryWordMain", { field: field.name });
               } else {
                 navigation.navigate("Kelime", { field: field.name });
               }
@@ -85,7 +85,7 @@ const Paragraph = () => {
   );
 };
 
-export default Paragraph;
+export default WordCategory;
 const styles = StyleSheet.create({
   container: {
     flex: 1,

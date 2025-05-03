@@ -9,9 +9,8 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import BottomNavBar from "./BottomNavBar";
-
-const HukukKelime = () => {
-  const navigation = useNavigation();
+const CategoryWordMain = ({ navigation, route }) => {
+  const { field } = route.params;
 
   return (
     <ImageBackground
@@ -19,20 +18,24 @@ const HukukKelime = () => {
       style={styles.imageBackground}
     >
       <View style={styles.container}>
-        <Text style={styles.header}>Hukuk Kelime Modülü</Text>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.navigate("WordCategory")}
+        ></TouchableOpacity>
+        <Text style={styles.header}>{field} Kelime Modülü</Text>
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("HukukRandomStudy")}
+          onPress={() => navigation.navigate("CategoryRandomStudy", { field })}
         >
-          <Text style={styles.buttonText}>Rastgele Hukuk Kelimesi Çalış</Text>
+          <Text style={styles.buttonText}>Rastgele {field} Kelimesi Çalış</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("HukukWordList")}
+          onPress={() => navigation.navigate("CategoryWordList", { field })}
         >
-          <Text style={styles.buttonText}>Tüm Hukuk Kelimelerini Gör</Text>
+          <Text style={styles.buttonText}>Tüm {field} Kelimelerini Gör</Text>
         </TouchableOpacity>
       </View>
       <BottomNavBar navigation={navigation} />
@@ -40,7 +43,7 @@ const HukukKelime = () => {
   );
 };
 
-export default HukukKelime;
+export default CategoryWordMain;
 
 const styles = StyleSheet.create({
   imageBackground: { flex: 1 },
