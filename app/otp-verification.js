@@ -6,19 +6,21 @@ import {
   TextInput,
   Pressable,
   Alert,
-  ActivityIndicator,
 } from "react-native";
-import Constants from "expo-constants";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
+import Constants from "expo-constants";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const ResetOTPVerification = ({ navigation, route }) => {
-  const { identifier } = route.params;
+const OTPVerification = () => {
+  const router = useRouter();
+  const { phone, tempToken, email, otpSessionToken, isLogin } =
+    useLocalSearchParams();
   const [otp, setOtp] = useState("");
+
   const [resendDisabled, setResendDisabled] = useState(true);
-  const [timer, setTimer] = useState(120);
-  const [loading, setLoading] = useState(false);
+  const [timer, setTimer] = useState(120); // 30 seconds cooldown
 
   useEffect(() => {
     let countdown;
@@ -39,64 +41,81 @@ const ResetOTPVerification = ({ navigation, route }) => {
 
   const handleVerifyOTP = async () => {
     if (otp.length !== 6) {
-      Alert.alert("Hata!", "Lütfen altı haneli kodu giriniz.");
+      Alert.alert("Error", "Please enter a 6-digit OTP.");
       return;
     }
 
-    setLoading(true);
     try {
-      const response = await fetch(
-        `${API_URL}/auth/password/validate-reset-otp`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ identifier, otp }),
-        }
-      );
+      let endpoint = isLogin ? "/auth/validate-otp" : "/auth/verify-phone";
+      let requestBody = isLogin
+        ? { otpSessionToken, otp } // Login OTP verification
+        : { phone, otp }; // Registration OTP verification
+
+      const response = await fetch(`${API_URL}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestBody),
+      });
 
       const data = await response.json();
+      console.log("OTP Verification Response:", data);
 
-      if (response.ok && data.success && data.data?.resetToken) {
-        navigation.navigate("ResetPasswordScreen", {
-          resetToken: data.data.resetToken,
-        });
+      if (response.ok) {
+        if (isLogin) {
+          Alert.alert("Success", "OTP verified successfully!");
+          router.push("/home");
+          // ✅ Login Success → Go to Home
+        } else {
+          router.push({
+            pathname: "/email-verification",
+            params: { email, tempToken },
+          });
+          // ✅ Registration Success → Go to Email Verification
+        }
       } else {
-        Alert.alert("Hata", data.message || "Geçersiz kod.");
+        Alert.alert("Error", data.message || "OTP verification failed.");
       }
     } catch (error) {
-      Alert.alert("Hata", "Kod doğrulanamadı, tekrar deneyiniz.");
-    } finally {
-      setLoading(false);
+      Alert.alert("Error", "An error occurred. Please try again.");
+      console.error(error);
     }
   };
 
   const handleResendOTP = async () => {
     setResendDisabled(true);
-    setTimer(120);
+    setTimer(120); // Reset timer to 2 minutes
 
     try {
-      const response = await fetch(`${API_URL}/auth/password/forgot`, {
+      const response = await fetch(`${API_URL}/auth/resend-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: identifier }),
+        body: JSON.stringify({ phone }),
       });
 
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json(); // ✅ Parse JSON safely
       if (data.success) {
-        Alert.alert("Başarı", "Tek seferlik kod mailinize gönderildi.");
+        Alert.alert("Success", data.message);
       } else {
-        Alert.alert("Error", data.message || "Tek seferlik kod gönderilemedi.");
+        Alert.alert("Error", data.message || "Failed to resend OTP.");
       }
     } catch (error) {
-      Alert.alert("Hata", "Tek seferlik kod gönderilemedi.");
+      Alert.alert("Error", "An error occurred while resending OTP.");
+      console.error("OTP Resend Error:", error);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Verify OTP</Text>
+      <Text style={styles.titleText}>
+        {isLogin ? "Verify Your Login" : "Verify Your Phone Number"}
+      </Text>
       <Text style={styles.subtitleText}>
-        Mailinize gönderilen altı haneli tek seferlik kodu giriniz.
+        Please enter the 6-digit OTP sent to your{" "}
+        {isLogin ? "email/phone" : "phone"}.
       </Text>
 
       <TextInput
@@ -109,16 +128,8 @@ const ResetOTPVerification = ({ navigation, route }) => {
         value={otp}
       />
 
-      <Pressable
-        onPress={handleVerifyOTP}
-        style={styles.button}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color="white" />
-        ) : (
-          <Text style={styles.buttonText}>Doğrula</Text>
-        )}
+      <Pressable onPress={handleVerifyOTP} style={styles.button}>
+        <Text style={styles.buttonText}>Verify</Text>
       </Pressable>
 
       <Pressable
@@ -130,16 +141,14 @@ const ResetOTPVerification = ({ navigation, route }) => {
         disabled={resendDisabled}
       >
         <Text style={styles.buttonText}>
-          {resendDisabled
-            ? `Kodu ${timer}s saniye içinde bir daha gönder`
-            : "Tekrar gönder"}
+          {resendDisabled ? `Resend OTP in ${timer}s` : "Resend OTP"}
         </Text>
       </Pressable>
     </View>
   );
 };
 
-export default ResetOTPVerification;
+export default OTPVerification;
 
 const styles = StyleSheet.create({
   container: {
@@ -177,7 +186,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: "center",
-    marginBottom: 15,
   },
   resendButton: {
     backgroundColor: "#000",

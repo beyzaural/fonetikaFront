@@ -15,12 +15,14 @@ import {
 import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_BASE = extra.apiUrl || "http://localhost:8080";
 
-const Sohbet = ({ navigation }) => {
+const Sohbet = () => {
+  const router = useRouter();
   const [messages, setMessages] = useState([]);
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
@@ -156,11 +158,15 @@ const Sohbet = ({ navigation }) => {
     }
   };
 
-  const handleEndConversation = () => {
-    Alert.alert("Sohbet bitti", "Ana ekrana dönmek ister misin?", [
-      { text: "İptal", style: "cancel" },
-      { text: "Evet", onPress: () => navigation.navigate("Home") },
-    ]);
+  const handleBack = () => {
+    Alert.alert(
+      "Uyarı",
+      "Sohbetten çıkmak istediğinizden emin misiniz?",
+      [
+        { text: "Hayır", style: "cancel" },
+        { text: "Evet", onPress: () => router.push("/home") },
+      ]
+    );
   };
 
   const renderItem = ({ item }) => (
@@ -182,10 +188,7 @@ const Sohbet = ({ navigation }) => {
     <View style={styles.container}>
       {/* Üst Başlık */}
       <View style={styles.topContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Image
             source={require("../assets/images/backspace.png")}
             style={styles.backIcon}
@@ -255,7 +258,7 @@ const Sohbet = ({ navigation }) => {
           />
         </TouchableOpacity>
         <View style={styles.iconButtonWithText}>
-          <TouchableOpacity onPress={handleEndConversation}>
+          <TouchableOpacity onPress={handleBack}>
             <FontAwesome
               name="times"
               size={50}
@@ -267,7 +270,7 @@ const Sohbet = ({ navigation }) => {
         </View>
       </View>
 
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar />
     </View>
   );
 };

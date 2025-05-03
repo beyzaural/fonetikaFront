@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import axios from "axios";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+
 import {
   StyleSheet,
   Text,
@@ -12,11 +13,12 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const Dersler = ({ navigation }) => {
+const Dersler = () => {
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
@@ -97,7 +99,7 @@ const Dersler = ({ navigation }) => {
         >
           <TouchableOpacity
             style={styles.backButton}
-            onPress={() => navigation.navigate("Home")}
+            onPress={() => router.push("/home")}
           >
             <Image
               source={require("../assets/images/backspace.png")}
@@ -117,9 +119,12 @@ const Dersler = ({ navigation }) => {
                 key={index}
                 style={styles.card}
                 onPress={() =>
-                  navigation.navigate("Ders", {
-                    courseId: course.id,
-                    phoneme: course.courseName,
+                  router.push({
+                    pathname: "/ders",
+                    params: {
+                      courseId: course.id,
+                      phoneme: course.courseName,
+                    },
                   })
                 }
               >
@@ -141,7 +146,7 @@ const Dersler = ({ navigation }) => {
             ))}
         </ScrollView>
       </View>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </View>
   );
 };

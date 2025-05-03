@@ -8,14 +8,16 @@ import {
   Image,
 } from "react-native";
 import BottomNavBar from "./BottomNavBar";
+import { useRouter } from "expo-router";
 
-const Tekrar = ({ navigation }) => {
+const Tekrar = () => {
+  const router = useRouter();
   const vowelModules = [
     {
       title: "A Harfi",
       difficulty: "Tekrar Et",
       image: require("../assets/images/1.png"),
-      navigateTo: "KursTekrar",
+      navigateTo: "/kurs-tekrar",
     },
     {
       title: "E Harfi",
@@ -39,7 +41,7 @@ const Tekrar = ({ navigation }) => {
       {/* Back Arrow */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate("Home")}
+        onPress={() => router.push("/home")}
       >
         <Image
           source={require("../assets/images/backspace.png")}
@@ -57,7 +59,7 @@ const Tekrar = ({ navigation }) => {
               style={styles.card}
               onPress={() => {
                 if (module.navigateTo) {
-                  navigation.navigate(module.navigateTo);
+                  router.push(module.navigateTo);
                 }
               }}
             >
@@ -71,7 +73,7 @@ const Tekrar = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <BottomNavBar navigation={navigation} />
+        <BottomNavBar />
       </View>
     </View>
   );

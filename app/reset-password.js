@@ -1,18 +1,21 @@
 import React, { useState } from "react";
 import {
-  View,
+  StyleSheet,
   Text,
+  View,
   TextInput,
   Pressable,
   Alert,
-  StyleSheet,
 } from "react-native";
+import { useRouter, useLocalSearchParams } from "expo-router";
 import Constants from "expo-constants";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const ResetPasswordScreen = ({ route, navigation }) => {
-  const { resetToken } = route.params || {};
+const ResetPassword = () => {
+  const router = useRouter();
+  const { resetToken } = useLocalSearchParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -41,8 +44,9 @@ const ResetPasswordScreen = ({ route, navigation }) => {
 
       const data = await response.json();
       if (data.success) {
-        Alert.alert("Başarı", "Parolanız değiştirildi.");
-        navigation.navigate("Login");
+        Alert.alert("Başarı", "Parolanız değiştirildi");
+        router.push("/login");
+      } else {
         Alert.alert("Error", data.message || "Parola değiştirilemedi.");
       }
     } catch (error) {
@@ -78,7 +82,7 @@ const ResetPasswordScreen = ({ route, navigation }) => {
   );
 };
 
-export default ResetPasswordScreen;
+export default ResetPassword;
 
 const styles = StyleSheet.create({
   container: {

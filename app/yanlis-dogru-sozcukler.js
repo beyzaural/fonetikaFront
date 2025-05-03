@@ -8,8 +8,11 @@ import {
   Image,
 } from "react-native";
 import yanlisDogruData from "../components/yanlisDogruData";
+import { useRouter } from "expo-router";
+import BottomNavBar from "../src/BottomNavBar";
 
-const YanlisDogruSozcukler = ({ navigation }) => {
+const YanlisDogruSozcukler = () => {
+  const router = useRouter();
   const sortedData = [...yanlisDogruData].sort((a, b) =>
     a.yanlis.localeCompare(b.yanlis)
   );
@@ -18,11 +21,8 @@ const YanlisDogruSozcukler = ({ navigation }) => {
     <View style={styles.container}>
       {/* Üst Satır: Geri Butonu + Başlık + Kalp */}
       <View style={styles.topRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
+        <TouchableOpacity onPress={() => router.back()}>
+          <Text style={styles.backButton}>Geri</Text>
         </TouchableOpacity>
 
         <Text style={styles.title}>Doğru Bilinen Yanlışlar</Text>
@@ -60,6 +60,7 @@ const YanlisDogruSozcukler = ({ navigation }) => {
           “:” işareti, harfin uzatılarak okunması gerektiğini belirtir.
         </Text>
       </View>
+      <BottomNavBar />
     </View>
   );
 };

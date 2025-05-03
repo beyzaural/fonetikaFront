@@ -1,15 +1,18 @@
-// src/Startup.js
+// app/startup.js
 import React, { useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwtDecode from "jwt-decode";
+import { useRouter } from "expo-router";
 
-const Startup = ({ navigation }) => {
+const Startup = () => {
+  const router = useRouter();
+
   useEffect(() => {
     const checkToken = async () => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        navigation.replace("Login");
+        router.replace("/login");
         return;
       }
 
@@ -19,21 +22,21 @@ const Startup = ({ navigation }) => {
 
         if (decoded.exp && decoded.exp < now) {
           await AsyncStorage.removeItem("token");
-          navigation.replace("Login");
+          router.replace("/login");
         } else {
-          navigation.replace("Home");
+          router.replace("/home");
         }
       } catch (e) {
         console.error("Invalid token:", e);
         await AsyncStorage.removeItem("token");
-        navigation.replace("Login");
+        router.replace("/login");
       }
     };
 
     checkToken();
   }, []);
 
-  return null; // or a splash screen
+  return null; // Or show a splash/loading screen here
 };
 
 export default Startup;

@@ -11,13 +11,15 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const ChangeEmail = ({ navigation }) => {
+const ChangeEmail = () => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [oldEmail, setOldEmail] = useState("");
   const [newEmail, setNewEmail] = useState("");
@@ -129,7 +131,7 @@ const ChangeEmail = ({ navigation }) => {
       if (!data.success) throw new Error(data.message);
 
       Alert.alert("Başarılı", "E-posta adresiniz güncellendi.");
-      navigation.goBack();
+      router.back();
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {
@@ -147,7 +149,7 @@ const ChangeEmail = ({ navigation }) => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -292,7 +294,7 @@ const ChangeEmail = ({ navigation }) => {
           </>
         )}
       </View>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </View>
   );
 };

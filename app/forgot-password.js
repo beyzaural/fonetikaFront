@@ -8,13 +8,14 @@ import {
   Alert,
   StyleSheet,
 } from "react-native";
+import { useRouter } from "expo-router";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const ForgotPasswordScreen = ({ navigation }) => {
+const ForgotPasswordScreen = () => {
   const [email, setEmail] = useState("");
-
+  const router = useRouter();
   const handleForgotPassword = async () => {
     if (!email) {
       Alert.alert("Error", "Please enter your email.");
@@ -32,8 +33,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
       const data = await response.json();
       if (data.success && data.data?.otpSessionToken && data.data?.identifier) {
-        navigation.navigate("ResetOTPVerification", {
-          identifier: email,
+        router.push({
+          pathname: "/reset-otp-verification",
+          params: { identifier: email },
         });
       } else {
         Alert.alert("Error", data.message || "Could not start reset flow.");

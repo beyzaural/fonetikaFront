@@ -9,9 +9,10 @@ import {
   import React, { useEffect, useRef } from 'react';
 
   import { useFonts } from 'expo-font';
-  import { useNavigation } from '@react-navigation/native';
+  import { useRouter } from 'expo-router';
 
   const Merhaba = () => {
+    const router = useRouter();
     return ( 
         <View style={styles.container}>
                 {/* Top Container for Title and Instruction */}

@@ -10,9 +10,11 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
-const Ders = ({ navigation, route }) => {
+const Ders = () => {
+  const router = useRouter();
   const { courseId, phoneme } = route?.params || {};
   const videoMap = {
     a: "https://www.youtube.com/embed/-yLIJNekZoI",
@@ -48,7 +50,7 @@ const Ders = ({ navigation, route }) => {
       {/* Back Arrow */}
       <TouchableOpacity
         style={styles.backButton}
-        onPress={() => navigation.navigate("Dersler")}
+        onPress={() => router.push("/dersler")}
       >
         <Image
           source={require("../assets/images/backspace.png")}
@@ -67,9 +69,9 @@ const Ders = ({ navigation, route }) => {
           <TouchableOpacity
             style={styles.button}
             onPress={() =>
-              navigation.navigate("KursKelime", {
-                courseId: courseId,
-                phoneme: phoneme,
+              router.push({
+                pathname: "/kurs-kelime",
+                params: { courseId, phoneme },
               })
             }
           >
@@ -78,10 +80,10 @@ const Ders = ({ navigation, route }) => {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() =>
-              navigation.navigate("KursTekrar", {
-                courseId: courseId,
-                phoneme: phoneme,
+            oonPress={() =>
+              router.push({
+                pathname: "/kurs-tekrar",
+                params: { courseId, phoneme },
               })
             }
           >
@@ -96,7 +98,7 @@ const Ders = ({ navigation, route }) => {
           </Text>
         </ScrollView>
 
-        <BottomNavBar navigation={navigation} />
+        <BottomNavBar router={router} />
       </View>
     </View>
   );

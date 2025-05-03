@@ -9,11 +9,13 @@ import {
 } from "react-native";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const EmailOTPVerification = ({ navigation, route }) => {
+const EmailOTPVerification = () => {
+  const router = useRouter();
   const { email } = route.params;
   const [otp, setOtp] = useState("");
   const [resendDisabled, setResendDisabled] = useState(true);
@@ -84,7 +86,7 @@ const EmailOTPVerification = ({ navigation, route }) => {
             finalizeData.data.refreshToken
           );
 
-          navigation.navigate("Record");
+          router.replace("/record");
         } else {
           Alert.alert("Error", finalizeData.message || "Hata.");
         }

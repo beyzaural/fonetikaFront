@@ -10,10 +10,12 @@ import {
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
+import { useRouter } from "expo-router";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const GoalSelection = ({ navigation, route }) => {
+const GoalSelection = () => {
+  const router = useRouter();
   const [selectedGoal, setSelectedGoal] = useState(null);
   const [tempToken, setTempToken] = useState(null);
 
@@ -22,7 +24,7 @@ const GoalSelection = ({ navigation, route }) => {
       const storedToken = await AsyncStorage.getItem("tempToken");
       if (!storedToken) {
         Alert.alert("Hata", "Kimlik doğrulama bulunamadı.");
-        navigation.navigate("Login"); // veya login sayfan
+        router.replace("/login");
       } else {
         setTempToken(storedToken);
       }
@@ -48,7 +50,7 @@ const GoalSelection = ({ navigation, route }) => {
 
       const data = await response.json();
       if (response.ok && data.success) {
-        navigation.navigate("Home", { dailyGoal: selectedGoal });
+        router.push({ pathname: "/home", params: { dailyGoal: selectedGoal } });
       } else {
         Alert.alert("Hata", data.message || "Günlük hedef kaydedilemedi.");
       }

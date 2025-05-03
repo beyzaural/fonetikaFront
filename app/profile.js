@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getUserProfile } from "./utils/auth";
-import BottomNavBar from "./BottomNavBar";
+import { getUserProfile } from "../src/utils/auth";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
 
-const Profile = ({ navigation }) => {
+const Profile = () => {
+  const router = useRouter();
   const [avatar, setAvatar] = useState("");
   const [userName, setUserName] = useState("");
   const [parola, setParola] = useState("");
@@ -35,7 +37,7 @@ const Profile = ({ navigation }) => {
   };
 
   const handleBack = () => {
-    navigation.navigate("Home");
+    router.push("/home");
   };
 
   return (
@@ -92,7 +94,7 @@ const Profile = ({ navigation }) => {
       <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>HESABI GÜNCELLE</Text>
       </TouchableOpacity>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar />
     </View>
   );
 };

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
@@ -15,16 +14,19 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { getUserInfo } from "./utils/auth";
-import BottomNavBar from "./BottomNavBar";
-import ProgressBar from "./ProgressBar";
-import GoalRing from "./GoalRing";
+import { getUserInfo } from "../src/utils/auth";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
+
+import ProgressBar from "../src/ProgressBar";
+import GoalRing from "../src/GoalRing";
 import Icon from "react-native-vector-icons/FontAwesome5"; // flame is available here
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl || "http://localhost:8080";
 
-const Home = ({ navigation, route }) => {
+const Home = () => {
+  const router = useRouter();
   const [userName, setUserName] = useState("");
   const [userDailyGoal, setUserDailyGoal] = useState(null);
   const [weeklyLoginDays, setWeeklyLoginDays] = useState([]);
@@ -190,7 +192,8 @@ const Home = ({ navigation, route }) => {
         <View style={styles.cardsContainer}>
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Sohbet")}
+            onPress={() => router.push("/sohbet")}
+            activeOpacity={0.7}
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -199,17 +202,18 @@ const Home = ({ navigation, route }) => {
               style={styles.cardGradient}
             >
               <Image
-                source={require("../assets/icons/chat.png")} // Reference the chat icon here
+                source={require("../assets/icons/chat.png")}
                 style={styles.chatIcon}
               />
               <Text style={styles.cardText}>Sohbet</Text>
               <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
-          {/* Kelime Card (Clickable) */}
+
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Kelime")}
+            onPress={() => router.push("/kelime")}
+            activeOpacity={0.7}
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -228,7 +232,8 @@ const Home = ({ navigation, route }) => {
 
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
+            onPress={() => router.push("/geneltekrar")}
+            activeOpacity={0.7}
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -244,9 +249,11 @@ const Home = ({ navigation, route }) => {
               <Text style={styles.cardSubText}> </Text>
             </LinearGradient>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Paragraph")} // Navigate to Paragraf.js
+            onPress={() => router.push("/paragraph")}
+            activeOpacity={0.7}
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -255,7 +262,7 @@ const Home = ({ navigation, route }) => {
               style={styles.cardGradient}
             >
               <Image
-                source={require("../assets/icons/file-2.png")} // Reference the chat icon here
+                source={require("../assets/icons/file-2.png")}
                 style={styles.chatIcon}
               />
               <Text style={styles.cardText}>Cümle</Text>
@@ -264,7 +271,7 @@ const Home = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </ImageBackground>
   );
 };
@@ -274,6 +281,35 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+  },
+  button: {
+    width: "100%",
+    height: 50,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "black",
+    marginTop: 20,
+    paddingVertical: 12,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#E8E8E8",
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    fontSize: 16,
+    backgroundColor: "white",
+    marginBottom: 20,
   },
   welcomeText: {
     fontSize: 50,
@@ -312,22 +348,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 17,
   },
   card: {
-    width: "48%", // Half width with spacing
+    width: "48%",
     height: 220,
     borderRadius: 35,
     marginBottom: 15,
+    overflow: "hidden",
   },
   cardGradient: {
     flex: 1,
     borderRadius: 35,
-    overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: -3, height: -3 },
-    shadowRadius: 4,
-    shadowOpacity: 0.5,
-    elevation: 6,
+    padding: 10,
   },
   cardText: {
     fontSize: 18,
@@ -457,12 +489,6 @@ const styles = StyleSheet.create({
     fontSize: 40, // larger icon size
   },
 
-  streakText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "white",
-    marginTop: 2,
-  },
   streakCard: {
     flexDirection: "row",
     alignItems: "center",

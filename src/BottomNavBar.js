@@ -1,11 +1,14 @@
 import React from "react";
 import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
 
-const BottomNavBar = ({ navigation }) => {
+const BottomNavBar = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.navBar}>
       <TouchableOpacity
-        onPress={() => navigation.navigate("Home")}
+        onPress={() => router.push("/home")}
         style={styles.navItem}
       >
         <Image
@@ -14,20 +17,18 @@ const BottomNavBar = ({ navigation }) => {
         />
       </TouchableOpacity>
 
-     
-
       <TouchableOpacity
-        onPress={() => navigation.navigate("YanlisDogruSozcukler")}
+        onPress={() => router.push("/yanlis-dogru-sozcukler")}
         style={styles.navItem}
       >
         <Image
-          source={require("../assets/icons/book.png")} // ikonunu buraya koy
+          source={require("../assets/icons/book.png")}
           style={styles.navIcon}
         />
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate("Ayarlar")}
+        onPress={() => router.push("/ayarlar")}
         style={styles.navItem}
       >
         <Image
@@ -37,7 +38,7 @@ const BottomNavBar = ({ navigation }) => {
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => navigation.navigate("Dersler")}
+        onPress={() => router.push("/dersler")}
         style={styles.navItem}
       >
         <Image

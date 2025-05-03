@@ -11,13 +11,16 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
+
 import { LinearGradient } from "expo-linear-gradient";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const ChangeName = ({ navigation }) => {
+const ChangeName = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const [token, setToken] = useState("");
@@ -57,7 +60,7 @@ const ChangeName = ({ navigation }) => {
       await AsyncStorage.setItem("token", data.accessToken);
 
       Alert.alert("Başarılı", "Kullanıcı adı güncellendi.");
-      navigation.goBack();
+      router.back();
     } catch (e) {
       Alert.alert("Hata", e.message);
       console.log("hata");
@@ -76,7 +79,7 @@ const ChangeName = ({ navigation }) => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -118,7 +121,7 @@ const ChangeName = ({ navigation }) => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </View>
   );
 };

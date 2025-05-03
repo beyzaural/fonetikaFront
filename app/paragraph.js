@@ -10,22 +10,21 @@ import {
   ActivityIndicator,
 } from "react-native";
 import axios from "axios";
-
 import { FontAwesome } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import { useFonts } from "expo-font";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
 import jwtDecode from "jwt-decode";
-import { getUserIdFromToken } from "./utils/auth";
+import { getUserIdFromToken } from "../src/utils/auth";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const Paragraph = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
@@ -211,7 +210,7 @@ const Paragraph = () => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => router.push("/home")}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -282,7 +281,7 @@ const Paragraph = () => {
           </View>
         </View>
       </Modal>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar />
     </View>
   );
 };

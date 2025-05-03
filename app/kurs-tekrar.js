@@ -11,13 +11,17 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
-import BottomNavBar from "./BottomNavBar";
-import { getUserIdFromToken } from "./utils/auth";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter, useLocalSearchParams } from "expo-router";
+
 import Constants from "expo-constants";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
+import { getUserIdFromToken } from "../src/utils/auth";
 
-const Geneltekrar = ({ navigation }) => {
+const KursTekrar = () => {
+  const router = useRouter();
+  const { courseId, phoneme } = useLocalSearchParams();
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
@@ -47,8 +51,12 @@ const Geneltekrar = ({ navigation }) => {
         if (!userId) return;
 
         const res = await axios.get(
-          `${API_URL}/api/mispronounced-words/user/${userId}`
+          `${API_URL}/api/mispronounced-words/user-course-phoneme`,
+          {
+            params: { phoneme, userId },
+          }
         );
+
         const mistakes = res.data;
 
         const enriched = await Promise.all(
@@ -75,7 +83,7 @@ const Geneltekrar = ({ navigation }) => {
     };
 
     fetchMistakes();
-  }, []);
+  }, [phoneme]);
 
   const playOriginalAudio = async () => {
     const currentWord = enrichedMistakes[currentIndex];
@@ -115,7 +123,7 @@ const Geneltekrar = ({ navigation }) => {
       });
 
       const responseJson = await response.json();
-      console.log("✅ Geneltekrar backend response:", responseJson);
+      console.log("✅ KursTekrar backend response:", responseJson);
 
       await axios.post(`${API_URL}/api/progress/add`, null, {
         params: { userId, count: 1 },
@@ -134,29 +142,15 @@ const Geneltekrar = ({ navigation }) => {
         );
       }
 
-      const updatedMistakes = await axios.get(
-        `${API_URL}/api/mispronounced-words/user/${userId}`
-      );
-      const stillMistaken = updatedMistakes.data.find(
-        (item) => item.wordId === currentWord.wordId
-      );
-
-      if (!stillMistaken) {
-        setEnrichedMistakes((prev) =>
-          prev.filter((_, index) => index !== currentIndex)
-        );
-        setCurrentIndex((prev) => Math.max(0, prev - 1));
-      } else {
-        setEnrichedMistakes((prev) => {
-          const updated = [...prev];
-          updated[currentIndex] = {
-            ...updated[currentIndex],
-            transcribedText: responseJson.transcribedText,
-            isCorrect: responseJson.correct,
-          };
-          return updated;
-        });
-      }
+      setEnrichedMistakes((prev) => {
+        const updated = [...prev];
+        updated[currentIndex] = {
+          ...updated[currentIndex],
+          transcribedText: responseJson.transcribedText,
+          isCorrect: responseJson.correct,
+        };
+        return updated;
+      });
 
       setShowFeedback(true);
     } catch (error) {
@@ -169,6 +163,7 @@ const Geneltekrar = ({ navigation }) => {
       try {
         await recording.stopAndUnloadAsync();
         const uri = recording.getURI();
+        console.log("Recording saved at:", uri);
         setAudioUri(uri);
         setRecording(null);
         setIsRecording(false);
@@ -203,6 +198,7 @@ const Geneltekrar = ({ navigation }) => {
       alert("Henüz bir kayıt yapılmadı!");
       return;
     }
+
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioUri },
@@ -214,19 +210,19 @@ const Geneltekrar = ({ navigation }) => {
   };
 
   const handleNextWord = () => {
-    setCurrentIndex((prev) => (prev + 1) % enrichedMistakes.length);
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % enrichedMistakes.length);
     setShowFeedback(false);
     setIsRecording(false);
   };
 
   const handlePreviousWord = () => {
     setCurrentIndex(
-      (prev) => (prev - 1 + enrichedMistakes.length) % enrichedMistakes.length
+      (prevIndex) =>
+        (prevIndex - 1 + enrichedMistakes.length) % enrichedMistakes.length
     );
     setShowFeedback(false);
     setIsRecording(false);
   };
-
   return (
     <ImageBackground
       source={require("../assets/images/bluedalga.png")}
@@ -236,7 +232,15 @@ const Geneltekrar = ({ navigation }) => {
         {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() =>
+            router.push({
+              pathname: "/ders",
+              params: {
+                courseId: courseId,
+                phoneme: phoneme,
+              }
+            })
+          }
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -247,30 +251,25 @@ const Geneltekrar = ({ navigation }) => {
         {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            {enrichedMistakes.length === 0 ? (
-              <Text style={styles.wordText}>
-                Tekrar edilecek kelime bulunamadı.
-              </Text>
-            ) : (
+            {enrichedMistakes[currentIndex] ? (
               <>
                 <Text style={styles.wordText}>
-                  {enrichedMistakes[currentIndex]?.word}
+                  {enrichedMistakes[currentIndex].word}
                 </Text>
                 <Text style={styles.phoneticText}>
-                  {enrichedMistakes[currentIndex]?.phonetic}
+                  {enrichedMistakes[currentIndex].phonetic}
                 </Text>
-                <TouchableOpacity
-                  onPress={playOriginalAudio}
-                  style={{ marginTop: 20 }}
-                >
-                  <Image
-                    source={require("../assets/icons/speaker.png")}
-                    style={styles.speakerIcon}
-                  />
-                </TouchableOpacity>
               </>
+            ) : (
+              <Text style={styles.wordText}>Yükleniyor...</Text>
             )}
           </View>
+          <TouchableOpacity
+            onPress={playOriginalAudio}
+            style={styles.listenButton}
+          >
+            <Text style={styles.listenButtonText}>Doğru Telaffuzu Dinle</Text>
+          </TouchableOpacity>
 
           {/* Navigation Arrows and Microphone Button in a Row */}
           <View style={styles.navigationContainer}>
@@ -309,9 +308,9 @@ const Geneltekrar = ({ navigation }) => {
               {enrichedMistakes[currentIndex] ? (
                 <>
                   <Text style={styles.tahminText}>
-                    Sanırım “
-                    {enrichedMistakes[currentIndex]?.transcribedText || "..."}”
-                    dediniz.
+                    Sanırım "
+                    {enrichedMistakes[currentIndex]?.transcribedText || "..."}
+                    " dediniz.
                   </Text>
                   <Text style={styles.instructionText}>
                     {enrichedMistakes[currentIndex]?.isCorrect
@@ -366,13 +365,13 @@ const Geneltekrar = ({ navigation }) => {
           </View>
         </Modal>
 
-        <BottomNavBar navigation={navigation} />
+        <BottomNavBar />
       </View>
     </ImageBackground>
   );
 };
 
-export default Geneltekrar;
+export default KursTekrar;
 
 const styles = StyleSheet.create({
   container: {

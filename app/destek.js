@@ -8,14 +8,15 @@ import {
   Image,
   ScrollView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { Platform, Linking } from "react-native";
-import BottomNavBar from "./BottomNavBar";
+
+import BottomNavBar from "../src/BottomNavBar";
+
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/FontAwesome5";
+import { useRouter } from "expo-router";
 
 const Destek = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const sendEmail = async () => {
     const subject = encodeURIComponent("Fonetika Desteği");
@@ -40,7 +41,7 @@ const Destek = () => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -54,13 +55,20 @@ const Destek = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("FAQ")}
+          onPress={() => router.push("/faq")}
         >
           <View style={styles.cardContent}>
-            <Icon name="question-circle" size={30} color="#333" style={styles.icon} />
+            <Icon
+              name="question-circle"
+              size={30}
+              color="#333"
+              style={styles.icon}
+            />
             <View>
               <Text style={styles.cardTitle}>Sık Sorulan Sorular</Text>
-              <Text style={styles.cardSubtitle}>Yaygın sorular ve cevaplar</Text>
+              <Text style={styles.cardSubtitle}>
+                Yaygın sorular ve cevaplar
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -73,7 +81,9 @@ const Destek = () => {
             <Icon name="envelope" size={30} color="#333" style={styles.icon} />
             <View>
               <Text style={styles.cardTitle}>Bize Ulaşın</Text>
-              <Text style={styles.cardSubtitle}>Genel soru ve önerileriniz için</Text>
+              <Text style={styles.cardSubtitle}>
+                Genel soru ve önerileriniz için
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -83,15 +93,22 @@ const Destek = () => {
           onPress={() => sendEmail("Fonetika – Sorun Bildirimi")}
         >
           <View style={styles.cardContent}>
-            <Icon name="exclamation-circle" size={30} color="#333" style={styles.icon} />
+            <Icon
+              name="exclamation-circle"
+              size={30}
+              color="#333"
+              style={styles.icon}
+            />
             <View>
               <Text style={styles.cardTitle}>Sorun Bildir</Text>
-              <Text style={styles.cardSubtitle}>Karşılaştığınız sorunları bildirin</Text>
+              <Text style={styles.cardSubtitle}>
+                Karşılaştığınız sorunları bildirin
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
       </ScrollView>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </View>
   );
 };

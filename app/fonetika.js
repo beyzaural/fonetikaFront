@@ -8,7 +8,7 @@ import {
 import React, { useEffect, useRef } from "react";
 
 import { useFonts } from "expo-font";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 const Fonetika = () => {
   // Load fonts
@@ -23,7 +23,7 @@ const Fonetika = () => {
     "Roboto-Black": require("../assets/fonts/Roboto-Black.ttf"),
   });
 
-  const navigation = useNavigation(); // For navigating to Record.js
+  const router = useRouter();
   const fadeAnim = useRef(new Animated.Value(0)).current; // Initial opacity value
 
   useEffect(() => {
@@ -34,14 +34,13 @@ const Fonetika = () => {
       useNativeDriver: true, // Optimize animation
     }).start();
 
-    // Navigate to Record.js after 1 second
     const timer = setTimeout(() => {
-      navigation.navigate("Login");
+      router.replace("/login");
     }, 2000);
 
     // Cleanup timer on component unmount
     return () => clearTimeout(timer);
-  }, [fadeAnim, navigation]);
+  }, [fadeAnim, router]);
 
   return (
     <View style={styles.container}>

@@ -10,22 +10,21 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const LoginOTPVerification = ({ navigation, route }) => {
-  const { otpSessionToken, identifier, deliveryMethod, email, password } =
-    route.params;
+const LoginOTPVerification = () => {
+  const router = useRouter();
+  const { otpSessionToken, identifier, deliveryMethod, email, password } = useLocalSearchParams();
 
   const [currentIdentifier, setCurrentIdentifier] = useState(identifier);
-  const [currentOtpSessionToken, setCurrentOtpSessionToken] =
-    useState(otpSessionToken);
+  const [currentOtpSessionToken, setCurrentOtpSessionToken] = useState(otpSessionToken);
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [resendEnabled, setResendEnabled] = useState(false);
-  const [currentDeliveryMethod, setCurrentDeliveryMethod] =
-    useState(deliveryMethod);
+  const [currentDeliveryMethod, setCurrentDeliveryMethod] = useState(deliveryMethod);
 
   const deliveryMethodMapping = {
     phone: "telefon",
@@ -69,7 +68,7 @@ const LoginOTPVerification = ({ navigation, route }) => {
       }
 
       Alert.alert("Başarı", "Giriş Başarılı!");
-      navigation.navigate("Home");
+      router.push("/home");
     } catch (error) {
       Alert.alert("Hata", "Bir hata oluştu lütfen tekrar deneyiniz.");
     }

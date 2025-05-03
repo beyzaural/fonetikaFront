@@ -9,12 +9,14 @@ import {
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { logout } from "./utils/auth";
+import { logout } from "../src/utils/auth";
 import { LinearGradient } from "expo-linear-gradient";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
 
-const Parola = ({ navigation }) => {
+const Parola = () => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -102,7 +104,7 @@ const Parola = ({ navigation }) => {
       if (!data.success) throw new Error(data.message);
 
       await logout();
-      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+      router.replace("/login");
     } catch (e) {
       Alert.alert("Hata", e.message);
     } finally {
@@ -120,7 +122,7 @@ const Parola = ({ navigation }) => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -238,7 +240,7 @@ const Parola = ({ navigation }) => {
           </>
         )}
       </View>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar />
     </View>
   );
 };
@@ -346,15 +348,20 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderWidth: 1,
     borderColor: "#0a7ea4",
+    minHeight: 50,
+    justifyContent: "center",
   },
   buttonGradient: {
     padding: 15,
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: 50,
   },
   buttonText: {
     fontSize: 16,
     fontWeight: "600",
     color: "#fff",
+    textAlign: "center",
   },
 });
 

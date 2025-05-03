@@ -10,18 +10,19 @@ import {
   Alert,
 } from "react-native";
 import axios from "axios";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwt_decode from "jwt-decode";
 import Icon from "react-native-vector-icons/FontAwesome5";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const Hesap = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   const handleDeleteAccount = async () => {
     try {
@@ -47,7 +48,7 @@ const Hesap = () => {
       });
 
       await AsyncStorage.clear();
-      navigation.navigate("Login");
+      router.replace("/login");
     } catch (error) {
       console.error(
         "Error deleting account:",
@@ -63,7 +64,7 @@ const Hesap = () => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -77,33 +78,37 @@ const Hesap = () => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Parola")}
+          onPress={() => router.push("/parola")}
         >
           <View style={styles.cardContent}>
             <Icon name="key" size={30} color="#333" style={styles.icon} />
             <View>
               <Text style={styles.cardTitle}>Şifreyi Değiştir</Text>
-              <Text style={styles.cardSubtitle}>Hesap şifrenizi güncelleyin</Text>
+              <Text style={styles.cardSubtitle}>
+                Hesap şifrenizi güncelleyin
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("ChangeEmail")}
+          onPress={() => router.push("/change-email")}
         >
           <View style={styles.cardContent}>
             <Icon name="envelope" size={30} color="#333" style={styles.icon} />
             <View>
               <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
-              <Text style={styles.cardSubtitle}>E-posta adresinizi güncelleyin</Text>
+              <Text style={styles.cardSubtitle}>
+                E-posta adresinizi güncelleyin
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("ChangeName")}
+          onPress={() => router.push("/change-name")}
         >
           <View style={styles.cardContent}>
             <Icon name="user-edit" size={30} color="#333" style={styles.icon} />
@@ -114,20 +119,26 @@ const Hesap = () => {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={handleDeleteAccount}
-        >
+        <TouchableOpacity style={styles.card} onPress={handleDeleteAccount}>
           <View style={styles.cardContent}>
-            <Icon name="trash-alt" size={30} color="#FF3B30" style={styles.icon} />
+            <Icon
+              name="trash-alt"
+              size={30}
+              color="#FF3B30"
+              style={styles.icon}
+            />
             <View>
-              <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>Hesabımı Sil</Text>
-              <Text style={styles.cardSubtitle}>Hesabınızı kalıcı olarak silin</Text>
+              <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>
+                Hesabımı Sil
+              </Text>
+              <Text style={styles.cardSubtitle}>
+                Hesabınızı kalıcı olarak silin
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
       </ScrollView>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </View>
   );
 };

@@ -11,10 +11,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import React, { useState } from "react";
 import { Alert } from "react-native";
+import { useRouter } from "expo-router";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const Login = ({ navigation }) => {
+const Login = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [deliveryMethod, setDeliveryMethod] = useState("phone"); // Default to phone
@@ -34,12 +37,12 @@ const Login = ({ navigation }) => {
 
       const data = await response.json();
       if (data.token) {
-        await AsyncStorage.setItem("token", data.token); 
+        await AsyncStorage.setItem("token", data.token);
       } else {
         console.warn("No token received in login response"); // ✅ Log missing token
       }
       if (!response.ok) {
-        console.error("Login Error:", data); 
+        console.error("Login Error:", data);
         Alert.alert(
           "Giriş Başarısız!",
           data.message || "Yanlış mail ya da şifre."
@@ -50,12 +53,15 @@ const Login = ({ navigation }) => {
       const otpSessionToken = data.data.otpSessionToken;
       const identifier = data.data.identifier;
 
-      navigation.navigate("LoginOTPVerification", {
-        otpSessionToken: otpSessionToken,
-        identifier: identifier,
-        deliveryMethod: deliveryMethod,
-        email: email,
-        password: password,
+      router.push({
+        pathname: "/login-otp-verification",
+        params: {
+          otpSessionToken: otpSessionToken,
+          identifier: identifier,
+          deliveryMethod: deliveryMethod,
+          email: email,
+          password: password,
+        },
       });
     } catch (error) {
       Alert.alert(
@@ -105,9 +111,7 @@ const Login = ({ navigation }) => {
         </View>
 
         {/* Forgot Password Button */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("ForgotPasswordScreen")}
-        >
+        <TouchableOpacity onPress={() => router.push("/forgot-password")}>
           <Text style={styles.forgotPasswordText}>Şifrenizi mi unuttunuz?</Text>
         </TouchableOpacity>
 
@@ -152,7 +156,7 @@ const Login = ({ navigation }) => {
         </Pressable>
 
         <Pressable
-          onPress={() => navigation.navigate("Register")}
+          onPress={() => router.push("/register")}
           style={({ pressed }) => [
             styles.registerButton,
             pressed && { opacity: 0.8 },

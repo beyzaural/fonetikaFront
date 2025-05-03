@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,12 +8,12 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  Alert,
 } from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
-import { Alert } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import Constants from "expo-constants";
-import React, { useState } from "react";
+import FontAwesome from "react-native-vector-icons/FontAwesome";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 const occupations = [
@@ -49,7 +50,8 @@ const countryCodes = [
   { code: "+49", country: "Almanya" },
 ];
 
-const Register = ({ navigation }) => {
+const Register = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -101,8 +103,6 @@ const Register = ({ navigation }) => {
     }
 
     try {
-      
-
       const fullPhoneNumber = `${countryCode}${phone}`;
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
@@ -118,16 +118,15 @@ const Register = ({ navigation }) => {
       });
 
       const data = await response.json();
-
-      if (response.ok) {
-        console.log(
-          "Navigating to OTPVerification with Token:",
-          data.data.tempToken
-        );
-        navigation.navigate("OTPVerification", {
-          phone: fullPhoneNumber,
-          tempToken: data.data.tempToken,
-          email: email,
+      if (data.success) {
+        router.push({
+          pathname: "/otp-verification",
+          params: {
+            phone: fullPhoneNumber,
+            tempToken: data.data.tempToken,
+            email,
+            isLogin: false,
+          },
         });
       } else {
         Alert.alert("Hata", data.message || "Kayıt başarısız oldu.");
@@ -146,7 +145,7 @@ const Register = ({ navigation }) => {
     <View style={styles.container}>
       {/* Title */}
       <TouchableOpacity
-        onPress={() => navigation.goBack()}
+        onPress={() => router.back()}
         style={styles.goBackTopLeftButton}
       >
         <FontAwesome name="arrow-left" size={20} color="black" />

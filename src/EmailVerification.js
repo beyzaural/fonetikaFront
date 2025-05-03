@@ -10,13 +10,15 @@ import {
 
 import Constants from "expo-constants";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter, useLocalSearchParams } from "expo-router";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import jwtDecode from "jwt-decode";
 
-const EmailVerification = ({ navigation, route }) => {
-  const { email } = route.params;
+const EmailVerification = () => {
+  const router = useRouter();
+  const { email } = useLocalSearchParams();
   const [tempToken, setTempToken] = useState(null);
   const [resendDisabled, setResendDisabled] = useState(true);
   const [timer, setTimer] = useState(120); // 2 minutes cooldown
@@ -29,7 +31,7 @@ const EmailVerification = ({ navigation, route }) => {
           "Hata",
           "Kimlik doğrulama eksik. Lütfen tekrar kayıt olun."
         );
-        navigation.navigate("Register"); // veya giriş ekranı
+        router.push("/register");
       } else {
         setTempToken(storedToken);
       }
@@ -161,7 +163,7 @@ const EmailVerification = ({ navigation, route }) => {
         await AsyncStorage.setItem("token", data.data.accessToken);
         await AsyncStorage.setItem("refreshToken", data.data.refreshToken);
 
-        navigation.navigate("Record");
+        router.push("/record");
       } else {
         console.error("Finalize Registration Failed:", data.message);
       }

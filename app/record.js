@@ -10,10 +10,10 @@ import {
 } from "react-native";
 import { Audio } from "expo-av";
 import { useFonts } from "expo-font";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-import { getUserIdFromToken } from "./utils/auth"; // you already have this
+import { getUserIdFromToken } from "../src/utils/auth";// you already have this
 
 const API_URL =
   Constants.expoConfig?.extra?.apiUrl || Constants.manifest?.extra?.apiUrl;
@@ -58,7 +58,7 @@ const targetWords = [
 ];
 
 const Record = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [fontsLoaded] = useFonts({
     "Parkinsans-Medium": require("../assets/fonts/Parkinsans-Medium.ttf"),
     "NotoSans-Regular": require("../assets/fonts/NotoSans-Regular.ttf"),
@@ -189,22 +189,21 @@ const Record = () => {
       uri: latestRecordingUri,
     };
 
-    setLatestRecordingUri(null); // Clear UI
-    setIsUploading(true); // Show loading
+    setLatestRecordingUri(null);
+    setIsUploading(true);
 
-    // ⬅️ Wait for upload and response
     const uploadResult = await uploadSingleRecording(finalRecording);
 
-    setIsUploading(false); // Hide loading
+    setIsUploading(false);
 
     if (uploadResult?.correct) {
       if (currentWordIndex < targetWords.length - 1) {
         setCurrentWordIndex((prev) => prev + 1);
-        setLatestRecordingUri(null); // Reset recording
-        setFeedbackMessage(null); // Clear message
-        setIsCorrect(null); // Reset correctness
+        setLatestRecordingUri(null);
+        setFeedbackMessage(null);
+        setIsCorrect(null);
       } else {
-        navigation.navigate("GoalSelection");
+        router.push("/goal-selection");
       }
     }
   };

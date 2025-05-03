@@ -12,16 +12,17 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
-import BottomNavBar from "./BottomNavBar";
-import { getUserIdFromToken } from "./utils/auth";
 import Constants from "expo-constants";
-/* import { checkDailyGoalAchieved } from "./CheckIfGoalAchieved";
-import AsyncStorage from "@react-native-async-storage/async-storage";
- */
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter, useLocalSearchParams } from "expo-router";
+
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
+import { getUserIdFromToken } from "../src/utils/auth";
 
-const Kelime = ({ navigation }) => {
+const KursKelime = () => {
+  const router = useRouter();
+  const { courseId, phoneme } = useLocalSearchParams();
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -35,6 +36,18 @@ const Kelime = ({ navigation }) => {
     fetchRandomWord(null);
   }, []);
 
+  const sanitizeWord = (word) => {
+    return word
+      .toLowerCase()
+      .replace(/ç/g, "c")
+      .replace(/ğ/g, "g")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ş/g, "s")
+      .replace(/ü/g, "u")
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
   const playOriginalAudio = async () => {
     const currentWord = words[currentIndex];
     if (!currentWord?.audioPath) {
@@ -106,7 +119,7 @@ const Kelime = ({ navigation }) => {
 
         const { granted } = await Audio.requestPermissionsAsync();
         if (!granted) {
-          alert("Microphone permission is required to record audio.");
+          alert("Mikrofon erişimi gerekiyor.");
           return;
         }
 
@@ -134,36 +147,11 @@ const Kelime = ({ navigation }) => {
     // This File object only renames the file and sets the MIME type; it doesn't convert audio format.
     return new File([blob], "recording.m4a", { type: "audio/m4a" });
   };
-  /*  {const fetchProgress = async () => {
-    try {
-      const userId = await getUserIdFromToken();
-      const res = await axios.get(
-        `http://localhost:8080/api/progress/${userId}`
-      );
-      const progress = res.data;
-      checkDailyGoalAchieved(progress.todayCount, progress.dailyGoal);
-    } catch (error) {
-      console.error("Failed to fetch progress:", error);
-    }
-  };} */
-
-  const sanitizeWord = (word) => {
-    return word
-      .toLowerCase()
-      .replace(/ç/g, "c")
-      .replace(/ğ/g, "g")
-      .replace(/ı/g, "i")
-      .replace(/ö/g, "o")
-      .replace(/ş/g, "s")
-      .replace(/ü/g, "u")
-      .replace(/\s+/g, "")
-      .replace(/[^a-z0-9]/g, "");
-  };
 
   // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
-      const userId = await getUserIdFromToken(); // 🔥 You forgot this! Must load it
+      const userId = await getUserIdFromToken();
       const currentWord = words[currentIndex];
 
       const formData = new FormData();
@@ -188,13 +176,13 @@ const Kelime = ({ navigation }) => {
       console.log("✅ Full backend response:", responseJson);
 
       if (responseJson.correct) {
-        setFeedback(responseJson.feedbackText); 
+        setFeedback(responseJson.feedbackText);
       } else {
-        setFeedback(responseJson.feedbackText); 
+        setFeedback(
+          `You said "${responseJson.recognizedWord}", but expected "${currentWord.word}".`
+        );
       }
-      
 
-      // Save feedback for modal
       setWords((prevWords) => {
         const updatedWords = [...prevWords];
         updatedWords[currentIndex].transcribedText =
@@ -203,18 +191,16 @@ const Kelime = ({ navigation }) => {
         return updatedWords;
       });
 
-      // Progress Update
       await axios.post(`${API_URL}/api/progress/add`, null, {
         params: { userId, count: 1 },
       });
 
-      // Save mispronounced if needed
       if (!responseJson.correct) {
         await axios.post(`${API_URL}/api/mispronounced-words/record`, {
           userId,
           wordId: currentWord.id,
         });
-        console.log("❌ MispronouncedWord recorded.");
+        console.log("❌ MispronouncedWord kaydedildi.");
       }
 
       setShowFeedback(true);
@@ -243,27 +229,12 @@ const Kelime = ({ navigation }) => {
     setShowFeedback(false);
     setIsRecording(false);
 
-    const isCurrentWrong = words[currentIndex]?.isCorrect === false;
-
-    setWords((prevWords) => {
-      let updated = [...prevWords];
-
-      // ❌ Eğer kelime yanlış telaffuz edildiyse, listeden çıkar
-      if (isCurrentWrong) {
-        updated.splice(currentIndex, 1); // mevcut kelimeyi çıkar
-        setCurrentIndex((prev) => Math.max(0, prev - 1)); // indexi bir geri al
-      } else {
-        if (currentIndex < updated.length - 1) {
-          setCurrentIndex(currentIndex + 1);
-        }
-      }
-
-      return updated;
-    });
-
-    // Yeni kelime çek (yanlış da olsa hep yeni kelime çekiyoruz)
-    const lastId = words[currentIndex]?.id || null;
-    fetchRandomWord(lastId);
+    if (currentIndex < words.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      const lastId = words[currentIndex]?.id || null;
+      fetchRandomWord(lastId);
+    }
   };
 
   const handlePreviousWord = () => {
@@ -274,16 +245,23 @@ const Kelime = ({ navigation }) => {
     }
   };
 
+  const handleBack = () => {
+    router.push({
+      pathname: "/ders",
+      params: {
+        courseId,
+        phoneme,
+      },
+    });
+  };
+
   return (
     <ImageBackground
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
       <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
-        >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
           <Image
             source={require("../assets/images/backspace.png")}
             style={styles.backIcon}
@@ -304,7 +282,7 @@ const Kelime = ({ navigation }) => {
             )}
             <TouchableOpacity
               onPress={playOriginalAudio}
-              style={styles.speakerIconWrapper}
+              style={{ marginTop: 20 }}
             >
               <Image
                 source={require("../assets/icons/speaker.png")}
@@ -320,22 +298,13 @@ const Kelime = ({ navigation }) => {
             >
               <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
             </TouchableOpacity>
-
-            <View style={{ alignItems: "center" }}>
-              <TouchableOpacity onPress={handleMicrophonePress}>
-                <FontAwesome
-                  name="microphone"
-                  size={100}
-                  color={isRecording ? "black" : "#FF3B30"}
-                />
-              </TouchableOpacity>
-              <Text style={styles.micInfoText}>
-                {isRecording
-                  ? "Bitirmek için tekrar basın"
-                  : "Kaydetmek için mikrofona basın"}
-              </Text>
-            </View>
-
+            <TouchableOpacity onPress={handleMicrophonePress}>
+              <FontAwesome
+                name="microphone"
+                size={100}
+                color={isRecording ? "red" : "#FF3B30"}
+              />
+            </TouchableOpacity>
             <TouchableOpacity
               style={styles.nextButton}
               onPress={handleNextWord}
@@ -409,12 +378,12 @@ const Kelime = ({ navigation }) => {
           </View>
         </Modal>
       </View>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar />
     </ImageBackground>
   );
 };
 
-export default Kelime;
+export default KursKelime;
 
 const styles = StyleSheet.create({
   container: {
@@ -454,14 +423,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "80%",
-    marginTop: 10,
-    marginBottom: 40,
+    marginTop: 20,
+    marginBottom: 20,
   },
   prevButton: {
-    padding: 5,
+    padding: 10,
   },
   nextButton: {
-    padding: 5,
+    padding: 10,
   },
   wordText: {
     fontSize: 40,
@@ -473,13 +442,6 @@ const styles = StyleSheet.create({
     color: "#FF8754",
     marginTop: 10,
   },
-  speakerIcon: {
-    marginTop: 20,
-    width: 60,
-    height: 60,
-    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
-  },
-
   listenButton: {
     backgroundColor: "#FF3B30",
     paddingVertical: 10,
@@ -534,11 +496,10 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: "bold",
   },
-  micInfoText: {
-    fontSize: 14,
-    color: "#6CA3AD",
-    marginTop: 10,
-    fontStyle: "italic",
-    textAlign: "center",
+  speakerIcon: {
+    marginTop: 20,
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
   },
 });

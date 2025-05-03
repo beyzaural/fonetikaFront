@@ -1,5 +1,7 @@
 import React from "react";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
+
 import {
   StyleSheet,
   Text,
@@ -8,18 +10,20 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { logout } from "./utils/auth";
+import { logout } from "../src/utils/auth";
 import Icon from "react-native-vector-icons/FontAwesome5";
 //import { Alert } from "react-native";
 
-const Ayarlar = ({ navigation }) => {
+const Ayarlar = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -33,13 +37,20 @@ const Ayarlar = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Hesap")}
+          onPress={() => router.push("/hesap")}
         >
           <View style={styles.cardContent}>
-            <Icon name="user-circle" size={30} color="#333" style={styles.icon} />
+            <Icon
+              name="user-circle"
+              size={30}
+              color="#333"
+              style={styles.icon}
+            />
             <View>
               <Text style={styles.cardTitle}>Hesap</Text>
-              <Text style={styles.cardSubtitle}>Profil bilgilerinizi yönetin</Text>
+              <Text style={styles.cardSubtitle}>
+                Profil bilgilerinizi yönetin
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
@@ -49,17 +60,24 @@ const Ayarlar = ({ navigation }) => {
             <Icon name="cog" size={30} color="#333" style={styles.icon} />
             <View>
               <Text style={styles.cardTitle}>Tercihler</Text>
-              <Text style={styles.cardSubtitle}>Uygulama ayarlarınızı özelleştirin</Text>
+              <Text style={styles.cardSubtitle}>
+                Uygulama ayarlarınızı özelleştirin
+              </Text>
             </View>
           </View>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.card}
-          onPress={() => navigation.navigate("Destek")}
+          onPress={() => router.push("/destek")}
         >
           <View style={styles.cardContent}>
-            <Icon name="question-circle" size={30} color="#333" style={styles.icon} />
+            <Icon
+              name="question-circle"
+              size={30}
+              color="#333"
+              style={styles.icon}
+            />
             <View>
               <Text style={styles.cardTitle}>Destek</Text>
               <Text style={styles.cardSubtitle}>Yardım ve destek alın</Text>
@@ -71,22 +89,26 @@ const Ayarlar = ({ navigation }) => {
           style={styles.card}
           onPress={async () => {
             await logout();
-            navigation.reset({
-              index: 0,
-              routes: [{ name: "Login" }],
-            });
+            router.replace("/login");
           }}
         >
           <View style={styles.cardContent}>
-            <Icon name="sign-out-alt" size={30} color="#FF3B30" style={styles.icon} />
+            <Icon
+              name="sign-out-alt"
+              size={30}
+              color="#FF3B30"
+              style={styles.icon}
+            />
             <View>
-              <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>Çıkış Yap</Text>
+              <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>
+                Çıkış Yap
+              </Text>
               <Text style={styles.cardSubtitle}>Hesabınızdan çıkış yapın</Text>
             </View>
           </View>
         </TouchableOpacity>
       </ScrollView>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar router={router} />
     </View>
   );
 };

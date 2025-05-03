@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import BottomNavBar from "./BottomNavBar";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
+
 import { LinearGradient } from "expo-linear-gradient";
 
 const FAQ = () => {
-  const navigation = useNavigation();
+  const router = useRouter();
   const faqs = [
     {
       question: "Fonetika nedir?",
@@ -41,7 +42,7 @@ const FAQ = () => {
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => router.back()}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -60,7 +61,7 @@ const FAQ = () => {
           </View>
         ))}
       </ScrollView>
-      <BottomNavBar navigation={navigation} />
+      <BottomNavBar  router={router} />
     </View>
   );
 };

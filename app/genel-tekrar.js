@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Alert } from "react-native";
 import {
   StyleSheet,
   Text,
@@ -12,26 +11,23 @@ import {
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
+import BottomNavBar from "../src/BottomNavBar";
+import { useRouter } from "expo-router";
+import { getUserIdFromToken } from "../src/utils/auth";
 import Constants from "expo-constants";
-import BottomNavBar from "./BottomNavBar";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
-import { getUserIdFromToken } from "./utils/auth";
 
-const KursKelime = ({ navigation, route }) => {
-  const { courseId, phoneme } = route?.params || {};
-  const [words, setWords] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+const Geneltekrar = () => {
+  const router = useRouter();
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
-
-  // Fetch random word from backend
-  useEffect(() => {
-    fetchRandomWord(null);
-  }, []);
+  const [mistakes, setMistakes] = useState([]);
+  const [enrichedMistakes, setEnrichedMistakes] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const sanitizeWord = (word) => {
     return word
@@ -45,13 +41,50 @@ const KursKelime = ({ navigation, route }) => {
       .replace(/\s+/g, "")
       .replace(/[^a-z0-9]/g, "");
   };
+
+  useEffect(() => {
+    const fetchMistakes = async () => {
+      try {
+        const userId = await getUserIdFromToken();
+        if (!userId) return;
+
+        const res = await axios.get(
+          `${API_URL}/api/mispronounced-words/user/${userId}`
+        );
+        const mistakes = res.data;
+
+        const enriched = await Promise.all(
+          mistakes.map(async (mistake) => {
+            const wordRes = await axios.get(
+              `${API_URL}/api/words/id/${mistake.wordId}`
+            );
+            const wordData = wordRes.data;
+            if (!wordData || !wordData.word) return null;
+            return {
+              ...mistake,
+              word: wordData.word,
+              phonetic: wordData.phoneticWriting,
+              ipucu: "'Bu kelimeyi daha önce yanlış telaffuz ettiniz.'",
+              audioPath: wordData.audioPath,
+            };
+          })
+        );
+
+        setEnrichedMistakes(enriched.filter((e) => e !== null));
+      } catch (error) {
+        console.error("❌ Hatalar alınamadı:", error);
+      }
+    };
+
+    fetchMistakes();
+  }, []);
+
   const playOriginalAudio = async () => {
-    const currentWord = words[currentIndex];
+    const currentWord = enrichedMistakes[currentIndex];
     if (!currentWord?.audioPath) {
       alert("Bu kelime için ses kaydı bulunamadı.");
       return;
     }
-
     try {
       const { sound } = await Audio.Sound.createAsync(
         { uri: currentWord.audioPath },
@@ -59,97 +92,13 @@ const KursKelime = ({ navigation, route }) => {
       );
     } catch (error) {
       console.error("Error playing original audio:", error);
-      Alert.alert("Hata", "Orijinal ses çalınamadı.");
     }
   };
 
-  const fetchRandomWord = (lastWordId = null) => {
-    axios
-      .get(`${API_URL}/api/words/random`, {
-        params: { lastWordId, userId: getUserIdFromToken },
-      })
-      .then((res) => {
-        const w = res.data;
-        const enrichedWord = {
-          ...w,
-          definition: w.phoneticWriting || "",
-          tahmin: "",
-          instruction: "",
-          kelime: w.phoneticWriting || "",
-          ipucu: "",
-        };
-
-        setWords((prevWords) => {
-          const updatedWords = [...prevWords, enrichedWord];
-          if (prevWords.length === 0) {
-            setCurrentIndex(0);
-          } else {
-            setCurrentIndex(updatedWords.length - 1);
-          }
-          return updatedWords;
-        });
-      })
-      .catch((err) => {
-        console.error("Random kelime alınamadı", err);
-      });
-  };
-
-  const handleMicrophonePress = async () => {
-    if (recording) {
-      try {
-        await recording.stopAndUnloadAsync();
-        const uri = recording.getURI();
-        console.log("Recording saved at:", uri);
-        setAudioUri(uri);
-        setRecording(null);
-        setIsRecording(false);
-        sendAudioToBackend(uri); // Send m4a file to backend
-      } catch (error) {
-        console.error("Error stopping recording:", error);
-      }
-    } else {
-      try {
-        if (recording !== null) {
-          await recording.stopAndUnloadAsync();
-          setRecording(null);
-        }
-
-        const { granted } = await Audio.requestPermissionsAsync();
-        if (!granted) {
-          alert("Mikrofon erişimi gerekiyor.");
-          return;
-        }
-
-        await Audio.setAudioModeAsync({
-          allowsRecordingIOS: true,
-          playsInSilentModeIOS: true,
-        });
-
-        const { recording: newRecording } = await Audio.Recording.createAsync(
-          Audio.RecordingOptionsPresets.HIGH_QUALITY
-        );
-
-        setRecording(newRecording);
-        setIsRecording(true);
-      } catch (error) {
-        console.error("Failed to start recording:", error);
-      }
-    }
-  };
-
-  // Utility: Convert a blob URL into a temporary File object with m4a name/type.
-  const createTemporaryFile = async (blobUri) => {
-    const response = await fetch(blobUri);
-    const blob = await response.blob();
-    // This File object only renames the file and sets the MIME type; it doesn't convert audio format.
-    return new File([blob], "recording.m4a", { type: "audio/m4a" });
-  };
-
-  // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
       const userId = await getUserIdFromToken();
-      const currentWord = words[currentIndex];
+      const currentWord = enrichedMistakes[currentIndex];
 
       const formData = new FormData();
       formData.append("file", {
@@ -158,52 +107,96 @@ const KursKelime = ({ navigation, route }) => {
         name: sanitizeWord(currentWord.word) + ".wav",
       });
       formData.append("expected_word", currentWord.word || "");
-      formData.append("word_id", currentWord.id || "");
+      formData.append("word_id", currentWord.wordId || "");
       formData.append("user_id", userId);
 
       const response = await fetch(`${API_URL}/api/speech/evaluate`, {
         method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
         body: formData,
       });
 
       const responseJson = await response.json();
-      console.log("✅ Full backend response:", responseJson);
-
-      if (responseJson.correct) {
-        setFeedback(responseJson.feedbackText);
-      } else {
-        setFeedback(
-          `You said "${responseJson.recognizedWord}", but expected "${currentWord.word}".`
-        );
-      }
-
-      setWords((prevWords) => {
-        const updatedWords = [...prevWords];
-        updatedWords[currentIndex].transcribedText =
-          responseJson.recognizedWord;
-        updatedWords[currentIndex].isCorrect = responseJson.correct;
-        return updatedWords;
-      });
+      console.log("✅ Geneltekrar backend response:", responseJson);
 
       await axios.post(`${API_URL}/api/progress/add`, null, {
         params: { userId, count: 1 },
       });
 
-      if (!responseJson.correct) {
-        await axios.post(`${API_URL}/api/mispronounced-words/record`, {
-          userId,
-          wordId: currentWord.id,
+      setFeedback(responseJson.feedback);
+
+      if (responseJson.correct) {
+        await axios.post(
+          `${API_URL}/api/mispronounced-words/record-pronunciation`,
+          {
+            userId,
+            wordId: currentWord.wordId,
+            correct: true,
+          }
+        );
+      }
+
+      const updatedMistakes = await axios.get(
+        `${API_URL}/api/mispronounced-words/user/${userId}`
+      );
+      const stillMistaken = updatedMistakes.data.find(
+        (item) => item.wordId === currentWord.wordId
+      );
+
+      if (!stillMistaken) {
+        setEnrichedMistakes((prev) =>
+          prev.filter((_, index) => index !== currentIndex)
+        );
+        setCurrentIndex((prev) => Math.max(0, prev - 1));
+      } else {
+        setEnrichedMistakes((prev) => {
+          const updated = [...prev];
+          updated[currentIndex] = {
+            ...updated[currentIndex],
+            transcribedText: responseJson.transcribedText,
+            isCorrect: responseJson.correct,
+          };
+          return updated;
         });
-        console.log("❌ MispronouncedWord kaydedildi.");
       }
 
       setShowFeedback(true);
     } catch (error) {
-      console.error("❌ Error sending audio:", error);
-      Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
+      console.error("❌ Feedback alınırken hata oluştu:", error);
+    }
+  };
+
+  const handleMicrophonePress = async () => {
+    if (recording) {
+      try {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        setAudioUri(uri);
+        setRecording(null);
+        setIsRecording(false);
+        await sendAudioToBackend(uri);
+      } catch (error) {
+        console.error("Error stopping recording:", error);
+      }
+    } else {
+      try {
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+          alert("Mikrofon izni gerekiyor.");
+          return;
+        }
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+        const { recording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+        setRecording(recording);
+        setIsRecording(true);
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+      }
     }
   };
 
@@ -223,23 +216,17 @@ const KursKelime = ({ navigation, route }) => {
   };
 
   const handleNextWord = () => {
+    setCurrentIndex((prev) => (prev + 1) % enrichedMistakes.length);
     setShowFeedback(false);
     setIsRecording(false);
-
-    if (currentIndex < words.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      const lastId = words[currentIndex]?.id || null;
-      fetchRandomWord(lastId);
-    }
   };
 
   const handlePreviousWord = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-      setShowFeedback(false);
-      setIsRecording(false);
-    }
+    setCurrentIndex(
+      (prev) => (prev - 1 + enrichedMistakes.length) % enrichedMistakes.length
+    );
+    setShowFeedback(false);
+    setIsRecording(false);
   };
 
   return (
@@ -248,14 +235,10 @@ const KursKelime = ({ navigation, route }) => {
       style={styles.imageBackground}
     >
       <View style={styles.container}>
+        {/* Back Arrow */}
         <TouchableOpacity
           style={styles.backButton}
-          onPress={() =>
-            navigation.navigate("Ders", {
-              courseId: courseId,
-              phoneme: phoneme,
-            })
-          }
+          onPress={() => router.push("/home")}
         >
           <Image
             source={require("../assets/images/backspace.png")}
@@ -263,29 +246,35 @@ const KursKelime = ({ navigation, route }) => {
           />
         </TouchableOpacity>
 
+        {/* Top Container */}
         <View style={styles.topContainer}>
           <View style={styles.wordContainer}>
-            {words[currentIndex] ? (
-              <>
-                <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-                <Text style={styles.phoneticText}>
-                  {words[currentIndex].definition}
-                </Text>
-              </>
+            {enrichedMistakes.length === 0 ? (
+              <Text style={styles.wordText}>
+                Tekrar edilecek kelime bulunamadı.
+              </Text>
             ) : (
-              <Text style={styles.wordText}>Yükleniyor...</Text>
+              <>
+                <Text style={styles.wordText}>
+                  {enrichedMistakes[currentIndex]?.word}
+                </Text>
+                <Text style={styles.phoneticText}>
+                  {enrichedMistakes[currentIndex]?.phonetic}
+                </Text>
+                <TouchableOpacity
+                  onPress={playOriginalAudio}
+                  style={{ marginTop: 20 }}
+                >
+                  <Image
+                    source={require("../assets/icons/speaker.png")}
+                    style={styles.speakerIcon}
+                  />
+                </TouchableOpacity>
+              </>
             )}
-            <TouchableOpacity
-              onPress={playOriginalAudio}
-              style={{ marginTop: 20 }}
-            >
-              <Image
-                source={require("../assets/icons/speaker.png")}
-                style={styles.speakerIcon}
-              />
-            </TouchableOpacity>
           </View>
 
+          {/*  Arrows and Microphone Button in a Row */}
           <View style={styles.navigationContainer}>
             <TouchableOpacity
               style={styles.prevButton}
@@ -318,40 +307,46 @@ const KursKelime = ({ navigation, route }) => {
           <View style={styles.feedbackContainer}>
             <View style={styles.feedbackContent}>
               <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-              {words.length > 0 && words[currentIndex] ? (
+
+              {enrichedMistakes[currentIndex] ? (
                 <>
                   <Text style={styles.tahminText}>
-                    Sanırım “{words[currentIndex]?.transcribedText || "..."}”
+                    Sanırım “
+                    {enrichedMistakes[currentIndex]?.transcribedText || "..."}”
                     dediniz.
                   </Text>
                   <Text style={styles.instructionText}>
-                    {words[currentIndex]?.isCorrect
+                    {enrichedMistakes[currentIndex]?.isCorrect
                       ? "✅ Doğru söylediniz!"
                       : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
                   </Text>
                   <Text style={styles.kelimeText}>
-                    {words[currentIndex].kelime.split("").map((char, index) => {
-                      const isRed =
-                        (words[currentIndex].word === "Kamuflaj" &&
-                          char === "u") ||
-                        (words[currentIndex].word === "Ağabey" &&
-                          char === "i") ||
-                        (words[currentIndex].word === "Sahi" && char === ":");
-                      return (
-                        <Text
-                          key={index}
-                          style={isRed ? styles.redText : styles.blackText}
-                        >
-                          {char}
-                        </Text>
-                      );
-                    })}
+                    {enrichedMistakes[currentIndex].phonetic
+                      .split("")
+                      .map((char, index) => {
+                        const isRed =
+                          (enrichedMistakes[currentIndex].word === "Kamuflaj" &&
+                            char === "u") ||
+                          (enrichedMistakes[currentIndex].word === "Ağabey" &&
+                            char === "i") ||
+                          (enrichedMistakes[currentIndex].word === "Sahi" &&
+                            char === ":");
+
+                        return (
+                          <Text
+                            key={index}
+                            style={isRed ? styles.redText : styles.blackText}
+                          >
+                            {char}
+                          </Text>
+                        );
+                      })}
                   </Text>
 
-                  {words[currentIndex].ipucu !== "" && (
+                  {enrichedMistakes[currentIndex].ipucu && (
                     <Text style={styles.ipucuText}>
                       <Text style={styles.ipucuBold}>İpucu: </Text>
-                      {words[currentIndex].ipucu}
+                      {enrichedMistakes[currentIndex].ipucu}
                     </Text>
                   )}
                 </>
@@ -372,13 +367,14 @@ const KursKelime = ({ navigation, route }) => {
             </View>
           </View>
         </Modal>
+
+        <BottomNavBar router={router}/>
       </View>
-      <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
 };
 
-export default KursKelime;
+export default Geneltekrar;
 
 const styles = StyleSheet.create({
   container: {
@@ -406,20 +402,20 @@ const styles = StyleSheet.create({
   wordContainer: {
     backgroundColor: "#F9F4F1",
     width: "80%",
-    height: 430,
+    height: 430, // Sabit yükseklik ver
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
     marginTop: 40,
-    marginBottom: 40,
+    marginBottom: 40, // Add margin to create space
   },
   navigationContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "80%",
-    marginTop: 20,
-    marginBottom: 20,
+    width: "80%", // Adjust to your design needs
+    marginTop: 20, // Optional spacing
+    marginBottom: 20, // Optional spacing for further alignment
   },
   prevButton: {
     padding: 10,
@@ -427,6 +423,7 @@ const styles = StyleSheet.create({
   nextButton: {
     padding: 10,
   },
+
   wordText: {
     fontSize: 40,
     fontWeight: "bold",
@@ -437,6 +434,7 @@ const styles = StyleSheet.create({
     color: "#FF8754",
     marginTop: 10,
   },
+
   listenButton: {
     backgroundColor: "#FF3B30",
     paddingVertical: 10,
@@ -492,9 +490,9 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   speakerIcon: {
-    marginTop: 20,
     width: 60,
     height: 60,
-    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
+    tintColor: "#FF3B30", // isteğe bağlı renk
+    marginTop: 10,
   },
 });
