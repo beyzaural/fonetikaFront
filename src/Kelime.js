@@ -296,7 +296,6 @@ const Kelime = ({ navigation }) => {
       setIsRecording(false);
     }
   };
-
   return (
     <ImageBackground
       source={require("../assets/images/bluedalga.png")}
@@ -367,6 +366,7 @@ const Kelime = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         </View>
+
         <Modal
           animationType="slide"
           transparent={true}
@@ -377,20 +377,17 @@ const Kelime = ({ navigation }) => {
             <View style={styles.feedbackContent}>
               <ScrollView contentContainerStyle={styles.scrollContainer}>
                 <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-
                 {words.length > 0 && words[currentIndex] ? (
                   <>
                     <Text style={styles.tahminText}>
                       Sanırım “{words[currentIndex]?.transcribedText || "..."}”
                       dediniz.
                     </Text>
-
                     <Text style={styles.instructionText}>
                       {words[currentIndex]?.isCorrect
                         ? "✅ Doğru söylediniz!"
                         : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
                     </Text>
-
                     {feedback !== "" && (
                       <Text
                         style={{
@@ -403,44 +400,27 @@ const Kelime = ({ navigation }) => {
                         {feedback}
                       </Text>
                     )}
-
                     <Text style={styles.kelimeText}>
                       {words[currentIndex].kelime
                         .split("")
-                        .map((char, index) => {
-                          const isRed =
-                            (words[currentIndex].word === "Kamuflaj" &&
-                              char === "u") ||
-                            (words[currentIndex].word === "Ağabey" &&
-                              char === "i") ||
-                            (words[currentIndex].word === "Sahi" &&
-                              char === ":");
-
-                          return (
-                            <Text
-                              key={index}
-                              style={isRed ? styles.redText : styles.blackText}
-                            >
-                              {char}
-                            </Text>
-                          );
-                        })}
+                        .map((char, index) => (
+                          <Text key={index} style={styles.blackText}>
+                            {char}
+                          </Text>
+                        ))}
                     </Text>
-
                     {words[currentIndex].ipucu !== "" && (
                       <Text style={styles.ipucuText}>
                         <Text style={styles.ipucuBold}>İpucu: </Text>
                         {words[currentIndex].ipucu}
                       </Text>
                     )}
-
                     <TouchableOpacity
                       onPress={playAudio}
                       style={styles.listenButton}
                     >
                       <Text style={styles.listenButtonText}>Dinle</Text>
                     </TouchableOpacity>
-
                     <TouchableOpacity
                       style={styles.closeButton}
                       onPress={() => setShowFeedback(false)}
