@@ -9,6 +9,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
@@ -29,7 +30,9 @@ const Kelime = ({ navigation }) => {
   const [audioUri, setAudioUri] = useState(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
-
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); // replaces showFeedback
+  
   // Fetch random word from backend
   useEffect(() => {
     fetchRandomWord(null);
@@ -163,6 +166,8 @@ const Kelime = ({ navigation }) => {
   // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
+      setIsFeedbackLoading(true);      // Start loading
+      setShowModal(true);
       const userId = await getUserIdFromToken();
       const currentWord = words[currentIndex];
   
@@ -198,7 +203,7 @@ const Kelime = ({ navigation }) => {
           : "Tebrikler! Tüm sesleri doğru söylediniz.";
   
       setFeedback(formattedFeedback);
-  
+      setIsFeedbackLoading(false);
       // ✅ Save response data to current word
       setWords((prevWords) => {
         const updatedWords = [...prevWords];
@@ -231,6 +236,8 @@ const Kelime = ({ navigation }) => {
     } catch (error) {
       console.error("❌ Error sending audio:", error);
       Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
+    } finally {
+      setIsFeedbackLoading(false);  // Stop loading regardless of success/failure
     }
   };
   
@@ -359,79 +366,77 @@ const Kelime = ({ navigation }) => {
         <Modal
           animationType="slide"
           transparent={true}
-          visible={showFeedback}
-          onRequestClose={() => setShowFeedback(false)}
+          visible={showModal}
+          onRequestClose={() => setShowModal(false)}
         >
           <View style={styles.feedbackContainer}>
             <View style={styles.feedbackContent}>
-              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-              {words.length > 0 && words[currentIndex] ? (
-                <>
-                  <Text style={styles.tahminText}>
-                    Sanırım “{words[currentIndex]?.transcribedText || "..."}”
-                    dediniz.
+              
+              {/* Fixed top-right close button */}
+              <TouchableOpacity
+                onPress={() => setShowModal(false)}
+                style={styles.modalCloseIcon}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <FontAwesome name="close" size={26} color="#FF3B30" />
+              </TouchableOpacity>
+
+              <ScrollView contentContainerStyle={styles.scrollContainer}>
+                {isFeedbackLoading || !words[currentIndex] ? (
+                  <Text style={{ textAlign: "center", fontSize: 16 }}>
+                    Geri bildirim hazırlanıyor...
                   </Text>
-                  <Text style={styles.instructionText}>
-                    {words[currentIndex]?.isCorrect
-                      ? "✅ Doğru söylediniz!"
-                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
-                  </Text>
-                    {/* ⚡ Display feedback if available */}
-                    {feedback !== "" && (
-                    <Text
-                      style={{
-                        marginTop: 10,
-                        fontSize: 14,
-                        color: "#333",
-                        whiteSpace: "pre-line", // for newline formatting
-                      }}
-                    >
-                      {feedback}
+                ) : (
+                  <>
+                    <Text style={[styles.feedbackTitle, { marginBottom: 10 }]}>
+                      Geri Bildirim
                     </Text>
-                  )}
-                  <Text style={styles.kelimeText}>
-                    {words[currentIndex].kelime.split("").map((char, index) => {
-                      const isRed =
-                        (words[currentIndex].word === "Kamuflaj" &&
-                          char === "u") ||
-                        (words[currentIndex].word === "Ağabey" &&
-                          char === "i") ||
-                        (words[currentIndex].word === "Sahi" && char === ":");
-                      return (
-                        <Text
-                          key={index}
-                          style={isRed ? styles.redText : styles.blackText}
-                        >
+
+                    <Text style={[styles.tahminText, { marginBottom: 10 }]}>
+                      Sanırım “{words[currentIndex].transcribedText || "..."}” dediniz.
+                    </Text>
+
+                    <Text style={[styles.instructionText, { marginBottom: 10 }]}>
+                      {words[currentIndex].isCorrect
+                        ? "✅ Doğru söylediniz!"
+                        : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
+                    </Text>
+
+                    {feedback !== "" && (
+                      <Text style={{ marginTop: 10, fontSize: 14, color: "#333", lineHeight: 20 }}>
+                        {feedback}
+                      </Text>
+                    )}
+
+                    <Text style={styles.kelimeText}>
+                      {words[currentIndex].kelime.split("").map((char, index) => (
+                        <Text key={index} style={styles.blackText}>
                           {char}
                         </Text>
-                      );
-                    })}
-                  </Text>
-
-                  {words[currentIndex].ipucu !== "" && (
-                    <Text style={styles.ipucuText}>
-                      <Text style={styles.ipucuBold}>İpucu: </Text>
-                      {words[currentIndex].ipucu}
+                      ))}
                     </Text>
-                  )}
-                </>
-              ) : (
-                <Text>Yükleniyor...</Text>
-              )}
 
-              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-                <Text style={styles.listenButtonText}>Dinle</Text>
-              </TouchableOpacity>
+                    {words[currentIndex].ipucu !== "" && (
+                      <Text style={styles.ipucuText}>
+                        <Text style={styles.ipucuBold}>İpucu: </Text>
+                        {words[currentIndex].ipucu}
+                      </Text>
+                    )}
 
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowFeedback(false)}
-              >
-                <Text style={styles.closeButtonText}>Kapat</Text>
-              </TouchableOpacity>
+                    <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+                      <Text style={styles.listenButtonText}>Dinle</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.closeButton} onPress={() => setShowModal(false)}>
+                      <Text style={styles.closeButtonText}>Kapat</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </ScrollView>
             </View>
           </View>
         </Modal>
+
       </View>
       <BottomNavBar navigation={navigation} />
     </ImageBackground>
@@ -519,6 +524,8 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    //padding:20,
+    
   },
   feedbackContent: {
     height: "50%",
@@ -565,4 +572,17 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     textAlign: "center",
   },
+  scrollContainer: {
+    paddingBottom: 10, // prevents content from touching the bottom
+    paddingHorizontal: 15,
+    paddingVertical:10,  // adds horizontal space
+  },
+  modalCloseIcon: {
+    position: "absolute",
+    top: 10,
+    right: 15,
+    zIndex: 10,
+  },
+  
+  
 });
