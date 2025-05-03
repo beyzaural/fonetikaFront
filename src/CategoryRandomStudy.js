@@ -1,3 +1,4 @@
+// RandomStudy.js
 import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
@@ -11,12 +12,13 @@ import { Audio } from "expo-av";
 import axios from "axios";
 import Constants from "expo-constants";
 import { getUserIdFromToken } from "./utils/auth";
-import { useNavigation } from "@react-navigation/native";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
-const HukukRandomStudy = () => {
+const CategoryRandomStudy = ({ navigation, route }) => {
+  const { field } = route.params;
+
   const [wordData, setWordData] = useState(null);
   const [recording, setRecording] = useState(null);
   const [recordedUri, setRecordedUri] = useState(null);
@@ -24,15 +26,17 @@ const HukukRandomStudy = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const navigation = useNavigation();
-
   const fetchRandomWord = async () => {
     setIsLoading(true);
     try {
       const userId = await getUserIdFromToken();
-      const res = await axios.get(`${API_URL}/api/hukuk-words/random`, {
-        params: { userId },
-      });
+      const endpoint = `${API_URL}/api/${field.toLowerCase()}-words/random`;
+      console.log(
+        "Trying to fetch:",
+        `${API_URL}/api/${field.toLowerCase()}-words/all`
+      );
+
+      const res = await axios.get(endpoint, { params: { userId } });
       setWordData(res.data);
       setFeedback(null);
       setRecordedUri(null);
@@ -99,8 +103,7 @@ const HukukRandomStudy = () => {
       });
       formData.append("expectedWord", wordData.word);
       formData.append("userId", userId);
-
-      formData.append("word_id", wordData.id); // required by /evaluate
+      formData.append("word_id", wordData.id);
 
       const res = await axios.post(`${API_URL}/api/speech/evaluate`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -189,7 +192,7 @@ const HukukRandomStudy = () => {
   );
 };
 
-export default HukukRandomStudy;
+export default CategoryRandomStudy;
 
 const styles = StyleSheet.create({
   container: {
