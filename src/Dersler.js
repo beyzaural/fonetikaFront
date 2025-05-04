@@ -164,9 +164,6 @@ const Dersler = ({ navigation }) => {
                     <Text style={styles.cardTitle}>
                       {getTitleForCourse(course.courseName)}
                     </Text>
-                    <Text style={styles.cardDifficulty}>
-                      Zorluk: {course.difficulty || "Bilinmiyor"}
-                    </Text>
                   </View>
                 </View>
               </TouchableOpacity>

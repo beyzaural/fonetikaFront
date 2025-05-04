@@ -15,7 +15,7 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { getUserProfile } from "./utils/auth";
+import { getUserProfile, getUserIdFromToken } from "./utils/auth";
 import BottomNavBar from "./BottomNavBar";
 import ProgressBar from "./ProgressBar";
 import GoalRing from "./GoalRing";
@@ -32,55 +32,58 @@ const Home = ({ navigation, route }) => {
   const [userProgress, setUserProgress] = useState(null);
 
   useEffect(() => {
-    const fetchProgress = async () => {
-      if (!userId) return;
-      try {
-        const token = await AsyncStorage.getItem("token");
-        const res = await axios.get(`${API_URL}/api/progress/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setUserProgress(res.data);
-      } catch (err) {
-        console.error("❌ Kullanıcı ilerlemesi alınamadı:", err);
-      }
-    };
-    fetchProgress();
-  }, [userId]);
-  useEffect(() => {
     const fetchUserData = async () => {
-      const userProfile = await getUserProfile();
-      if (userProfile?.username) {
-        setUserName(userProfile.username);
-        setUserId(userProfile.userId);
+      console.log("🔍 Fetching user data...");
+      try {
+        const userId = await getUserIdFromToken();
+        console.log("✅ Got userId from token:", userId);
+        if (userId) {
+          setUserId(userId);
+        }
+
+        const userProfile = await getUserProfile();
+        console.log("📦 User profile received:", userProfile);
+        if (userProfile?.username) {
+          setUserName(userProfile.username);
+          setUserDailyGoal(userProfile.dailyGoal);
+          console.log("✅ Set username and dailyGoal:", userProfile.username, userProfile.dailyGoal);
+        }
+      } catch (error) {
+        console.error("❌ Error fetching user data:", error);
       }
     };
     fetchUserData();
   }, []);
 
   useEffect(() => {
-    const fetchUserInfo = async () => {
-      if (!userId) return;
+    const fetchProgress = async () => {
+      if (!userId) {
+        console.log("❌ No userId available, skipping progress fetch");
+        return;
+      }
       try {
+        console.log("🔍 Fetching progress for userId:", userId);
         const token = await AsyncStorage.getItem("token");
-        console.log("🧪 Raw token:", token);
-        console.log("🧪 User id:", userId);
-        const res = await axios.get(`${API_URL}/users/profile`, {
+        if (!token) {
+          console.log("❌ No token available");
+          return;
+        }
+        const res = await axios.get(`${API_URL}/api/progress/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          params: {
-            userId: userId
-          }
         });
-        setUserDailyGoal(res.data.dailyGoal);
+        console.log("📦 Progress data received:", res.data);
+        setUserProgress(res.data);
       } catch (err) {
-        console.error("❌ Kullanıcı bilgisi alınamadı:", err);
+        console.error("❌ Failed to fetch progress:", err);
+        if (err.response) {
+          console.error("📡 Response status:", err.response.status);
+          console.error("📡 Response data:", err.response.data);
+        }
       }
     };
-
-    fetchUserInfo();
+    fetchProgress();
   }, [userId]);
 
   const [dictionTip, setDictionTip] = useState(null);
