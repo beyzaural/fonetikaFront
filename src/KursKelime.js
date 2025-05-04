@@ -62,26 +62,31 @@ const KursKelime = ({ navigation, route }) => {
     }
   };
 
-  const fetchRandomWord = async (lastWordId = null) => {
+  const fetchRandomWord = async () => {
     try {
-      const userId = await getUserIdFromToken(); // ✅ properly await the value
+      const userId = await getUserIdFromToken(); // still useful for other logic
 
-      const res = await axios.get(`${API_URL}/api/words/random`, {
-        params: { lastWordId, userId },
-      });
+      const res = await axios.get(
+        `${API_URL}/api/courses/${courseId}/random-word`
+      );
+      const word = res.data;
 
-      const w = res.data;
-      const enrichedWord = {
-        ...w,
-        definition: w.phoneticWriting || "",
+      if (!word) {
+        console.warn("⚠️ No word received from backend.");
+        return;
+      }
+
+      const enriched = {
+        ...word,
+        definition: word.phoneticWriting || "",
         tahmin: "",
         instruction: "",
-        kelime: w.phoneticWriting || "",
+        kelime: word.phoneticWriting || "",
         ipucu: "",
       };
 
       setWords((prevWords) => {
-        const updatedWords = [...prevWords, enrichedWord];
+        const updatedWords = [...prevWords, enriched];
         if (prevWords.length === 0) {
           setCurrentIndex(0);
         } else {
@@ -90,7 +95,7 @@ const KursKelime = ({ navigation, route }) => {
         return updatedWords;
       });
     } catch (err) {
-      console.error("Random kelime alınamadı", err);
+      console.error("❌ Random course word fetch error:", err);
     }
   };
 
