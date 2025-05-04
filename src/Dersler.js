@@ -22,23 +22,51 @@ const Dersler = ({ navigation }) => {
   useEffect(() => {
     const fetchCourses = async () => {
       try {
+        console.log("🔍 Fetching courses from:", `${API_URL}/api/courses/user`);
         const token = await AsyncStorage.getItem("token");
         if (!token) {
-          console.warn("No token found in AsyncStorage.");
+          console.warn("❌ No token found in AsyncStorage.");
           return;
         }
+        console.log("✅ Token found, making request...");
 
         const res = await axios.get(`${API_URL}/api/courses/user`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
+          validateStatus: function (status) {
+            return status >= 200 && status < 500; // Accept all status codes less than 500
+          }
         });
+
+        if (res.status >= 400) {
+          console.error("❌ Server returned error status:", res.status);
+          console.error("❌ Error response:", res.data);
+          return;
+        }
+
+        console.log("📦 Response data:", res.data);
+        if (!res.data || !Array.isArray(res.data)) {
+          console.error("❌ Invalid response format:", res.data);
+          return;
+        }
 
         const groupedCourses = groupCourses(res.data);
         setCourses(groupedCourses);
-        console.log(groupedCourses);
+        console.log("🎯 Grouped courses:", groupedCourses);
       } catch (error) {
-        console.error("Failed to fetch courses:", error);
+        console.error("❌ Failed to fetch courses:", error);
+        if (error.response) {
+          console.error("📡 Response status:", error.response.status);
+          console.error("📡 Response data:", error.response.data);
+          console.error("📡 Response headers:", error.response.headers);
+        } else if (error.request) {
+          console.error("📡 No response received:", error.request);
+        } else {
+          console.error("📡 Error setting up request:", error.message);
+        }
       }
     };
 

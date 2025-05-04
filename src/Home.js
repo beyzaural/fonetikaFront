@@ -67,10 +67,12 @@ const Home = ({ navigation, route }) => {
         console.log("🧪 Raw token:", token);
         console.log("🧪 User id:", userId);
         const res = await axios.get(`${API_URL}/users/profile`, {
-          params: { userId },
           headers: {
             Authorization: `Bearer ${token}`,
           },
+          params: {
+            userId: userId
+          }
         });
         setUserDailyGoal(res.data.dailyGoal);
       } catch (err) {
