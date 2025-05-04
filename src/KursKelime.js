@@ -66,9 +66,10 @@ const KursKelime = ({ navigation, route }) => {
     try {
       const userId = await getUserIdFromToken(); // still useful for other logic
 
-      const res = await axios.get(
-        `${API_URL}/api/courses/${courseId}/random-word`
-      );
+      const res = await axios.get(`${API_URL}/api/words/random-by-phoneme`, {
+        params: { phoneme },
+      });
+
       const word = res.data;
 
       if (!word) {
