@@ -15,7 +15,7 @@ import {
   ScrollView,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { getUserInfo } from "./utils/auth";
+import { getUserProfile } from "./utils/auth";
 import BottomNavBar from "./BottomNavBar";
 import ProgressBar from "./ProgressBar";
 import GoalRing from "./GoalRing";
@@ -50,10 +50,10 @@ const Home = ({ navigation, route }) => {
   }, [userId]);
   useEffect(() => {
     const fetchUserData = async () => {
-      const userInfo = await getUserInfo();
-      if (userInfo?.username) {
-        setUserName(userInfo.username);
-        setUserId(userInfo.userId); // 👈 ADD THIS
+      const userProfile = await getUserProfile();
+      if (userProfile?.username) {
+        setUserName(userProfile.username);
+        setUserId(userProfile.userId);
       }
     };
     fetchUserData();
