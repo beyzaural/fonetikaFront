@@ -28,7 +28,6 @@ const KursKelime = ({ navigation, route }) => {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
 
-  // Fetch random word from backend
   useEffect(() => {
     fetchRandomWord(null);
   }, []);
@@ -63,35 +62,36 @@ const KursKelime = ({ navigation, route }) => {
     }
   };
 
-  const fetchRandomWord = (lastWordId = null) => {
-    axios
-      .get(`${API_URL}/api/words/random`, {
-        params: { lastWordId, userId: getUserIdFromToken },
-      })
-      .then((res) => {
-        const w = res.data;
-        const enrichedWord = {
-          ...w,
-          definition: w.phoneticWriting || "",
-          tahmin: "",
-          instruction: "",
-          kelime: w.phoneticWriting || "",
-          ipucu: "",
-        };
+  const fetchRandomWord = async (lastWordId = null) => {
+    try {
+      const userId = await getUserIdFromToken(); // ✅ properly await the value
 
-        setWords((prevWords) => {
-          const updatedWords = [...prevWords, enrichedWord];
-          if (prevWords.length === 0) {
-            setCurrentIndex(0);
-          } else {
-            setCurrentIndex(updatedWords.length - 1);
-          }
-          return updatedWords;
-        });
-      })
-      .catch((err) => {
-        console.error("Random kelime alınamadı", err);
+      const res = await axios.get(`${API_URL}/api/words/random`, {
+        params: { lastWordId, userId },
       });
+
+      const w = res.data;
+      const enrichedWord = {
+        ...w,
+        definition: w.phoneticWriting || "",
+        tahmin: "",
+        instruction: "",
+        kelime: w.phoneticWriting || "",
+        ipucu: "",
+      };
+
+      setWords((prevWords) => {
+        const updatedWords = [...prevWords, enrichedWord];
+        if (prevWords.length === 0) {
+          setCurrentIndex(0);
+        } else {
+          setCurrentIndex(updatedWords.length - 1);
+        }
+        return updatedWords;
+      });
+    } catch (err) {
+      console.error("Random kelime alınamadı", err);
+    }
   };
 
   const handleMicrophonePress = async () => {
