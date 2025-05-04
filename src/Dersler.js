@@ -12,6 +12,7 @@ import {
   ScrollView,
   Image,
 } from "react-native";
+import { getUserIdFromToken } from "./utils/auth"; // add this at the top
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -30,15 +31,18 @@ const Dersler = ({ navigation }) => {
         }
         console.log("✅ Token found, making request...");
 
+        const userId = await getUserIdFromToken();
+
         const res = await axios.get(`${API_URL}/api/courses/user`, {
+          params: { userId }, // ✅ required by backend
           headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
           validateStatus: function (status) {
-            return status >= 200 && status < 500; // Accept all status codes less than 500
-          }
+            return status >= 200 && status < 500;
+          },
         });
 
         if (res.status >= 400) {
