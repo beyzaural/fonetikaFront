@@ -9,25 +9,33 @@ import {
 } from "react-native";
 import BottomNavBar from "./BottomNavBar";
 import { useNavigation } from "@react-navigation/native";
+import Icon from "react-native-vector-icons/FontAwesome5";
 
 const fields = [
   {
     name: "Hukuk",
     description: "Hukuki terimlerle pratik yap",
-    color: "#E3EFF0",
-    icon: require("../assets/icons/law.png"), // İsteğe bağlı ikonlar
+    icon: "balance-scale",
   },
   {
     name: "Satış",
     description: "Satış jargonuna özel kelimeler",
-    color: "#E3EFF0",
-    icon: require("../assets/icons/sales.png"),
+    icon: "chart-line",
   },
   {
     name: "Eğitim",
     description: "Eğitimle ilgili ifadeleri öğren",
-    color: "#E3EFF0",
-    icon: require("../assets/icons/education.png"),
+    icon: "graduation-cap",
+  },
+  {
+    name: "Medya",
+    description: "Medya diline özel sözcükler",
+    icon: "newspaper",
+  },
+  {
+    name: "Sanat",
+    description: "Sanatsal terimlerle çalış",
+    icon: "palette",
   },
 ];
 
@@ -36,7 +44,7 @@ const WordCategory = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Top Section */}
       <View style={styles.topContainer}>
         <TouchableOpacity
           style={styles.backButton}
@@ -47,35 +55,37 @@ const WordCategory = () => {
             style={styles.backIcon}
           />
         </TouchableOpacity>
-        <Text style={styles.titleText}>Alan Seçimi</Text>
+        <Text style={styles.title}>Alan Seçimi</Text>
       </View>
 
       {/* Field list */}
-      <ScrollView contentContainerStyle={styles.listContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
         {fields.map((field, index) => (
           <TouchableOpacity
             key={index}
-            style={[styles.card, { backgroundColor: field.color }]}
+            style={styles.card}
             onPress={() => {
-              if (field.name === "Hukuk") {
-                navigation.navigate("CategoryWordMain", { field: field.name });
-              } else {
-                navigation.navigate("Kelime", { field: field.name });
-              }
+              navigation.navigate("CategoryWordMain", { field: field.name });
             }}
           >
             <View style={styles.cardContent}>
-              <Image source={field.icon} style={styles.icon} />
-              <View style={styles.textWrapper}>
+              <Icon
+                name={field.icon}
+                size={30}
+                color="#333"
+                style={styles.icon}
+              />
+              <View>
                 <Text style={styles.cardTitle}>{field.name}</Text>
-                <Text style={styles.cardDesc}>{field.description}</Text>
+                <Text style={styles.cardSubtitle}>{field.description}</Text>
               </View>
             </View>
           </TouchableOpacity>
         ))}
       </ScrollView>
-      <View style={styles.progressBox}>
-        <Text style={styles.progressText}>
+
+      <View style={styles.tipBox}>
+        <Text style={styles.tipText}>
           💡 Güzel konuşmak, zeki görünmenin en zarif yoludur.
         </Text>
       </View>
@@ -86,73 +96,77 @@ const WordCategory = () => {
 };
 
 export default WordCategory;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "white",
   },
   topContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 20,
-    paddingTop: 40,
+    paddingTop: 50,
+    paddingHorizontal: 20,
+    paddingBottom: 15,
     backgroundColor: "#E3EFF0",
   },
   backButton: {
-    position: "absolute",
-    top: 25,
-    left: 10,
-    zIndex: 10,
-  },
-  backIcon: {
     width: 40,
     height: 40,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  titleText: {
-    flex: 1,
-    textAlign: "center",
+  backIcon: {
+    width: 20,
+    height: 20,
+  },
+  title: {
     fontSize: 24,
     fontWeight: "bold",
     color: "#333",
+    marginLeft: 15,
   },
-  listContainer: {
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 20,
   },
   card: {
     width: "100%",
-    borderRadius: 18,
-    marginBottom: 18,
-    padding: 18,
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 4,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardContent: {
     flexDirection: "row",
     alignItems: "center",
   },
   icon: {
-    width: 50,
-    height: 50,
-    marginRight: 16,
-  },
-  textWrapper: {
-    flex: 1,
+    marginRight: 15,
   },
   cardTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#FF3B30",
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 5,
   },
-  cardDesc: {
+  cardSubtitle: {
     fontSize: 14,
-    color: "#444",
-    marginTop: 4,
+    color: "#666",
   },
-  progressBox: {
+  tipBox: {
     backgroundColor: "#F9F4F1",
     padding: 12,
     marginHorizontal: 20,
@@ -165,7 +179,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  progressText: {
+  tipText: {
     fontSize: 14,
     color: "#444",
     fontStyle: "italic",
