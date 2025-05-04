@@ -40,6 +40,14 @@ const KursTekrar = ({ navigation, route }) => {
       .replace(/\s+/g, "")
       .replace(/[^a-z0-9]/g, "");
   };
+  const normalizePhoneme = (p) => {
+    const map = {
+      "ı/i": "ı",
+      "u/ü": "u",
+      "o/ö": "o",
+    };
+    return map[p] || p;
+  };
 
   useEffect(() => {
     const fetchMistakes = async () => {
@@ -50,7 +58,10 @@ const KursTekrar = ({ navigation, route }) => {
         const res = await axios.get(
           `${API_URL}/api/mispronounced-words/user-course-phoneme`,
           {
-            params: { phoneme, userId },
+            params: {
+              phoneme: normalizePhoneme(phoneme),
+              userId, // ✅ now this is valid again
+            },
           }
         );
 
@@ -123,7 +134,7 @@ const KursTekrar = ({ navigation, route }) => {
       console.log("✅ KursTekrar backend response:", responseJson);
 
       await axios.post(`${API_URL}/api/progress/add`, null, {
-        params: { userId, count: 1 },
+        params: { phoneme: normalizePhoneme(phoneme), userId },
       });
 
       setFeedback(responseJson.feedback);
