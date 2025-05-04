@@ -32,27 +32,36 @@ const Kelime = ({ navigation }) => {
   const [feedback, setFeedback] = useState("");
   const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
   const [showModal, setShowModal] = useState(false); // replaces showFeedback
+  const [sttPreview, setSttPreview] = useState(null); // for Google STT preview
+  const [alternativesMap, setAlternativesMap] = useState({});
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingMessages, setLoadingMessages] = useState([]);
   
+
   // Fetch random word from backend
   useEffect(() => {
     fetchRandomWord(null);
   }, []);
 
   const playOriginalAudio = async () => {
-    const currentWord = words[currentIndex];
-    if (!currentWord?.audioPath) {
-      alert("Bu kelime için ses kaydı bulunamadı.");
-      return;
-    }
+    if (words && words.length > 0 && currentIndex < words.length) {
+      const currentWord = words[currentIndex];
+      if (!currentWord?.audioPath) {
+        alert("Bu kelime için ses kaydı bulunamadı.");
+        return;
+      }
 
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: currentWord.audioPath },
-        { shouldPlay: true }
-      );
-    } catch (error) {
-      console.error("Error playing original audio:", error);
-      Alert.alert("Hata", "Orijinal ses çalınamadı.");
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: currentWord.audioPath },
+          { shouldPlay: true }
+        );
+      } catch (error) {
+        console.error("Error playing original audio:", error);
+        Alert.alert("Hata", "Orijinal ses çalınamadı.");
+      }
+    } else {
+      console.warn("Words array is empty or currentIndex is out of bounds.");
     }
   };
 
@@ -168,6 +177,38 @@ const Kelime = ({ navigation }) => {
     try {
       setIsFeedbackLoading(true);      // Start loading
       setShowModal(true);
+      
+
+    // PREVIEW: Fetch Google STT while feedback is loading
+    const sttForm = new FormData();
+    sttForm.append("file", {
+      uri: uri,
+      type: "audio/wav",
+      name: "preview.wav",
+    });
+
+    // 👇 Make transcribe-detailed request
+    fetch(`${API_URL}/api/speech/detailed-transcribe`, {
+      method: "POST",
+      headers: { "Content-Type": "multipart/form-data" },
+      body: sttForm,
+    })
+      .then((res) => res.json())
+      .then((json) => {
+        if (json) {
+          setSttPreview(json.bestTranscription);
+        
+          if (json.alternativeTranscriptions?.length > 0) {
+            setAlternativesMap(
+              Object.fromEntries(json.alternativeTranscriptions.map(alt => [alt.transcript, alt.confidence]))
+            );
+          }
+        }
+        
+        
+      })
+      .catch((err) => console.warn("🌀 Google STT failed", err));
+
       const userId = await getUserIdFromToken();
       const currentWord = words[currentIndex];
   
@@ -190,6 +231,7 @@ const Kelime = ({ navigation }) => {
       });
   
       const responseJson = await response.json();
+      setSttPreview(null);
       console.log("✅ Full backend response:", responseJson);
   
       // ✅ Format feedback from subwordFeedbackList
@@ -200,7 +242,7 @@ const Kelime = ({ navigation }) => {
                 (f) => `🔸 "${f.subword}" (${f.vowelIpa}): ${f.feedbackMessage}`
               )
               .join("\n")
-          : "Tebrikler! Tüm sesleri doğru söylediniz.";
+          : "";
   
       setFeedback(formattedFeedback);
       setIsFeedbackLoading(false);
@@ -260,6 +302,8 @@ const Kelime = ({ navigation }) => {
   const handleNextWord = () => {
     setShowFeedback(false);
     setIsRecording(false);
+    setAlternativesMap({});
+    setSttPreview(null);
 
     const isCurrentWrong = words[currentIndex]?.isCorrect === false;
 
@@ -289,6 +333,8 @@ const Kelime = ({ navigation }) => {
       setCurrentIndex(currentIndex - 1);
       setShowFeedback(false);
       setIsRecording(false);
+      setAlternativesMap({});
+      setSttPreview(null);
     }
   };
 
@@ -382,54 +428,73 @@ const Kelime = ({ navigation }) => {
               </TouchableOpacity>
 
               <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {isFeedbackLoading || !words[currentIndex] ? (
-                  <Text style={{ textAlign: "center", fontSize: 16 }}>
-                    Geri bildirim hazırlanıyor...
+              {isFeedbackLoading || !words[currentIndex] ? (
+              <>
+                <Text style={{ textAlign: "center", fontSize: 16 }}>
+                  Geri bildirim hazırlanıyor...
+                </Text>
+                
+                {sttPreview && (
+                  <Text style={{ textAlign: "center", fontSize: 14, marginTop: 10, color: "#666" }}>
+                    Google STT tahmini: " {sttPreview} "
                   </Text>
-                ) : (
+                )}
+                {Object.keys(alternativesMap).length > 0 && (
+                  <View style={{ marginTop: 15 }}>
+                    <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
+                      Diğer Tahminler:
+                    </Text>
+                    {Object.entries(alternativesMap).map(([transcript, confidence], index) => (
+                      <Text key={index} style={{ fontSize: 13, color: "#555" }}>
+                        • {transcript} ({(confidence * 100).toFixed(1)}%)
+                      </Text>
+                    ))}
+                  </View>
+                )}
+              </>
+            ) : (
                   <>
                     <Text style={[styles.feedbackTitle, { marginBottom: 10 }]}>
                       Geri Bildirim
                     </Text>
 
-                    <Text style={[styles.tahminText, { marginBottom: 10 }]}>
-                      Sanırım “{words[currentIndex].transcribedText || "..."}” dediniz.
-                    </Text>
-
-                    <Text style={[styles.instructionText, { marginBottom: 10 }]}>
-                      {words[currentIndex].isCorrect
-                        ? "✅ Doğru söylediniz!"
-                        : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
-                    </Text>
-
-                    {feedback !== "" && (
-                      <Text style={{ marginTop: 10, fontSize: 14, color: "#333", lineHeight: 20 }}>
-                        {feedback}
-                      </Text>
-                    )}
-
-                    <Text style={styles.kelimeText}>
-                      {words[currentIndex].kelime.split("").map((char, index) => (
-                        <Text key={index} style={styles.blackText}>
-                          {char}
+                    {words[currentIndex].transcribedText ? (
+                      <>
+                        <Text style={[styles.tahminText, { marginBottom: 10 }]}>
+                          Sanırım "{words[currentIndex].transcribedText}" dediniz.
                         </Text>
-                      ))}
-                    </Text>
 
-                    {words[currentIndex].ipucu !== "" && (
-                      <Text style={styles.ipucuText}>
-                        <Text style={styles.ipucuBold}>İpucu: </Text>
-                        {words[currentIndex].ipucu}
+                        <Text style={[styles.instructionText, { marginBottom: 10 }]}>
+                          {words[currentIndex].isCorrect
+                            ? "Analizin sonuçları:"
+                            : "Lütfen tekrar deneyin, bazı hatalar algılandı!"}
+                        </Text>
+
+                        {feedback !== "" && (
+                          <Text style={{ marginTop: 10, fontSize: 14, color: "#333", lineHeight: 20 }}>
+                            {feedback}
+                          </Text>
+                        )}
+
+                        {words[currentIndex].ipucu !== "" && (
+                          <Text style={styles.ipucuText}>
+                            <Text style={styles.ipucuBold}>İpucu: </Text>
+                            {words[currentIndex].ipucu}
+                          </Text>
+                        )}
+                      </>
+                    ) : (
+                      <Text style={[styles.tahminText, { marginBottom: 10 }]}>
+                        {words[currentIndex].transcribedText
+                          ? "Kelime farklı algılandı, lütfen doğru okunuşunu dinleyerek tekrar söyleyiniz."
+                          : "Lütfen tekrar kaydedin, ses net bir şekilde algılanamadı..."}
                       </Text>
                     )}
 
                     <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
                       <Text style={styles.listenButtonText}>Dinle</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={styles.closeButton} onPress={() => setShowModal(false)}>
-                      <Text style={styles.closeButtonText}>Kapat</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity>  
+           
                   </>
                 )}
               </ScrollView>
