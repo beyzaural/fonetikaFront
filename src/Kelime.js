@@ -440,17 +440,34 @@ const Kelime = ({ navigation }) => {
                   </Text>
                 )}
                 {Object.keys(alternativesMap).length > 0 && (
-                  <View style={{ marginTop: 15 }}>
-                    <Text style={{ fontWeight: "bold", marginBottom: 5 }}>
-                      Diğer Tahminler:
-                    </Text>
-                    {Object.entries(alternativesMap).map(([transcript, confidence], index) => (
-                      <Text key={index} style={{ fontSize: 13, color: "#555" }}>
-                        • {transcript} ({(confidence * 100).toFixed(1)}%)
-                      </Text>
-                    ))}
-                  </View>
-                )}
+  <View style={{ marginTop: 20, alignItems: "center" }}>
+    <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, color: "#FF3B30" }}>
+      Diğer STT Tahminleri
+    </Text>
+    {Object.entries(alternativesMap).map(([transcript, confidence], index) => (
+      <View
+        key={index}
+        style={{
+          backgroundColor: "#F0F0F0",
+          borderRadius: 10,
+          paddingVertical: 8,
+          paddingHorizontal: 16,
+          marginBottom: 8,
+          alignItems: "center",
+          width: "90%",
+        }}
+      >
+        <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>
+          {transcript}
+        </Text>
+        <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
+          Güven: {(confidence * 100).toFixed(1)}%
+        </Text>
+      </View>
+    ))}
+  </View>
+)}
+
               </>
             ) : (
                   <>
@@ -469,12 +486,31 @@ const Kelime = ({ navigation }) => {
                             ? "Analizin sonuçları:"
                             : "Lütfen tekrar deneyin, bazı hatalar algılandı!"}
                         </Text>
-
                         {feedback !== "" && (
-                          <Text style={{ marginTop: 10, fontSize: 14, color: "#333", lineHeight: 20 }}>
-                            {feedback}
-                          </Text>
-                        )}
+  <View style={{ marginTop: 10 }}>
+    {feedback.split("\n").map((line, index) => {
+      const match = line.match(/🔸 "(.*?)" \((.*?)\): (.*)/);
+      if (match) {
+        const [, subword, vowelIpa, message] = match;
+        return (
+          <Text key={index} style={{ marginBottom: 10,marginTop:5, fontSize: 14, color: "#333", lineHeight: 20 }}>
+            🔸{" "}
+            <Text style={{ fontWeight: "bold", color: "#FF3B30" }}>{`"${subword}"`}</Text>{" "}
+            (<Text style={{ fontWeight: "bold", color: "#007AFF" }}>{vowelIpa}</Text>):{" "}
+            <Text>{message}</Text>
+          </Text>
+        );
+      } else {
+        return (
+          <Text key={index} style={{ fontSize: 14, color: "#333", lineHeight: 20 }}>
+            {line}
+          </Text>
+        );
+      }
+    })}
+  </View>
+)}
+
 
                         {words[currentIndex].ipucu !== "" && (
                           <Text style={styles.ipucuText}>
@@ -491,9 +527,13 @@ const Kelime = ({ navigation }) => {
                       </Text>
                     )}
 
-                    <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-                      <Text style={styles.listenButtonText}>Dinle</Text>
-                    </TouchableOpacity>  
+<TouchableOpacity
+  onPress={playAudio}
+  style={[styles.listenButton, { marginTop: 20 }]}
+>
+  <Text style={styles.listenButtonText}>Dinle</Text>
+</TouchableOpacity>
+ 
            
                   </>
                 )}
@@ -600,6 +640,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 30,
     justifyContent: "space-between",
+  },
+  ipucuText: {
+    marginTop: 15,
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
   },
   navBar: {
     position: "absolute",
