@@ -436,13 +436,13 @@ const Kelime = ({ navigation }) => {
                 
                 {sttPreview && (
                   <Text style={{ textAlign: "center", fontSize: 14, marginTop: 10, color: "#666" }}>
-                    Google STT tahmini: " {sttPreview} "
+                    En yatkın kelime: " {sttPreview} "
                   </Text>
                 )}
                 {Object.keys(alternativesMap).length > 0 && (
   <View style={{ marginTop: 20, alignItems: "center" }}>
     <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, color: "#FF3B30" }}>
-      Diğer STT Tahminleri
+      Hesaplanan olası kelimeler
     </Text>
     {Object.entries(alternativesMap).map(([transcript, confidence], index) => (
       <View
