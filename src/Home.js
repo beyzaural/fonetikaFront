@@ -4,7 +4,10 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useCallback } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
-
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import {
   StyleSheet,
   Text,
@@ -20,11 +23,12 @@ import BottomNavBar from "./BottomNavBar";
 import ProgressBar from "./ProgressBar";
 import GoalRing from "./GoalRing";
 import Icon from "react-native-vector-icons/FontAwesome5"; // flame is available here
-
+import BackButton from "./BackButton";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl || "http://localhost:8080";
 
 const Home = ({ navigation, route }) => {
+  const insets = useSafeAreaInsets();
   const [userName, setUserName] = useState("");
   const [userDailyGoal, setUserDailyGoal] = useState(null);
   const [weeklyLoginDays, setWeeklyLoginDays] = useState([]);
@@ -46,7 +50,11 @@ const Home = ({ navigation, route }) => {
         if (userProfile?.username) {
           setUserName(userProfile.username);
           setUserDailyGoal(userProfile.dailyGoal);
-          console.log("✅ Set username and dailyGoal:", userProfile.username, userProfile.dailyGoal);
+          console.log(
+            "✅ Set username and dailyGoal:",
+            userProfile.username,
+            userProfile.dailyGoal
+          );
         }
       } catch (error) {
         console.error("❌ Error fetching user data:", error);
@@ -147,12 +155,6 @@ const Home = ({ navigation, route }) => {
       {showTip && dictionTip && (
         <View style={styles.tipPopup}>
           <Text style={styles.tipText}>{dictionTip}</Text>
-          <TouchableOpacity
-            onPress={() => setShowTip(false)}
-            style={styles.closeButton}
-          >
-            <Text style={styles.closeText}>X</Text>
-          </TouchableOpacity>
         </View>
       )}
       {/* 💬 Info Icon - sağ üstte sabit */}
@@ -170,107 +172,110 @@ const Home = ({ navigation, route }) => {
 
       {/* Welcome Text */}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <Text style={styles.welcomeText}>Hoşgeldin</Text>
-        <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
+        <SafeAreaView style={{ flex: 1 }}>
+          <Text style={styles.welcomeText}>Hoşgeldin</Text>
+          <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
 
-        <View style={styles.progressInfoContainer}>
-          {userProgress && <GoalRing progress={progress} goal={goal} />}
+          <View style={styles.progressInfoContainer}>
+            {userProgress && <GoalRing progress={progress} goal={goal} />}
 
-          <View style={styles.streakCard}>
-            <Icon
-              name="fire"
-              style={styles.streakCardIcon}
-              color="#FF3B30"
-              solid
-            />
-            <Text style={styles.streakCardText}>
-              {userProgress?.streak || 0} Günlük Seri
-            </Text>
+            <View style={styles.streakCard}>
+              <Icon
+                name="fire"
+                style={styles.streakCardIcon}
+                color="#FF3B30"
+                solid
+              />
+              <Text style={styles.streakCardText}>
+                {userProgress?.streak || 0} Günlük Seri
+              </Text>
+            </View>
           </View>
-        </View>
 
-        {/* Subtitle */}
-        <Text style={styles.subtitle}> </Text>
+          {/* Subtitle */}
+          <Text style={styles.subtitle}> </Text>
 
-        {/* Cards Container */}
+          {/* Cards Container */}
 
-        <View style={styles.cardsContainer}>
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate("Sohbet")}
-          >
-            <LinearGradient
-              colors={["#d6d5b3", "#FFFFFF"]}
-              start={{ x: 4, y: 0 }}
-              end={{ x: 0, y: 0.2 }}
-              style={styles.cardGradient}
+          <View style={styles.cardsContainer}>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("Sohbet")}
             >
-              <Image
-                source={require("../assets/icons/chat.png")} // Reference the chat icon here
-                style={styles.chatIcon}
-              />
-              <Text style={styles.cardText}>Sohbet</Text>
-              <Text style={styles.cardSubText}> </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          {/* Kelime Card (Clickable) */}
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate("Kelime")}
-          >
-            <LinearGradient
-              colors={["#d6d5b3", "#FFFFFF"]}
-              start={{ x: 4, y: 0 }}
-              end={{ x: 0, y: 0.2 }}
-              style={styles.cardGradient}
+              <LinearGradient
+                colors={["#d6d5b3", "#FFFFFF"]}
+                start={{ x: 4, y: 0 }}
+                end={{ x: 0, y: 0.2 }}
+                style={styles.cardGradient}
+              >
+                <Image
+                  source={require("../assets/icons/chat.png")} // Reference the chat icon here
+                  style={styles.chatIcon}
+                />
+                <Text style={styles.cardText}>Sohbet</Text>
+                <Text style={styles.cardSubText}> </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            {/* Kelime Card (Clickable) */}
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("Kelime")}
             >
-              <Image
-                source={require("../assets/icons/game.png")}
-                style={styles.chatIcon}
-              />
-              <Text style={styles.cardText}>Kelime</Text>
-              <Text style={styles.cardSubText}> </Text>
-            </LinearGradient>
-          </TouchableOpacity>
+              <LinearGradient
+                colors={["#d6d5b3", "#FFFFFF"]}
+                start={{ x: 4, y: 0 }}
+                end={{ x: 0, y: 0.2 }}
+                style={styles.cardGradient}
+              >
+                <Image
+                  source={require("../assets/icons/game.png")}
+                  style={styles.chatIcon}
+                />
+                <Text style={styles.cardText}>Kelime</Text>
+                <Text style={styles.cardSubText}> </Text>
+              </LinearGradient>
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
-          >
-            <LinearGradient
-              colors={["#d6d5b3", "#FFFFFF"]}
-              start={{ x: 4, y: 0 }}
-              end={{ x: 0, y: 0.2 }}
-              style={styles.cardGradient}
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
             >
-              <Image
-                source={require("../assets/icons/update-arrow.png")}
-                style={styles.chatIcon}
-              />
-              <Text style={styles.cardText}>Geçmiş</Text>
-              <Text style={styles.cardSubText}> </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate("WordCategory")} // Navigate to Paragraf.js
-          >
-            <LinearGradient
-              colors={["#d6d5b3", "#FFFFFF"]}
-              start={{ x: 4, y: 0 }}
-              end={{ x: 0, y: 0.2 }}
-              style={styles.cardGradient}
+              <LinearGradient
+                colors={["#d6d5b3", "#FFFFFF"]}
+                start={{ x: 4, y: 0 }}
+                end={{ x: 0, y: 0.2 }}
+                style={styles.cardGradient}
+              >
+                <Image
+                  source={require("../assets/icons/update-arrow.png")}
+                  style={styles.chatIcon}
+                />
+                <Text style={styles.cardText}>Geçmiş</Text>
+                <Text style={styles.cardSubText}> </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() => navigation.navigate("WordCategory")} // Navigate to Paragraf.js
             >
-              <Image
-                source={require("../assets/icons/file-2.png")} // Reference the chat icon here
-                style={styles.chatIcon}
-              />
-              <Text style={styles.cardText}>Mesleki Terimler</Text>
-              <Text style={styles.cardSubText}> </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
+              <LinearGradient
+                colors={["#d6d5b3", "#FFFFFF"]}
+                start={{ x: 4, y: 0 }}
+                end={{ x: 0, y: 0.2 }}
+                style={styles.cardGradient}
+              >
+                <Image
+                  source={require("../assets/icons/file-2.png")} // Reference the chat icon here
+                  style={styles.chatIcon}
+                />
+                <Text style={styles.cardText}>Mesleki Terimler</Text>
+                <Text style={styles.cardSubText}> </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
       </ScrollView>
+
       <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
@@ -378,7 +383,7 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     margin: 20,
-    marginTop: 10,
+    marginTop: 60,
     position: "absolute",
     top: 10,
     left: 20,
@@ -404,7 +409,7 @@ const styles = StyleSheet.create({
   },
   infoIconWrapper: {
     position: "absolute",
-    top: 20,
+    top: 60,
     right: 20,
     zIndex: 1000,
     padding: 8,

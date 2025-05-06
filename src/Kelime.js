@@ -20,6 +20,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import BackButton from "./BackButton";
 
 /* import { checkDailyGoalAchieved } from "./CheckIfGoalAchieved";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -354,13 +355,8 @@ const Kelime = ({ navigation }) => {
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate("Home")}
-      >
-        <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
-      </TouchableOpacity>
-      <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
+      <SafeAreaView style={{ flex: 1, marginTop: 50, paddingTop: 30 }}>
+        <BackButton navigation={navigation} />
         <View style={styles.container}>
           <View style={styles.topContainer}>
             <View style={styles.wordContainer}>
@@ -632,18 +628,9 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
-  backButton: {
-    position: "absolute",
-    top: 90,
-    left: 20,
-    zIndex: 10,
-  },
-  backIcon: {
-    width: 40,
-    height: 40,
-  },
+
   topContainer: {
-    marginTop: 30,
+    marginTop: 10,
     height: "100%",
     alignItems: "center",
   },
