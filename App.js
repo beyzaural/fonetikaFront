@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { StyleSheet } from "react-native";
 
-// All your screen imports:
+
 import Home from "./src/Home";
 import Kelime from "./src/Kelime";
 import Record from "./src/Record";
