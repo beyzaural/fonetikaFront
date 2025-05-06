@@ -14,6 +14,12 @@ import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
 import { getUserIdFromToken } from "./utils/auth";
 import Constants from "expo-constants";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
+import BackButton from "./BackButton";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
@@ -232,142 +238,139 @@ const Geneltekrar = ({ navigation }) => {
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
-      <View style={styles.container}>
-        {/* Back Arrow */}
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1, marginTop: 50, paddingTop: 30 }}>
+        <BackButton navigation={navigation} />
+        <View style={styles.container}>
+          {/* Back Arrow */}
 
-        {/* Top Container */}
-        <View style={styles.topContainer}>
-          <View style={styles.wordContainer}>
-            {enrichedMistakes.length === 0 ? (
-              <Text style={styles.wordText}>
-                Tekrar edilecek kelime bulunamadı.
-              </Text>
-            ) : (
-              <>
+          {/* Top Container */}
+          <View style={styles.topContainer}>
+            <View style={styles.wordContainer}>
+              {enrichedMistakes.length === 0 ? (
                 <Text style={styles.wordText}>
-                  {enrichedMistakes[currentIndex]?.word}
+                  Tekrar edilecek kelime bulunamadı.
                 </Text>
-                <Text style={styles.phoneticText}>
-                  {enrichedMistakes[currentIndex]?.phonetic}
-                </Text>
-                <TouchableOpacity
-                  onPress={playOriginalAudio}
-                  style={{ marginTop: 20 }}
-                >
-                  <Image
-                    source={require("../assets/icons/speaker.png")}
-                    style={styles.speakerIcon}
-                  />
-                </TouchableOpacity>
-              </>
-            )}
-          </View>
-
-          {/* Navigation Arrows and Microphone Button in a Row */}
-          <View style={styles.navigationContainer}>
-            <TouchableOpacity
-              style={styles.prevButton}
-              onPress={handlePreviousWord}
-            >
-              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleMicrophonePress}>
-              <FontAwesome
-                name="microphone"
-                size={100}
-                color={isRecording ? "red" : "#FF3B30"}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNextWord}
-            >
-              <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showFeedback}
-          onRequestClose={() => setShowFeedback(false)}
-        >
-          <View style={styles.feedbackContainer}>
-            <View style={styles.feedbackContent}>
-              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-
-              {enrichedMistakes[currentIndex] ? (
-                <>
-                  <Text style={styles.tahminText}>
-                    Sanırım “
-                    {enrichedMistakes[currentIndex]?.transcribedText || "..."}”
-                    dediniz.
-                  </Text>
-                  <Text style={styles.instructionText}>
-                    {enrichedMistakes[currentIndex]?.isCorrect
-                      ? "✅ Doğru söylediniz!"
-                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
-                  </Text>
-                  <Text style={styles.kelimeText}>
-                    {enrichedMistakes[currentIndex].phonetic
-                      .split("")
-                      .map((char, index) => {
-                        const isRed =
-                          (enrichedMistakes[currentIndex].word === "Kamuflaj" &&
-                            char === "u") ||
-                          (enrichedMistakes[currentIndex].word === "Ağabey" &&
-                            char === "i") ||
-                          (enrichedMistakes[currentIndex].word === "Sahi" &&
-                            char === ":");
-
-                        return (
-                          <Text
-                            key={index}
-                            style={isRed ? styles.redText : styles.blackText}
-                          >
-                            {char}
-                          </Text>
-                        );
-                      })}
-                  </Text>
-
-                  {enrichedMistakes[currentIndex].ipucu && (
-                    <Text style={styles.ipucuText}>
-                      <Text style={styles.ipucuBold}>İpucu: </Text>
-                      {enrichedMistakes[currentIndex].ipucu}
-                    </Text>
-                  )}
-                </>
               ) : (
-                <Text>Yükleniyor...</Text>
+                <>
+                  <Text style={styles.wordText}>
+                    {enrichedMistakes[currentIndex]?.word}
+                  </Text>
+                  <Text style={styles.phoneticText}>
+                    {enrichedMistakes[currentIndex]?.phonetic}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={playOriginalAudio}
+                    style={{ marginTop: 20 }}
+                  >
+                    <Image
+                      source={require("../assets/icons/speaker.png")}
+                      style={styles.speakerIcon}
+                    />
+                  </TouchableOpacity>
+                </>
               )}
+            </View>
 
-              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-                <Text style={styles.listenButtonText}>Dinle</Text>
-              </TouchableOpacity>
-
+            {/* Navigation Arrows and Microphone Button in a Row */}
+            <View style={styles.navigationContainer}>
               <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowFeedback(false)}
+                style={styles.prevButton}
+                onPress={handlePreviousWord}
               >
-                <Text style={styles.closeButtonText}>Kapat</Text>
+                <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleMicrophonePress}>
+                <FontAwesome
+                  name="microphone"
+                  size={100}
+                  color={isRecording ? "red" : "#FF3B30"}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.nextButton}
+                onPress={handleNextWord}
+              >
+                <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
 
-        <BottomNavBar navigation={navigation} />
-      </View>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showFeedback}
+            onRequestClose={() => setShowFeedback(false)}
+          >
+            <View style={styles.feedbackContainer}>
+              <View style={styles.feedbackContent}>
+                <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+
+                {enrichedMistakes[currentIndex] ? (
+                  <>
+                    <Text style={styles.tahminText}>
+                      Sanırım “
+                      {enrichedMistakes[currentIndex]?.transcribedText || "..."}
+                      ” dediniz.
+                    </Text>
+                    <Text style={styles.instructionText}>
+                      {enrichedMistakes[currentIndex]?.isCorrect
+                        ? "✅ Doğru söylediniz!"
+                        : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
+                    </Text>
+                    <Text style={styles.kelimeText}>
+                      {enrichedMistakes[currentIndex].phonetic
+                        .split("")
+                        .map((char, index) => {
+                          const isRed =
+                            (enrichedMistakes[currentIndex].word ===
+                              "Kamuflaj" &&
+                              char === "u") ||
+                            (enrichedMistakes[currentIndex].word === "Ağabey" &&
+                              char === "i") ||
+                            (enrichedMistakes[currentIndex].word === "Sahi" &&
+                              char === ":");
+
+                          return (
+                            <Text
+                              key={index}
+                              style={isRed ? styles.redText : styles.blackText}
+                            >
+                              {char}
+                            </Text>
+                          );
+                        })}
+                    </Text>
+
+                    {enrichedMistakes[currentIndex].ipucu && (
+                      <Text style={styles.ipucuText}>
+                        <Text style={styles.ipucuBold}>İpucu: </Text>
+                        {enrichedMistakes[currentIndex].ipucu}
+                      </Text>
+                    )}
+                  </>
+                ) : (
+                  <Text>Yükleniyor...</Text>
+                )}
+
+                <TouchableOpacity
+                  onPress={playAudio}
+                  style={styles.listenButton}
+                >
+                  <Text style={styles.listenButtonText}>Dinle</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setShowFeedback(false)}
+                >
+                  <Text style={styles.closeButtonText}>Kapat</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      </SafeAreaView>
+      <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
 };
@@ -382,18 +385,9 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
-  backButton: {
-    position: "absolute",
-    top: 20,
-    left: 10,
-    zIndex: 10,
-  },
-  backIcon: {
-    width: 40,
-    height: 40,
-  },
+
   topContainer: {
-    marginTop: 30,
+    marginTop: 10,
     height: "100%",
     alignItems: "center",
   },

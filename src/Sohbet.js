@@ -16,6 +16,12 @@ import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
 import BottomNavBar from "./BottomNavBar";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
+import BackButton from "./BackButton";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_BASE = extra.apiUrl || "http://localhost:8080";
@@ -180,33 +186,27 @@ const Sohbet = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Üst Başlık */}
-      <View style={styles.topContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerText}>Sohbet</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Üst Başlık */}
+        <View style={styles.topContainer}>
+          <BackButton navigation={navigation} />
+          <Text style={styles.headerText}>Sohbet</Text>
+        </View>
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        <FlatList
-          ref={flatListRef}
-          data={messages}
-          renderItem={renderItem}
-          keyExtractor={(_, index) => index.toString()}
-          style={styles.chatList}
-          contentContainerStyle={styles.chatContainer}
-        />
-      </KeyboardAvoidingView>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            renderItem={renderItem}
+            keyExtractor={(_, index) => index.toString()}
+            style={styles.chatList}
+            contentContainerStyle={styles.chatContainer}
+          />
+        </KeyboardAvoidingView>
+        </SafeAreaView>
 
       {loading && (
         <ActivityIndicator
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
   },
   topContainer: {
     backgroundColor: "#E3EFF0",
-    paddingVertical: 30,
+    paddingVertical: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -298,11 +298,11 @@ const styles = StyleSheet.create({
   },
 
   headerText: {
-    fontSize: 24,
-    textAlign: "center",
-    marginBottom: 8,
-    color: "#333",
+    paddingTop: 25,
+    fontSize: 34,
     fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
   },
 
   inputContainer: {
