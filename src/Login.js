@@ -2,10 +2,15 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
   TextInput,
   Pressable,
   Image,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
@@ -34,12 +39,12 @@ const Login = ({ navigation }) => {
 
       const data = await response.json();
       if (data.token) {
-        await AsyncStorage.setItem("token", data.token); 
+        await AsyncStorage.setItem("token", data.token);
       } else {
         console.warn("No token received in login response"); // ✅ Log missing token
       }
       if (!response.ok) {
-        console.error("Login Error:", data); 
+        console.error("Login Error:", data);
         Alert.alert(
           "Giriş Başarısız!",
           data.message || "Yanlış mail ya da şifre."
@@ -66,102 +71,114 @@ const Login = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Top Container */}
-      <View style={styles.topContainer}>
-        <Image
-          source={require("../assets/images/login2.png")}
-          style={styles.topImage}
-          resizeMode="contain"
-        />
-      </View>
-
-      {/* Main Login Form */}
-      <View style={styles.formContainer}>
-        <Text style={styles.titleText}>Hesabınıza giriş yapın </Text>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}> Email </Text>
-          <TextInput
-            placeholder="Mail adresinizi girin."
-            style={styles.textInputStyle}
-            placeholderTextColor="#888"
-            autoCapitalize="none"
-            onChangeText={setEmail}
-            value={email}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}> Password </Text>
-          <TextInput
-            placeholder="Şifrenizi girin."
-            style={styles.textInputStyle}
-            placeholderTextColor="#888"
-            secureTextEntry
-            onChangeText={setPassword}
-            value={password}
-          />
-        </View>
-
-        {/* Forgot Password Button */}
-        <TouchableOpacity
-          onPress={() => navigation.navigate("ForgotPasswordScreen")}
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={{ flexGrow: 1 }}
         >
-          <Text style={styles.forgotPasswordText}>Şifrenizi mi unuttunuz?</Text>
-        </TouchableOpacity>
+          {/* Top Container */}
+          <View style={styles.topContainer}>
+            <Image
+              source={require("../assets/images/login2.png")}
+              style={styles.topImage}
+              resizeMode="contain"
+            />
+          </View>
 
-        {/* Delivery Method Selection */}
-        <View style={{ marginBottom: 10 }}>
-          <Text
-            style={[
-              styles.labelText,
-              { textAlign: "center", marginBottom: 10 },
-            ]}
-          >
-            Tek seferlik giriş kodunu almak istediğiniz yolu seçin.
-          </Text>
-        </View>
+          {/* Main Login Form */}
+          <View style={styles.formContainer}>
+            <Text style={styles.titleText}>Hesabınıza giriş yapın </Text>
 
-        <View style={styles.radioContainer}>
-          <Pressable
-            onPress={() => setDeliveryMethod("email")}
-            style={[
-              styles.radioButton,
-              deliveryMethod === "email" && styles.radioSelected,
-            ]}
-          >
-            <Text>Mail</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setDeliveryMethod("phone")}
-            style={[
-              styles.radioButton,
-              deliveryMethod === "phone" && styles.radioSelected,
-            ]}
-          >
-            <Text>Telefon</Text>
-          </Pressable>
-        </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.labelText}> Email </Text>
+              <TextInput
+                placeholder="Mail adresinizi girin."
+                style={styles.textInputStyle}
+                placeholderTextColor="#888"
+                autoCapitalize="none"
+                onChangeText={setEmail}
+                value={email}
+              />
+            </View>
 
-        <Pressable
-          onPress={handleLogin}
-          style={({ pressed }) => [styles.button]}
-        >
-          <Text style={styles.kaydolText}>Giriş Yap</Text>
-        </Pressable>
+            <View style={styles.inputContainer}>
+              <Text style={styles.labelText}> Password </Text>
+              <TextInput
+                placeholder="Şifrenizi girin."
+                style={styles.textInputStyle}
+                placeholderTextColor="#888"
+                secureTextEntry
+                onChangeText={setPassword}
+                value={password}
+              />
+            </View>
 
-        <Pressable
-          onPress={() => navigation.navigate("Register")}
-          style={({ pressed }) => [
-            styles.registerButton,
-            pressed && { opacity: 0.8 },
-          ]}
-        >
-          <Text style={styles.registerText}>Kaydol</Text>
-        </Pressable>
-      </View>
-    </View>
+            {/* Forgot Password Button */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ForgotPasswordScreen")}
+            >
+              <Text style={styles.forgotPasswordText}>
+                Şifrenizi mi unuttunuz?
+              </Text>
+            </TouchableOpacity>
+
+            {/* Delivery Method Selection */}
+            <View style={{ marginBottom: 10 }}>
+              <Text
+                style={[
+                  styles.labelText,
+                  { textAlign: "center", marginBottom: 10 },
+                ]}
+              >
+                Tek seferlik giriş kodunu almak istediğiniz yolu seçin.
+              </Text>
+            </View>
+
+            <View style={styles.radioContainer}>
+              <Pressable
+                onPress={() => setDeliveryMethod("email")}
+                style={[
+                  styles.radioButton,
+                  deliveryMethod === "email" && styles.radioSelected,
+                ]}
+              >
+                <Text>Mail</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setDeliveryMethod("phone")}
+                style={[
+                  styles.radioButton,
+                  deliveryMethod === "phone" && styles.radioSelected,
+                ]}
+              >
+                <Text>Telefon</Text>
+              </Pressable>
+            </View>
+
+            <Pressable
+              onPress={handleLogin}
+              style={({ pressed }) => [styles.button]}
+            >
+              <Text style={styles.kaydolText}>Giriş Yap</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => navigation.navigate("Register")}
+              style={({ pressed }) => [
+                styles.registerButton,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <Text style={styles.registerText}>Kaydol</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -194,9 +211,10 @@ const styles = StyleSheet.create({
     opacity: 0.8,
   },
   topImage: {
-    marginTop: 30,
-    width: 550, // Adjust the image width
-    height: 500, // Adjust the image height
+    width: "100%",
+    height: undefined,
+    aspectRatio: 1.5, // or adjust based on your image
+    resizeMode: "contain",
   },
   formContainer: {
     paddingHorizontal: 20,
