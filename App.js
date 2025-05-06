@@ -3,7 +3,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { StyleSheet } from "react-native";
 
-
+// All your screen imports:
 import Home from "./src/Home";
 import Kelime from "./src/Kelime";
 import Record from "./src/Record";
@@ -41,199 +41,196 @@ import CategoryWordCard from "./src/CategoryWordCard";
 import CategoryWordList from "./src/CategoryWordList";
 import CategoryRandomStudy from "./src/CategoryRandomStudy";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <Stack.Navigator initialRouteName="Startup">
-            {/* Screens below */}
-            <Stack.Screen
-              name="Startup"
-              component={Startup}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Login"
-              component={Login}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="LoginOTPVerification"
-              component={LoginOTPVerification}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ForgotPasswordScreen"
-              component={ForgotPasswordScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ResetPasswordScreen"
-              component={ResetPasswordScreen}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Register"
-              component={Register}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="GoalSelection"
-              component={GoalSelection}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="OTPVerification"
-              component={OTPVerification}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ResetOTPVerification"
-              component={ResetOTPVerification}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Ayarlar"
-              component={Ayarlar}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Hesap"
-              component={Hesap}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ChangeEmail"
-              component={ChangeEmail}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ChangeName"
-              component={ChangeName}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="ChangePassword"
-              component={ChangePassword}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Destek"
-              component={Destek}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="FAQ"
-              component={FAQ}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="EmailOTPVerification"
-              component={EmailOTPVerification}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Home"
-              component={Home}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="YanlisDogruSozcukler"
-              component={YanlisDogruSozcukler}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="CategoryWordMain"
-              component={CategoryWordMain}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="CategoryWordCard"
-              component={CategoryWordCard}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="CategoryWordList"
-              component={CategoryWordList}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="CategoryRandomStudy"
-              component={CategoryRandomStudy}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Profile"
-              component={Profile}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Kelime"
-              component={Kelime}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Record"
-              component={Record}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Fonetika"
-              component={Fonetika}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Merhaba"
-              component={Merhaba}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="WordCategory"
-              component={WordCategory}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Dersler"
-              component={Dersler}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Tekrar"
-              component={Tekrar}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="KursTekrar"
-              component={KursTekrar}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Sohbet"
-              component={Sohbet}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Ders"
-              component={Ders}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="KursKelime"
-              component={KursKelime}
-              options={{ headerShown: false }}
-            />
-            <Stack.Screen
-              name="Geneltekrar"
-              component={Geneltekrar}
-              options={{ headerShown: false }}
-            />
-          </Stack.Navigator>
-        </NavigationContainer>
-      </SafeAreaProvider>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Startup">
+          {/* Screens below */}
+          <Stack.Screen
+            name="Startup"
+            component={Startup}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="LoginOTPVerification"
+            component={LoginOTPVerification}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ForgotPasswordScreen"
+            component={ForgotPasswordScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ResetPasswordScreen"
+            component={ResetPasswordScreen}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Register"
+            component={Register}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="GoalSelection"
+            component={GoalSelection}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="OTPVerification"
+            component={OTPVerification}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ResetOTPVerification"
+            component={ResetOTPVerification}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Ayarlar"
+            component={Ayarlar}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Hesap"
+            component={Hesap}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ChangeEmail"
+            component={ChangeEmail}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ChangeName"
+            component={ChangeName}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="ChangePassword"
+            component={ChangePassword}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Destek"
+            component={Destek}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="FAQ"
+            component={FAQ}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="EmailOTPVerification"
+            component={EmailOTPVerification}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="YanlisDogruSozcukler"
+            component={YanlisDogruSozcukler}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="CategoryWordMain"
+            component={CategoryWordMain}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="CategoryWordCard"
+            component={CategoryWordCard}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="CategoryWordList"
+            component={CategoryWordList}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="CategoryRandomStudy"
+            component={CategoryRandomStudy}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={Profile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Kelime"
+            component={Kelime}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Record"
+            component={Record}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Fonetika"
+            component={Fonetika}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Merhaba"
+            component={Merhaba}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="WordCategory"
+            component={WordCategory}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Dersler"
+            component={Dersler}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Tekrar"
+            component={Tekrar}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="KursTekrar"
+            component={KursTekrar}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Sohbet"
+            component={Sohbet}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Ders"
+            component={Ders}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="KursKelime"
+            component={KursKelime}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="Geneltekrar"
+            component={Geneltekrar}
+            options={{ headerShown: false }}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     </GestureHandlerRootView>
   );
 }

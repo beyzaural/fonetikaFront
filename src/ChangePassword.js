@@ -16,7 +16,7 @@ import BottomNavBar from "./BottomNavBar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "./BackButton";
 
-const Parola = ({ navigation }) => {
+const ChangePassword = ({ navigation }) => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -333,4 +333,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Parola;
+export default ChangePassword;
