@@ -14,8 +14,6 @@ const BottomNavBar = ({ navigation }) => {
         />
       </TouchableOpacity>
 
-     
-
       <TouchableOpacity
         onPress={() => navigation.navigate("YanlisDogruSozcukler")}
         style={styles.navItem}
@@ -59,6 +57,7 @@ const styles = StyleSheet.create({
   },
   navItem: {
     alignItems: "center",
+    color: "#0a7ea4",
   },
   navIcon: {
     width: 30,

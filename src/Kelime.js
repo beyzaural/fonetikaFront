@@ -16,6 +16,11 @@ import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
 import { getUserIdFromToken } from "./utils/auth";
 import Constants from "expo-constants";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
 /* import { checkDailyGoalAchieved } from "./CheckIfGoalAchieved";
 import AsyncStorage from "@react-native-async-storage/async-storage";
  */
@@ -23,6 +28,8 @@ const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const Kelime = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
+
   const [words, setWords] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isRecording, setIsRecording] = useState(false);
@@ -36,7 +43,6 @@ const Kelime = ({ navigation }) => {
   const [alternativesMap, setAlternativesMap] = useState({});
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingMessages, setLoadingMessages] = useState([]);
-  
 
   // Fetch random word from backend
   useEffect(() => {
@@ -175,43 +181,45 @@ const Kelime = ({ navigation }) => {
   // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
-      setIsFeedbackLoading(true);      // Start loading
+      setIsFeedbackLoading(true); // Start loading
       setShowModal(true);
-      
 
-    // PREVIEW: Fetch Google STT while feedback is loading
-    const sttForm = new FormData();
-    sttForm.append("file", {
-      uri: uri,
-      type: "audio/wav",
-      name: "preview.wav",
-    });
+      // PREVIEW: Fetch Google STT while feedback is loading
+      const sttForm = new FormData();
+      sttForm.append("file", {
+        uri: uri,
+        type: "audio/wav",
+        name: "preview.wav",
+      });
 
-    // 👇 Make transcribe-detailed request
-    fetch(`${API_URL}/api/speech/detailed-transcribe`, {
-      method: "POST",
-      headers: { "Content-Type": "multipart/form-data" },
-      body: sttForm,
-    })
-      .then((res) => res.json())
-      .then((json) => {
-        if (json) {
-          setSttPreview(json.bestTranscription);
-        
-          if (json.alternativeTranscriptions?.length > 0) {
-            setAlternativesMap(
-              Object.fromEntries(json.alternativeTranscriptions.map(alt => [alt.transcript, alt.confidence]))
-            );
-          }
-        }
-        
-        
+      // 👇 Make transcribe-detailed request
+      fetch(`${API_URL}/api/speech/detailed-transcribe`, {
+        method: "POST",
+        headers: { "Content-Type": "multipart/form-data" },
+        body: sttForm,
       })
-      .catch((err) => console.warn("🌀 Google STT failed", err));
+        .then((res) => res.json())
+        .then((json) => {
+          if (json) {
+            setSttPreview(json.bestTranscription);
+
+            if (json.alternativeTranscriptions?.length > 0) {
+              setAlternativesMap(
+                Object.fromEntries(
+                  json.alternativeTranscriptions.map((alt) => [
+                    alt.transcript,
+                    alt.confidence,
+                  ])
+                )
+              );
+            }
+          }
+        })
+        .catch((err) => console.warn("🌀 Google STT failed", err));
 
       const userId = await getUserIdFromToken();
       const currentWord = words[currentIndex];
-  
+
       const formData = new FormData();
       formData.append("file", {
         uri: uri,
@@ -221,7 +229,7 @@ const Kelime = ({ navigation }) => {
       formData.append("expected_word", currentWord.word || "");
       formData.append("word_id", currentWord.id || "");
       formData.append("user_id", userId);
-  
+
       const response = await fetch(`${API_URL}/api/speech/evaluate`, {
         method: "POST",
         headers: {
@@ -229,11 +237,11 @@ const Kelime = ({ navigation }) => {
         },
         body: formData,
       });
-  
+
       const responseJson = await response.json();
       setSttPreview(null);
       console.log("✅ Full backend response:", responseJson);
-  
+
       // ✅ Format feedback from subwordFeedbackList
       const formattedFeedback =
         responseJson.subwordFeedbackList?.length > 0
@@ -243,7 +251,7 @@ const Kelime = ({ navigation }) => {
               )
               .join("\n")
           : "";
-  
+
       setFeedback(formattedFeedback);
       setIsFeedbackLoading(false);
       // ✅ Save response data to current word
@@ -252,37 +260,40 @@ const Kelime = ({ navigation }) => {
         updatedWords[currentIndex] = {
           ...updatedWords[currentIndex],
           transcribedText: responseJson.recognizedWord,
-          isCorrect: responseJson.wordCorrect === true || responseJson.wordCorrect === "true",
+          isCorrect:
+            responseJson.wordCorrect === true ||
+            responseJson.wordCorrect === "true",
           feedbackList: responseJson.subwordFeedbackList,
           highlightIndices: responseJson.highlightIndices,
-        };        
+        };
         return updatedWords;
       });
-  
+
       // ✅ Progress update
       await axios.post(`${API_URL}/api/progress/add`, null, {
         params: { userId, count: 1 },
       });
-  
+
       // ✅ Save mispronunciation if needed
-      if (responseJson.wordCorrect === false || responseJson.wordCorrect === "false") {
+      if (
+        responseJson.wordCorrect === false ||
+        responseJson.wordCorrect === "false"
+      ) {
         await axios.post(`${API_URL}/api/mispronounced-words/record`, {
           userId,
           wordId: currentWord.id,
         });
         console.log("❌ MispronouncedWord recorded.");
       }
-         
-  
+
       setShowFeedback(true);
     } catch (error) {
       console.error("❌ Error sending audio:", error);
       Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
     } finally {
-      setIsFeedbackLoading(false);  // Stop loading regardless of success/failure
+      setIsFeedbackLoading(false); // Stop loading regardless of success/failure
     }
   };
-  
 
   const playAudio = async () => {
     if (!audioUri) {
@@ -343,206 +354,269 @@ const Kelime = ({ navigation }) => {
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.navigate("Home")}
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.topContainer}>
-          <View style={styles.wordContainer}>
-            {words[currentIndex] ? (
-              <>
-                <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-                <Text style={styles.phoneticText}>
-                  {words[currentIndex].definition}
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.wordText}>Yükleniyor...</Text>
-            )}
-            <TouchableOpacity
-              onPress={playOriginalAudio}
-              style={styles.speakerIconWrapper}
-            >
-              <Image
-                source={require("../assets/icons/speaker.png")}
-                style={styles.speakerIcon}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.navigationContainer}>
-            <TouchableOpacity
-              style={styles.prevButton}
-              onPress={handlePreviousWord}
-            >
-              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
-            </TouchableOpacity>
-
-            <View style={{ alignItems: "center" }}>
-              <TouchableOpacity onPress={handleMicrophonePress}>
-                <FontAwesome
-                  name="microphone"
-                  size={100}
-                  color={isRecording ? "black" : "#FF3B30"}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate("Home")}
+      >
+        <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
+      </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1, paddingTop: insets.top }}>
+        <View style={styles.container}>
+          <View style={styles.topContainer}>
+            <View style={styles.wordContainer}>
+              {words[currentIndex] ? (
+                <>
+                  <Text style={styles.wordText}>
+                    {words[currentIndex].word}
+                  </Text>
+                  <Text style={styles.phoneticText}>
+                    {words[currentIndex].definition}
+                  </Text>
+                </>
+              ) : (
+                <Text style={styles.wordText}>Yükleniyor...</Text>
+              )}
+              <TouchableOpacity
+                onPress={playOriginalAudio}
+                style={styles.speakerIconWrapper}
+              >
+                <Image
+                  source={require("../assets/icons/speaker.png")}
+                  style={styles.speakerIcon}
                 />
               </TouchableOpacity>
-              <Text style={styles.micInfoText}>
-                {isRecording
-                  ? "Bitirmek için tekrar basın"
-                  : "Kaydetmek için mikrofona basın"}
-              </Text>
             </View>
 
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNextWord}
-            >
-              <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showModal}
-          onRequestClose={() => setShowModal(false)}
-        >
-          <View style={styles.feedbackContainer}>
-            <View style={styles.feedbackContent}>
-              
-              {/* Fixed top-right close button */}
+            <View style={styles.navigationContainer}>
               <TouchableOpacity
-                onPress={() => setShowModal(false)}
-                style={styles.modalCloseIcon}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                style={styles.prevButton}
+                onPress={handlePreviousWord}
               >
-                <FontAwesome name="close" size={26} color="#FF3B30" />
+                <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
               </TouchableOpacity>
 
-              <ScrollView contentContainerStyle={styles.scrollContainer}>
-              {isFeedbackLoading || !words[currentIndex] ? (
-              <>
-                <Text style={{ textAlign: "center", fontSize: 16 }}>
-                  Geri bildirim hazırlanıyor...
+              <View style={{ alignItems: "center" }}>
+                <TouchableOpacity onPress={handleMicrophonePress}>
+                  <FontAwesome
+                    name="microphone"
+                    size={100}
+                    color={isRecording ? "black" : "#FF3B30"}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.micInfoText}>
+                  {isRecording
+                    ? "Bitirmek için tekrar basın"
+                    : "Kaydetmek için mikrofona basın"}
                 </Text>
-                
-                {sttPreview && (
-                  <Text style={{ textAlign: "center", fontSize: 14, marginTop: 10, color: "#666" }}>
-                    En yatkın kelime: " {sttPreview} "
-                  </Text>
-                )}
-                {Object.keys(alternativesMap).length > 0 && (
-  <View style={{ marginTop: 20, alignItems: "center" }}>
-    <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 10, color: "#FF3B30" }}>
-      Hesaplanan olası kelimeler
-    </Text>
-    {Object.entries(alternativesMap).map(([transcript, confidence], index) => (
-      <View
-        key={index}
-        style={{
-          backgroundColor: "#F0F0F0",
-          borderRadius: 10,
-          paddingVertical: 8,
-          paddingHorizontal: 16,
-          marginBottom: 8,
-          alignItems: "center",
-          width: "90%",
-        }}
-      >
-        <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>
-          {transcript}
-        </Text>
-        <Text style={{ fontSize: 13, color: "#888", marginTop: 2 }}>
-          Güven: {(confidence * 100).toFixed(1)}%
-        </Text>
-      </View>
-    ))}
-  </View>
-)}
+              </View>
 
-              </>
-            ) : (
-                  <>
-                    <Text style={[styles.feedbackTitle, { marginBottom: 10 }]}>
-                      Geri Bildirim
-                    </Text>
-
-                    {words[currentIndex].transcribedText ? (
-                      <>
-                        <Text style={[styles.tahminText, { marginBottom: 10 }]}>
-                          Sanırım "{words[currentIndex].transcribedText}" dediniz.
-                        </Text>
-
-                        <Text style={[styles.instructionText, { marginBottom: 10 }]}>
-                          {words[currentIndex].isCorrect
-                            ? "Analizin sonuçları:"
-                            : "Lütfen tekrar deneyin, bazı hatalar algılandı!"}
-                        </Text>
-                        {feedback !== "" && (
-  <View style={{ marginTop: 10 }}>
-    {feedback.split("\n").map((line, index) => {
-      const match = line.match(/🔸 "(.*?)" \((.*?)\): (.*)/);
-      if (match) {
-        const [, subword, vowelIpa, message] = match;
-        return (
-          <Text key={index} style={{ marginBottom: 10,marginTop:5, fontSize: 14, color: "#333", lineHeight: 20 }}>
-            🔸{" "}
-            <Text style={{ fontWeight: "bold", color: "#FF3B30" }}>{`"${subword}"`}</Text>{" "}
-            (<Text style={{ fontWeight: "bold", color: "#007AFF" }}>{vowelIpa}</Text>):{" "}
-            <Text>{message}</Text>
-          </Text>
-        );
-      } else {
-        return (
-          <Text key={index} style={{ fontSize: 14, color: "#333", lineHeight: 20 }}>
-            {line}
-          </Text>
-        );
-      }
-    })}
-  </View>
-)}
-
-
-                        {words[currentIndex].ipucu !== "" && (
-                          <Text style={styles.ipucuText}>
-                            <Text style={styles.ipucuBold}>İpucu: </Text>
-                            {words[currentIndex].ipucu}
-                          </Text>
-                        )}
-                      </>
-                    ) : (
-                      <Text style={[styles.tahminText, { marginBottom: 10 }]}>
-                        {words[currentIndex].transcribedText
-                          ? "Kelime farklı algılandı, lütfen doğru okunuşunu dinleyerek tekrar söyleyiniz."
-                          : "Lütfen tekrar kaydedin, ses net bir şekilde algılanamadı..."}
-                      </Text>
-                    )}
-
-<TouchableOpacity
-  onPress={playAudio}
-  style={[styles.listenButton, { marginTop: 20 }]}
->
-  <Text style={styles.listenButtonText}>Dinle</Text>
-</TouchableOpacity>
- 
-           
-                  </>
-                )}
-              </ScrollView>
+              <TouchableOpacity
+                style={styles.nextButton}
+                onPress={handleNextWord}
+              >
+                <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
+              </TouchableOpacity>
             </View>
           </View>
-        </Modal>
 
-      </View>
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showModal}
+            onRequestClose={() => setShowModal(false)}
+          >
+            <View style={styles.feedbackContainer}>
+              <View style={styles.feedbackContent}>
+                {/* Fixed top-right close button */}
+                <TouchableOpacity
+                  onPress={() => setShowModal(false)}
+                  style={styles.modalCloseIcon}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <FontAwesome name="close" size={26} color="#FF3B30" />
+                </TouchableOpacity>
+
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                  {isFeedbackLoading || !words[currentIndex] ? (
+                    <>
+                      <Text style={{ textAlign: "center", fontSize: 16 }}>
+                        Geri bildirim hazırlanıyor...
+                      </Text>
+
+                      {sttPreview && (
+                        <Text
+                          style={{
+                            textAlign: "center",
+                            fontSize: 14,
+                            marginTop: 10,
+                            color: "#666",
+                          }}
+                        >
+                          Google STT tahmini: " {sttPreview} "
+                        </Text>
+                      )}
+                      {Object.keys(alternativesMap).length > 0 && (
+                        <View style={{ marginTop: 20, alignItems: "center" }}>
+                          <Text
+                            style={{
+                              fontSize: 18,
+                              fontWeight: "bold",
+                              marginBottom: 10,
+                              color: "#FF3B30",
+                            }}
+                          >
+                            Diğer STT Tahminleri
+                          </Text>
+                          {Object.entries(alternativesMap).map(
+                            ([transcript, confidence], index) => (
+                              <View
+                                key={index}
+                                style={{
+                                  backgroundColor: "#F0F0F0",
+                                  borderRadius: 10,
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 16,
+                                  marginBottom: 8,
+                                  alignItems: "center",
+                                  width: "90%",
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontWeight: "600",
+                                    color: "#333",
+                                  }}
+                                >
+                                  {transcript}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 13,
+                                    color: "#888",
+                                    marginTop: 2,
+                                  }}
+                                >
+                                  Güven: {(confidence * 100).toFixed(1)}%
+                                </Text>
+                              </View>
+                            )
+                          )}
+                        </View>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Text
+                        style={[styles.feedbackTitle, { marginBottom: 10 }]}
+                      >
+                        Geri Bildirim
+                      </Text>
+
+                      {words[currentIndex].transcribedText ? (
+                        <>
+                          <Text
+                            style={[styles.tahminText, { marginBottom: 10 }]}
+                          >
+                            Sanırım "{words[currentIndex].transcribedText}"
+                            dediniz.
+                          </Text>
+
+                          <Text
+                            style={[
+                              styles.instructionText,
+                              { marginBottom: 10 },
+                            ]}
+                          >
+                            {words[currentIndex].isCorrect
+                              ? "Analizin sonuçları:"
+                              : "Lütfen tekrar deneyin, bazı hatalar algılandı!"}
+                          </Text>
+                          {feedback !== "" && (
+                            <View style={{ marginTop: 10 }}>
+                              {feedback.split("\n").map((line, index) => {
+                                const match = line.match(
+                                  /🔸 "(.*?)" \((.*?)\): (.*)/
+                                );
+                                if (match) {
+                                  const [, subword, vowelIpa, message] = match;
+                                  return (
+                                    <Text
+                                      key={index}
+                                      style={{
+                                        marginBottom: 10,
+                                        marginTop: 5,
+                                        fontSize: 14,
+                                        color: "#333",
+                                        lineHeight: 20,
+                                      }}
+                                    >
+                                      🔸{" "}
+                                      <Text
+                                        style={{
+                                          fontWeight: "bold",
+                                          color: "#FF3B30",
+                                        }}
+                                      >{`"${subword}"`}</Text>{" "}
+                                      (
+                                      <Text
+                                        style={{
+                                          fontWeight: "bold",
+                                          color: "#007AFF",
+                                        }}
+                                      >
+                                        {vowelIpa}
+                                      </Text>
+                                      ): <Text>{message}</Text>
+                                    </Text>
+                                  );
+                                } else {
+                                  return (
+                                    <Text
+                                      key={index}
+                                      style={{
+                                        fontSize: 14,
+                                        color: "#333",
+                                        lineHeight: 20,
+                                      }}
+                                    >
+                                      {line}
+                                    </Text>
+                                  );
+                                }
+                              })}
+                            </View>
+                          )}
+
+                          {words[currentIndex].ipucu !== "" && (
+                            <Text style={styles.ipucuText}>
+                              <Text style={styles.ipucuBold}>İpucu: </Text>
+                              {words[currentIndex].ipucu}
+                            </Text>
+                          )}
+                        </>
+                      ) : (
+                        <Text style={[styles.tahminText, { marginBottom: 10 }]}>
+                          {words[currentIndex].transcribedText
+                            ? "Kelime farklı algılandı, lütfen doğru okunuşunu dinleyerek tekrar söyleyiniz."
+                            : "Lütfen tekrar kaydedin, ses net bir şekilde algılanamadı..."}
+                        </Text>
+                      )}
+
+                      <TouchableOpacity
+                        onPress={playAudio}
+                        style={[styles.listenButton, { marginTop: 20 }]}
+                      >
+                        <Text style={styles.listenButtonText}>Dinle</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </ScrollView>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      </SafeAreaView>
       <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
@@ -560,8 +634,8 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 20,
-    left: 10,
+    top: 90,
+    left: 20,
     zIndex: 10,
   },
   backIcon: {
@@ -630,7 +704,6 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
     //padding:20,
-    
   },
   feedbackContent: {
     height: "50%",
@@ -686,7 +759,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     paddingBottom: 10, // prevents content from touching the bottom
     paddingHorizontal: 15,
-    paddingVertical:10,  // adds horizontal space
+    paddingVertical: 10, // adds horizontal space
   },
   modalCloseIcon: {
     position: "absolute",
@@ -694,6 +767,4 @@ const styles = StyleSheet.create({
     right: 15,
     zIndex: 10,
   },
-  
-  
 });

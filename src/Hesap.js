@@ -16,6 +16,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import jwt_decode from "jwt-decode";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import BottomNavBar from "./BottomNavBar";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { FontAwesome } from "@expo/vector-icons";
+import BackButton from "./BackButton";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -59,75 +65,89 @@ const Hesap = () => {
 
   return (
     <View style={styles.container}>
-      {/* Top Section */}
-      <View style={styles.topContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>Hesap Ayarları</Text>
-      </View>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Top Section */}
+        <View style={styles.topContainer}>
+          <BackButton navigation={navigation} />
+          <Text style={styles.title}>Hesap Ayarları</Text>
+        </View>
 
-      {/* Settings List */}
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("Parola")}
-        >
-          <View style={styles.cardContent}>
-            <Icon name="key" size={30} color="#333" style={styles.icon} />
-            <View>
-              <Text style={styles.cardTitle}>Şifreyi Değiştir</Text>
-              <Text style={styles.cardSubtitle}>Hesap şifrenizi güncelleyin</Text>
+        {/* Settings List */}
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ChangePassword")}
+          >
+            <View style={styles.cardContent}>
+              <Icon name="key" size={30} color="#333" style={styles.icon} />
+              <View>
+                <Text style={styles.cardTitle}>Şifreyi Değiştir</Text>
+                <Text style={styles.cardSubtitle}>
+                  Hesap şifrenizi güncelleyin
+                </Text>
+              </View>
             </View>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("ChangeEmail")}
-        >
-          <View style={styles.cardContent}>
-            <Icon name="envelope" size={30} color="#333" style={styles.icon} />
-            <View>
-              <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
-              <Text style={styles.cardSubtitle}>E-posta adresinizi güncelleyin</Text>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ChangeEmail")}
+          >
+            <View style={styles.cardContent}>
+              <Icon
+                name="envelope"
+                size={30}
+                color="#333"
+                style={styles.icon}
+              />
+              <View>
+                <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
+                <Text style={styles.cardSubtitle}>
+                  E-posta adresinizi güncelleyin
+                </Text>
+              </View>
             </View>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={() => navigation.navigate("ChangeName")}
-        >
-          <View style={styles.cardContent}>
-            <Icon name="user-edit" size={30} color="#333" style={styles.icon} />
-            <View>
-              <Text style={styles.cardTitle}>Ad Soyad Değiştir</Text>
-              <Text style={styles.cardSubtitle}>İsminizi güncelleyin</Text>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("ChangeName")}
+          >
+            <View style={styles.cardContent}>
+              <Icon
+                name="user-edit"
+                size={30}
+                color="#333"
+                style={styles.icon}
+              />
+              <View>
+                <Text style={styles.cardTitle}>Ad Soyad Değiştir</Text>
+                <Text style={styles.cardSubtitle}>İsminizi güncelleyin</Text>
+              </View>
             </View>
-          </View>
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.card}
-          onPress={handleDeleteAccount}
-        >
-          <View style={styles.cardContent}>
-            <Icon name="trash-alt" size={30} color="#FF3B30" style={styles.icon} />
-            <View>
-              <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>Hesabımı Sil</Text>
-              <Text style={styles.cardSubtitle}>Hesabınızı kalıcı olarak silin</Text>
+          <TouchableOpacity style={styles.card} onPress={handleDeleteAccount}>
+            <View style={styles.cardContent}>
+              <Icon
+                name="trash-alt"
+                size={30}
+                color="#FF3B30"
+                style={styles.icon}
+              />
+              <View>
+                <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>
+                  Hesabımı Sil
+                </Text>
+                <Text style={styles.cardSubtitle}>
+                  Hesabınızı kalıcı olarak silin
+                </Text>
+              </View>
             </View>
-          </View>
-        </TouchableOpacity>
-      </ScrollView>
-      <BottomNavBar navigation={navigation} />
+          </TouchableOpacity>
+        </ScrollView>
+        <BottomNavBar navigation={navigation} />
+      </SafeAreaView>
     </View>
   );
 };
@@ -138,35 +158,20 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
   },
   topContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 8,
     justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    paddingTop: 50,
+    paddingBottom: 15,
+    position: "relative",
   },
-  backIcon: {
-    width: 20,
-    height: 20,
-  },
+
   title: {
-    fontSize: 24,
+    fontSize: 34,
     fontWeight: "bold",
     color: "#333",
-    marginLeft: 15,
+    textAlign: "center",
   },
+
   scrollContainer: {
     flexGrow: 1,
     padding: 20,

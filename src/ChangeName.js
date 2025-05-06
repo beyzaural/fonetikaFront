@@ -13,9 +13,13 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
 import { LinearGradient } from "expo-linear-gradient";
-
+import BackButton from "./BackButton";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const ChangeName = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -68,22 +72,17 @@ const ChangeName = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+
       <LinearGradient
         colors={["#f8f8f8", "#ffffff"]}
         style={styles.backgroundGradient}
       />
+        <SafeAreaView style={{ flex: 1 }}>
       {/* Top Section */}
       <View style={styles.topContainer}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-        <Text style={styles.title}>Kullanıcı Adını Güncelle</Text>
+        <BackButton navigation={navigation} />
+        <Text style={styles.title}>Kullanıcı Adını </Text>
+        <Text style={styles.title}>Güncelle</Text>
       </View>
 
       {/* Content */}
@@ -118,6 +117,7 @@ const ChangeName = ({ navigation }) => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+      </SafeAreaView>
       <BottomNavBar navigation={navigation} />
     </View>
   );
@@ -136,40 +136,20 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   topContainer: {
-    flexDirection: "row",
     alignItems: "center",
-    paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(214, 213, 179, 0.2)",
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
-    borderRadius: 8,
     justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "rgba(214, 213, 179, 0.3)",
+    paddingTop: 50,
+    paddingBottom: 15,
+    position: "relative",
   },
-  backIcon: {
-    width: 20,
-    height: 20,
-  },
+
   title: {
-    fontSize: 24,
+    fontSize: 34,
     fontWeight: "bold",
     color: "#333",
-    marginLeft: 15,
+    textAlign: "center",
   },
+
   contentContainer: {
     flex: 1,
     padding: 20,
