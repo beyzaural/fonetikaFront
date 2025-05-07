@@ -11,11 +11,13 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  ImageBackground,
 } from "react-native";
 import Constants from "expo-constants";
 import { Audio } from "expo-av";
 import { FontAwesome } from "@expo/vector-icons";
 import BottomNavBar from "./BottomNavBar";
+import { LinearGradient } from "expo-linear-gradient";
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -185,7 +187,10 @@ const Sohbet = ({ navigation }) => {
   );
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require("../assets/images/green.png")}
+      style={styles.imageBackground}
+    >
       <SafeAreaView style={{ flex: 1 }}>
         {/* Üst Başlık */}
         <View style={styles.topContainer}>
@@ -206,7 +211,7 @@ const Sohbet = ({ navigation }) => {
             contentContainerStyle={styles.chatContainer}
           />
         </KeyboardAvoidingView>
-        </SafeAreaView>
+      </SafeAreaView>
 
       {loading && (
         <ActivityIndicator
@@ -268,16 +273,16 @@ const Sohbet = ({ navigation }) => {
       </View>
 
       <BottomNavBar navigation={navigation} />
-    </View>
+    </ImageBackground>
   );
 };
 
 export default Sohbet;
 
 const styles = StyleSheet.create({
-  container: {
+  imageBackground: {
     flex: 1,
-    backgroundColor: "#E3EFF0",
+    resizeMode: "cover",
   },
   topContainer: {
     backgroundColor: "#E3EFF0",

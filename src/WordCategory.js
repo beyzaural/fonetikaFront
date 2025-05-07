@@ -112,11 +112,12 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-between",
     paddingHorizontal: 17,
+    paddingTop: 20,
   },
 
   card: {
     width: "48%",
-    height: 200,
+    height: 190,
     borderRadius: 35,
     marginBottom: 15,
   },

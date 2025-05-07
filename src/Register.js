@@ -9,6 +9,12 @@ import {
   FlatList,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
+import BackButton from "./BackButton";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
@@ -101,8 +107,6 @@ const Register = ({ navigation }) => {
     }
 
     try {
-      
-
       const fullPhoneNumber = `${countryCode}${phone}`;
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
@@ -144,237 +148,235 @@ const Register = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Title */}
-      <TouchableOpacity
-        onPress={() => navigation.goBack()}
-        style={styles.goBackTopLeftButton}
-      >
-        <FontAwesome name="arrow-left" size={20} color="black" />
-      </TouchableOpacity>
-
-      <Text style={styles.titleText}>Kayıt Olun</Text>
-
-      {/* Input Fields */}
-      <View style={styles.formContainer}>
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}> Ad </Text>
-          <TextInput
-            placeholder="Adınızı giriniz"
-            style={styles.textInputStyle}
-            placeholderTextColor="#888"
-            onChangeText={setUsername}
-            value={username}
-          />
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Title */}
+        <View style={styles.topContainer}>
+          <BackButton navigation={navigation} />
+          <Text style={styles.title}>Kayıt Olun</Text>
         </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}> Email </Text>
-          <TextInput
-            placeholder="Email adresinizi giriniz"
-            style={styles.textInputStyle}
-            placeholderTextColor="#888"
-            autoCapitalize="none"
-            onChangeText={setEmail}
-            value={email}
-          />
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}> Telefon Numarası </Text>
-          <View style={styles.phoneContainer}>
-            <TouchableOpacity
-              style={styles.countryCodeSelector}
-              onPress={() => setDropdownVisible(!dropdownVisible)}
-            >
-              <Text style={styles.countryCodeText}>{countryCode}</Text>
-            </TouchableOpacity>
+        {/* Input Fields */}
+        <View style={styles.formContainer}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.labelText}> Ad </Text>
             <TextInput
-              placeholder="Telefon numaranızı giriniz"
-              style={[styles.textInputStyle, styles.phoneInputStyle]}
+              placeholder="Adınızı giriniz"
+              style={styles.textInputStyle}
               placeholderTextColor="#888"
-              keyboardType="numeric"
-              onChangeText={setPhone}
-              value={phone}
+              onChangeText={setUsername}
+              value={username}
             />
           </View>
-          {dropdownVisible && (
-            <View style={styles.dropdownContainer}>
-              <FlatList
-                data={countryCodes}
-                keyExtractor={(item) => item.code}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setCountryCode(item.code);
-                      setDropdownVisible(false);
-                    }}
-                  >
-                    <Text style={styles.dropdownText}>
-                      {item.country} ({item.code})
-                    </Text>
-                  </TouchableOpacity>
-                )}
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.labelText}> Email </Text>
+            <TextInput
+              placeholder="Email adresinizi giriniz"
+              style={styles.textInputStyle}
+              placeholderTextColor="#888"
+              autoCapitalize="none"
+              onChangeText={setEmail}
+              value={email}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.labelText}> Telefon Numarası </Text>
+            <View style={styles.phoneContainer}>
+              <TouchableOpacity
+                style={styles.countryCodeSelector}
+                onPress={() => setDropdownVisible(!dropdownVisible)}
+              >
+                <Text style={styles.countryCodeText}>{countryCode}</Text>
+              </TouchableOpacity>
+              <TextInput
+                placeholder="Telefon numaranızı giriniz"
+                style={[styles.textInputStyle, styles.phoneInputStyle]}
+                placeholderTextColor="#888"
+                keyboardType="numeric"
+                onChangeText={setPhone}
+                value={phone}
               />
             </View>
-          )}
-        </View>
-
-        {/* Password Field with Eye Icon */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}>Şifre</Text>
-          <View style={styles.passwordInputContainer}>
-            <TextInput
-              placeholder="Şifrenizi giriniz"
-              style={styles.textInputStyle}
-              placeholderTextColor="#888"
-              autoCapitalize="none"
-              secureTextEntry={!showPassword}
-              onChangeText={setPassword}
-              value={password}
-            />
-            {/* 👁️ Toggle Password Visibility */}
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeIcon}
-            >
-              <FontAwesome
-                name={showPassword ? "eye" : "eye-slash"}
-                size={20}
-                color="gray"
-              />
-            </TouchableOpacity>
+            {dropdownVisible && (
+              <View style={styles.dropdownContainer}>
+                <FlatList
+                  data={countryCodes}
+                  keyExtractor={(item) => item.code}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setCountryCode(item.code);
+                        setDropdownVisible(false);
+                      }}
+                    >
+                      <Text style={styles.dropdownText}>
+                        {item.country} ({item.code})
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
           </View>
-          <Text style={styles.passwordRequirementsText}>
-            Şifre en az bir büyük harf, bir noktalama işareti içermeli ve 6
-            haneden uzun olmalıdır.
-          </Text>
-        </View>
 
-        {/* Confirm Password Field with Eye Icon */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}>Şifre Tekrar</Text>
-          <View style={styles.passwordInputContainer}>
-            <TextInput
-              placeholder="Şifrenizi tekrar giriniz"
-              style={styles.textInputStyle}
-              placeholderTextColor="#888"
-              autoCapitalize="none"
-              secureTextEntry={!showConfirmPassword}
-              onChangeText={setConfirmPassword}
-              value={confirmPassword}
-            />
-            {/* 👁️‍🗨️ Toggle Confirm Password Visibility */}
-            <TouchableOpacity
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={styles.eyeIcon}
-            >
-              <FontAwesome
-                name={showConfirmPassword ? "eye" : "eye-slash"}
-                size={20}
-                color="gray"
+          {/* Password Field with Eye Icon */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.labelText}>Şifre</Text>
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                placeholder="Şifrenizi giriniz"
+                style={styles.textInputStyle}
+                placeholderTextColor="#888"
+                autoCapitalize="none"
+                secureTextEntry={!showPassword}
+                onChangeText={setPassword}
+                value={password}
               />
-            </TouchableOpacity>
+              {/* 👁️ Toggle Password Visibility */}
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeIcon}
+              >
+                <FontAwesome
+                  name={showPassword ? "eye" : "eye-slash"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.passwordRequirementsText}>
+              Şifre en az bir büyük harf, bir noktalama işareti içermeli ve 6
+              haneden uzun olmalıdır.
+            </Text>
           </View>
-        </View>
 
-        <View style={styles.inputContainer}>
-          <Text style={styles.labelText}>Mesleğiniz</Text>
-          <TouchableOpacity
-            style={[styles.textInputStyle]}
-            onPress={() =>
-              setOccupationDropdownVisible(!occupationDropdownVisible)
-            }
-          >
-            <Text
-              style={
-                occupation
-                  ? styles.selectedText // Style when an occupation is selected
-                  : styles.placeholderText // Style for the placeholder
+          {/* Confirm Password Field with Eye Icon */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.labelText}>Şifre Tekrar</Text>
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                placeholder="Şifrenizi tekrar giriniz"
+                style={styles.textInputStyle}
+                placeholderTextColor="#888"
+                autoCapitalize="none"
+                secureTextEntry={!showConfirmPassword}
+                onChangeText={setConfirmPassword}
+                value={confirmPassword}
+              />
+              {/* 👁️‍🗨️ Toggle Confirm Password Visibility */}
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeIcon}
+              >
+                <FontAwesome
+                  name={showConfirmPassword ? "eye" : "eye-slash"}
+                  size={20}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.labelText}>Mesleğiniz</Text>
+            <TouchableOpacity
+              style={[styles.textInputStyle]}
+              onPress={() =>
+                setOccupationDropdownVisible(!occupationDropdownVisible)
               }
             >
-              {occupation || "Meslek Seçiniz"}
-            </Text>
-          </TouchableOpacity>
-
-          {occupationDropdownVisible && (
-            <View style={styles.dropdownContainer}>
-              <TextInput
-                placeholder="Meslek Ara"
-                style={styles.searchInput}
-                placeholderTextColor="#888"
-                onChangeText={setSearchText}
-                value={searchText}
-              />
-              <FlatList
-                data={filteredOccupations}
-                keyExtractor={(item, index) => index.toString()}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setOccupation(item);
-                      setOccupationDropdownVisible(false);
-                      setSearchText("");
-                    }}
-                  >
-                    <Text style={styles.dropdownText}>{item}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-            </View>
-          )}
-        </View>
-
-        <View style={styles.genderContainer}>
-          <Text style={styles.labelText}> Cinsiyet</Text>
-          <View style={styles.genderButtons}>
-            {/* Erkek Button */}
-            <TouchableOpacity
-              style={[
-                styles.genderButton,
-                gender === "Erkek" && styles.selectedGenderButton,
-              ]}
-              onPress={() => setGender("Erkek")}
-            >
               <Text
-                style={[
-                  styles.genderButtonText,
-                  gender === "Erkek" && styles.selectedGenderButtonText,
-                ]}
+                style={
+                  occupation
+                    ? styles.selectedText // Style when an occupation is selected
+                    : styles.placeholderText // Style for the placeholder
+                }
               >
-                Erkek
+                {occupation || "Meslek Seçiniz"}
               </Text>
             </TouchableOpacity>
 
-            {/* Kız Button */}
-            <TouchableOpacity
-              style={[
-                styles.genderButton,
-                gender === "Kadın" && styles.selectedGenderButton,
-              ]}
-              onPress={() => setGender("Kadın")}
-            >
-              <Text
-                style={[
-                  styles.genderButtonText,
-                  gender === "Kadın" && styles.selectedGenderButtonText,
-                ]}
-              >
-                Kadın
-              </Text>
-            </TouchableOpacity>
+            {occupationDropdownVisible && (
+              <View style={styles.dropdownContainer}>
+                <TextInput
+                  placeholder="Meslek Ara"
+                  style={styles.searchInput}
+                  placeholderTextColor="#888"
+                  onChangeText={setSearchText}
+                  value={searchText}
+                />
+                <FlatList
+                  data={filteredOccupations}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.dropdownItem}
+                      onPress={() => {
+                        setOccupation(item);
+                        setOccupationDropdownVisible(false);
+                        setSearchText("");
+                      }}
+                    >
+                      <Text style={styles.dropdownText}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+              </View>
+            )}
           </View>
-        </View>
 
-        {/* Register Button */}
-        <Pressable
-          onPress={handleRegister} // Directly call the handleRegister function
-          style={({ pressed }) => [styles.button]}
-        >
-          <Text style={styles.registerText}>Kayıt Ol</Text>
-        </Pressable>
-      </View>
+          <View style={styles.genderContainer}>
+            <Text style={styles.labelText}> Cinsiyet</Text>
+            <View style={styles.genderButtons}>
+              {/* Erkek Button */}
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  gender === "Erkek" && styles.selectedGenderButton,
+                ]}
+                onPress={() => setGender("Erkek")}
+              >
+                <Text
+                  style={[
+                    styles.genderButtonText,
+                    gender === "Erkek" && styles.selectedGenderButtonText,
+                  ]}
+                >
+                  Erkek
+                </Text>
+              </TouchableOpacity>
+
+              {/* Kız Button */}
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  gender === "Kadın" && styles.selectedGenderButton,
+                ]}
+                onPress={() => setGender("Kadın")}
+              >
+                <Text
+                  style={[
+                    styles.genderButtonText,
+                    gender === "Kadın" && styles.selectedGenderButtonText,
+                  ]}
+                >
+                  Kadın
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Register Button */}
+          <Pressable
+            onPress={handleRegister} // Directly call the handleRegister function
+            style={({ pressed }) => [styles.button]}
+          >
+            <Text style={styles.registerText}>Kayıt Ol</Text>
+          </Pressable>
+        </View>
+      </SafeAreaView>
     </View>
   );
 };
@@ -382,36 +384,32 @@ const Register = ({ navigation }) => {
 export default Register;
 
 const styles = StyleSheet.create({
-  goBackTopLeftButton: {
-    position: "absolute",
-    top: 20, // Adjust to give space from the top
-    left: 20, // Adjust to give space from the left
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 20, // Make it circular if needed
-    backgroundColor: "#E8E8E8", // Light gray background for better visibility
-  },
-
   container: {
     flex: 1,
     backgroundColor: "white",
     paddingHorizontal: 20,
     justifyContent: "center",
   },
-  titleText: {
-    fontSize: 30,
+  topContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 50,
+    paddingBottom: 55,
+    position: "relative",
+  },
+
+  title: {
+    fontSize: 34,
     fontWeight: "bold",
-    color: "black",
-    marginBottom: 40,
+    color: "#333",
     textAlign: "center",
   },
+
   formContainer: {
     paddingHorizontal: 10,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 25,
   },
   labelText: {
     position: "absolute",
