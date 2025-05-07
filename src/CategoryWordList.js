@@ -88,14 +88,16 @@ const CategoryWordList = ({ navigation, route }) => {
           )}
         </ScrollView>
 
-        <View style={styles.tipBox}>
+       
+
+        
+      </SafeAreaView>
+      <View style={styles.tipBox}>
           <Text style={styles.tipText}>
             💡 Her kelimeyi dikkatlice çalışın ve telaffuzunu öğrenin.
           </Text>
         </View>
-
-        <BottomNavBar navigation={navigation} />
-      </SafeAreaView>
+      <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
 };

@@ -1,23 +1,23 @@
 import React from "react";
 import { WebView } from "react-native-webview";
-
 import {
   StyleSheet,
   Text,
   View,
-  ImageBackground,
   TouchableOpacity,
   ScrollView,
   Image,
 } from "react-native";
 import BottomNavBar from "./BottomNavBar";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "./BackButton";
 
 const Ders = ({ navigation, route }) => {
   const { courseId, phoneme } = route?.params || {};
   const videoMap = {
     a: "https://www.youtube.com/embed/-yLIJNekZoI",
-    e: "https://www.youtube.com/embed/lMjPj1_XsKs", // Doğru: embed format
-    o: "https://www.youtube.com/embed/phqiPAFKRcc?modestbranding=1&showinfo=0&controls=1", // embed format
+    e: "https://www.youtube.com/embed/lMjPj1_XsKs",
+    o: "https://www.youtube.com/embed/phqiPAFKRcc?modestbranding=1&showinfo=0&controls=1",
     u: "https://www.youtube.com/embed/sGiEZEPBaF0",
     ı: "https://www.youtube.com/embed/EBPHE_V2f9M",
   };
@@ -26,102 +26,112 @@ const Ders = ({ navigation, route }) => {
     e: "e",
     "o/ö": "o",
     "u/ü": "u",
-    "ı/i": "ı", // varsa ileride eklersin
+    "ı/i": "ı",
   };
 
   const videoKey =
     phonemeKeyMap[phoneme?.toLowerCase()] || phoneme?.toLowerCase();
 
   return (
-    <View style={styles.imageBackground}>
-      <View style={styles.videoContainer}>
-        <WebView
-          style={styles.webview}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          source={{
-            uri: videoMap[videoKey] || "https://www.youtube.com",
-          }}
-        />
-      </View>
-
-      {/* Back Arrow */}
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => navigation.navigate("Dersler")}
-      >
-        <Image
-          source={require("../assets/images/backspace.png")}
-          style={styles.backIcon}
-        />
-      </TouchableOpacity>
-
-      <View style={styles.bottomContainer}>
-        <Text style={styles.title}>Ders Seçenekleri</Text>
-        <Text style={styles.subtitle}>
-          {phoneme.toUpperCase()} harfi için bir eğitim modülü seç:
-        </Text>
-
-        {/* Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() =>
-              navigation.navigate("KursKelime", {
-                courseId: courseId,
-                phoneme: phoneme,
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Kelime Çalış</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() =>
-              navigation.navigate("KursTekrar", {
-                courseId: courseId,
-                phoneme: phoneme,
-              })
-            }
-          >
-            <Text style={styles.buttonText}>Geçmiş Tekrarı</Text>
-          </TouchableOpacity>
+    <View style={styles.container}>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Top Section */}
+        <View style={styles.topContainer}>
+          <BackButton navigation={navigation} style={styles.backButton} />
+          <Text style={styles.title}>Ders Seçenekleri</Text>
         </View>
 
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.tip}>
-            💡 İpucu: Hedeflediğin sesi öğrenmenin en iyi yolu bol tekrar
-            yapmaktır.
-          </Text>
-        </ScrollView>
+        <View style={styles.videoContainer}>
+          <WebView
+            style={styles.webview}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            source={{
+              uri: videoMap[videoKey] || "https://www.youtube.com",
+            }}
+          />
+        </View>
 
-        <BottomNavBar navigation={navigation} />
-      </View>
+        <View style={styles.bottomContainer}>
+          <Text style={styles.subtitle}>
+            {phoneme.toUpperCase()} harfi için bir eğitim modülü seç:
+          </Text>
+
+          {/* Buttons */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                navigation.navigate("KursKelime", {
+                  courseId: courseId,
+                  phoneme: phoneme,
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Kelime Çalış</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                navigation.navigate("KursTekrar", {
+                  courseId: courseId,
+                  phoneme: phoneme,
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Geçmiş Tekrarı</Text>
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            <Text style={styles.tip}>
+              💡 İpucu: Hedeflediğin sesi öğrenmenin en iyi yolu bol tekrar
+              yapmaktır.
+            </Text>
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };
 
-export default Ders;
-
 const styles = StyleSheet.create({
-  imageBackground: {
+  container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
-
-    paddingTop: 60,
+    backgroundColor: "white",
+  },
+  topContainer: {
+    paddingTop: 30,
+    paddingBottom: 25,
+    position: "relative",
+    alignItems: "center",
   },
   backButton: {
     position: "absolute",
-    top: 17,
-    left: 17,
-    zIndex: 100,
-    borderRadius: 25,
-    padding: 5,
+    left: 20,
+    top: 30,
+    zIndex: 1,
   },
-  backIcon: {
-    width: 40,
-    height: 40,
+  title: {
+    fontSize: 34,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+  },
+  videoContainer: {
+    width: "100%",
+    height: 250,
+    alignSelf: "center",
+    marginTop: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+  webview: {
+    flex: 1,
   },
   bottomContainer: {
     flex: 1,
@@ -130,13 +140,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     paddingVertical: 30,
     paddingHorizontal: 20,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#222",
-    textAlign: "center",
-    marginBottom: 5,
+    marginTop: 20,
   },
   subtitle: {
     fontSize: 16,
@@ -176,18 +180,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 10,
   },
-  videoContainer: {
-    width: "100%",
-    height: 250,
-    alignSelf: "center",
-    marginTop: 10,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#ccc",
-  },
-
-  webview: {
-    flex: 1,
-  },
 });
+
+export default Ders;

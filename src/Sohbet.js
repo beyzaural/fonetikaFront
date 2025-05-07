@@ -285,7 +285,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   topContainer: {
-    backgroundColor: "#E3EFF0",
     paddingVertical: 20,
     flexDirection: "row",
     alignItems: "center",
@@ -319,10 +318,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   chatContainer: {
-    flexGrow: 1, // FlatList’in içeriği kadar uzamasını sağlar
+    flexGrow: 1,
     padding: 12,
-    paddingBottom: 130, // mikrofon paneline çarpmaması için yeterli boşluk
-    backgroundColor: "#E3EFF0",
+    paddingBottom: 130,
   },
 
   message: {
@@ -412,7 +410,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   chatList: {
-    backgroundColor: "#E3EFF0", // bu sayede yüklenirken de bu renk görünür
+    backgroundColor: 'transparent',
   },
   inputArea: {
     flexDirection: "row",

@@ -12,7 +12,9 @@ import {
   ScrollView,
   Image,
 } from "react-native";
-import { getUserIdFromToken } from "./utils/auth"; // add this at the top
+import { getUserIdFromToken } from "./utils/auth";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "./BackButton";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -34,7 +36,7 @@ const Dersler = ({ navigation }) => {
         const userId = await getUserIdFromToken();
 
         const res = await axios.get(`${API_URL}/api/courses/user`, {
-          params: { userId }, // ✅ required by backend
+          params: { userId },
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -77,7 +79,6 @@ const Dersler = ({ navigation }) => {
     fetchCourses();
   }, []);
 
-  // Aynı sesi temsil eden kursları gruplandır
   const groupCourses = (courses) => {
     const phonemeGroups = {
       "ı/i": ["ı", "i"],
@@ -109,9 +110,9 @@ const Dersler = ({ navigation }) => {
 
     if (["ı/i"].includes(lower)) return require("../assets/images/ı.png");
     if (["o/ö"].includes(lower)) return require("../assets/images/o.png");
-    if (lower === "a") return require("../assets/images/a.png"); // özel eşleştirme
+    if (lower === "a") return require("../assets/images/a.png");
     if (lower === "e") return require("../assets/images/e.png");
-    if (["u/ü"].includes(lower)) return require("../assets/images/u.png"); // 👈 varsa ikonun
+    if (["u/ü"].includes(lower)) return require("../assets/images/u.png");
   };
 
   const getTitleForCourse = (name) => {
@@ -120,62 +121,54 @@ const Dersler = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Top Container */}
-      <View style={styles.topContainer}>
-        <ImageBackground
-          source={require("../assets/images/ders1.png")}
-          style={styles.imageBackground}
-          imageStyle={styles.imageStyle}
-        >
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => navigation.navigate("Home")}
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Top Container */}
+        <View style={styles.topContainer}>
+          <ImageBackground
+            source={require("../assets/images/ders1.png")}
+            style={styles.imageBackground}
+            imageStyle={styles.imageStyle}
           >
-            <Image
-              source={require("../assets/images/backspace.png")}
-              style={styles.backIcon}
-            />
-          </TouchableOpacity>
-        </ImageBackground>
-      </View>
+            <BackButton navigation={navigation} />
+          </ImageBackground>
+        </View>
 
-      {/* Bottom Container */}
-      <View style={styles.bottomContainer}>
-        <Text style={styles.title}>Dersler</Text>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          {Array.isArray(courses) &&
-            courses.map((course, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.card}
-                onPress={() =>
-                  navigation.navigate("Ders", {
-                    courseId: course.id,
-                    phoneme: course.courseName,
-                  })
-                }
-              >
-                <View style={styles.cardContent}>
-                  <Image
-                    source={getImageForCourse(course.courseName)}
-                    style={styles.cardImage}
-                  />
-                  <View>
-                    <Text style={styles.cardTitle}>
-                      {getTitleForCourse(course.courseName)}
-                    </Text>
+        {/* Bottom Container */}
+        <View style={styles.bottomContainer}>
+          <Text style={styles.title}>Dersler</Text>
+          <ScrollView contentContainerStyle={styles.scrollContainer}>
+            {Array.isArray(courses) &&
+              courses.map((course, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.card}
+                  onPress={() =>
+                    navigation.navigate("Ders", {
+                      courseId: course.id,
+                      phoneme: course.courseName,
+                    })
+                  }
+                >
+                  <View style={styles.cardContent}>
+                    <Image
+                      source={getImageForCourse(course.courseName)}
+                      style={styles.cardImage}
+                    />
+                    <View>
+                      <Text style={styles.cardTitle}>
+                        {getTitleForCourse(course.courseName)}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            ))}
-        </ScrollView>
-      </View>
+                </TouchableOpacity>
+              ))}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
       <BottomNavBar navigation={navigation} />
     </View>
   );
 };
-
-export default Dersler;
 
 const styles = StyleSheet.create({
   container: {
@@ -195,19 +188,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     resizeMode: "cover",
-  },
-  backButton: {
-    position: "absolute",
-    top: 20,
-    left: 20,
-    zIndex: 10,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    borderRadius: 25,
-    padding: 5,
-  },
-  backIcon: {
-    width: 40,
-    height: 40,
   },
   bottomContainer: {
     flex: 5,
@@ -257,9 +237,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#333",
   },
-  cardDifficulty: {
-    fontSize: 16,
-    color: "#555",
-    marginTop: 5,
-  },
 });
+
+export default Dersler;

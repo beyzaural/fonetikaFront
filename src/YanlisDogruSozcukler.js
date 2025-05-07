@@ -8,6 +8,9 @@ import {
   Image,
 } from "react-native";
 import yanlisDogruData from "../components/yanlisDogruData";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BottomNavBar from "./BottomNavBar";
+import BackButton from "./BackButton";
 
 const YanlisDogruSozcukler = ({ navigation }) => {
   const sortedData = [...yanlisDogruData].sort((a, b) =>
@@ -16,50 +19,51 @@ const YanlisDogruSozcukler = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Üst Satır: Geri Butonu + Başlık + Kalp */}
-      <View style={styles.topRow}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
+      <SafeAreaView style={{ flex: 1 }}>
+        {/* Top Section */}
+        <View style={styles.topContainer}>
+          <BackButton navigation={navigation} />
+          <Text style={styles.title}>Doğru Bilinen </Text>
+          <Text style={styles.title}>Yanlışlar</Text>
+        </View>
 
-        <Text style={styles.title}>Doğru Bilinen Yanlışlar</Text>
-      </View>
+        <Image
+          source={require("../assets/images/kalp.png")}
+          style={styles.heartIcon}
+        />
 
-      <Image
-        source={require("../assets/images/kalp.png")}
-        style={styles.heartIcon}
-      />
-      {/* Başlıklar */}
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Yanlış Okunuş</Text>
-        <Text style={styles.headerText}>Doğru Okunuş</Text>
-      </View>
+        {/* Başlıklar */}
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Yanlış Okunuş</Text>
+          <Text style={styles.headerText}>Doğru Okunuş</Text>
+        </View>
 
-      {/* Liste */}
-      <ScrollView contentContainerStyle={styles.list}>
-        {sortedData.map((item, index) => (
-          <View key={index} style={styles.row}>
-            <Text style={styles.cell}>{item.yanlis}</Text>
-            <Text style={styles.cell}>{item.dogru}</Text>
-          </View>
-        ))}
-      </ScrollView>
-      {/* 🎓 Sabit Fonetik Notu Kutusu */}
-      <View style={styles.persistentNote}>
-        <Text style={styles.notifTitle}>Fonetik Notu</Text>
-        <Text style={styles.notifText}>
-          é : kapalı e, ağız çok açılmadan söylenir.
-        </Text>
-        <Text style={styles.notifText}>
-          e: açık e’dir. Ses daha net çıkar ve ağız daha fazla açılır.
-        </Text>
-        <Text style={styles.notifText}>
-          “:” işareti, harfin uzatılarak okunması gerektiğini belirtir.
-        </Text>
-      </View>
+        {/* Liste */}
+        <ScrollView contentContainerStyle={styles.list}>
+          {sortedData.map((item, index) => (
+            <View key={index} style={styles.row}>
+              <Text style={styles.cell}>{item.yanlis}</Text>
+              <Text style={styles.cell}>{item.dogru}</Text>
+            </View>
+          ))}
+        </ScrollView>
+
+      </SafeAreaView>
+
+        {/* 🎓 Sabit Fonetik Notu Kutusu */}
+        <View style={styles.persistentNote}>
+          <Text style={styles.notifTitle}>Fonetik Notu</Text>
+          <Text style={styles.notifText}>
+            é : kapalı e, ağız çok açılmadan söylenir.
+          </Text>
+          <Text style={styles.notifText}>
+            e: açık e'dir. Ses daha net çıkar ve ağız daha fazla açılır.
+          </Text>
+          <Text style={styles.notifText}>
+            ":": işareti, harfin uzatılarak okunması gerektiğini belirtir.
+          </Text>
+        </View>
+      <BottomNavBar navigation={navigation} />
     </View>
   );
 };
@@ -69,28 +73,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#ffffff",
     paddingHorizontal: 20,
-    paddingTop: 30,
-    paddingBottom: 150,
     minHeight: "100%",
   },
-  topRow: {
-    flexDirection: "row",
+  topContainer: {
     alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 40,
+    justifyContent: "center",
+    paddingTop: 30,
+    paddingBottom: 20,
+    position: "relative",
   },
-  backIcon: {
-    width: 40,
-    height: 40,
-  },
-
   title: {
-    fontSize: 20,
+    fontSize: 34,
     fontWeight: "bold",
-    color: "black",
+    color: "#333",
     textAlign: "center",
-    flex: 1,
-    marginHorizontal: 10,
   },
   header: {
     flexDirection: "row",
@@ -103,7 +99,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "black",
+    color: "#333",
     width: "45%",
   },
   list: {
@@ -117,18 +113,16 @@ const styles = StyleSheet.create({
   cell: {
     width: "45%",
     fontSize: 16,
-    color: "black",
+    color: "#333",
   },
-
   heartIcon: {
     position: "absolute",
-    bottom: 150, // başlık altına hizalar
-    right: 20, // sağ boşluk
+    bottom: 125,
+    right: 20,
     width: 80,
     height: 80,
     zIndex: 5,
   },
-
   notifTitle: {
     fontWeight: "bold",
     fontSize: 18,
@@ -137,26 +131,16 @@ const styles = StyleSheet.create({
   },
   notifText: {
     fontSize: 13,
-    color: "black",
+    color: "#333",
     margin: 2,
   },
-  closeNotif: {
-    position: "absolute",
-    top: 5,
-    right: 10,
-  },
-  closeText: {
-    fontSize: 20,
-    color: "#FF8F00",
-  },
-
   persistentNote: {
-    backgroundColor: "rgba(255, 255, 255, 0.9)", // saydam beyaz
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
     borderTopWidth: 2,
     borderTopColor: "#ddd",
     padding: 12,
     position: "absolute",
-    bottom: 30,
+    bottom: 80,
     left: 10,
     right: 10,
     zIndex: 0,

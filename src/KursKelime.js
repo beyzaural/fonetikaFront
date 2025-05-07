@@ -14,6 +14,8 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import Constants from "expo-constants";
 import BottomNavBar from "./BottomNavBar";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "./BackButton";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import { getUserIdFromToken } from "./utils/auth";
@@ -253,132 +255,130 @@ const KursKelime = ({ navigation, route }) => {
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
-      <View style={styles.container}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() =>
-            navigation.navigate("Ders", {
-              courseId: courseId,
-              phoneme: phoneme,
-            })
-          }
-        >
-          <Image
-            source={require("../assets/images/backspace.png")}
-            style={styles.backIcon}
-          />
-        </TouchableOpacity>
-
-        <View style={styles.topContainer}>
-          <View style={styles.wordContainer}>
-            {words[currentIndex] ? (
-              <>
-                <Text style={styles.wordText}>{words[currentIndex].word}</Text>
-                <Text style={styles.phoneticText}>
-                  {words[currentIndex].definition}
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.wordText}>Yükleniyor...</Text>
-            )}
-            <TouchableOpacity
-              onPress={playOriginalAudio}
-              style={{ marginTop: 20 }}
-            >
-              <Image
-                source={require("../assets/icons/speaker.png")}
-                style={styles.speakerIcon}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.navigationContainer}>
-            <TouchableOpacity
-              style={styles.prevButton}
-              onPress={handlePreviousWord}
-            >
-              <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleMicrophonePress}>
-              <FontAwesome
-                name="microphone"
-                size={100}
-                color={isRecording ? "red" : "#FF3B30"}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.nextButton}
-              onPress={handleNextWord}
-            >
-              <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={showFeedback}
-          onRequestClose={() => setShowFeedback(false)}
-        >
-          <View style={styles.feedbackContainer}>
-            <View style={styles.feedbackContent}>
-              <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-              {words.length > 0 && words[currentIndex] ? (
+      <SafeAreaView style={{ flex: 1, marginTop: 50, paddingTop: 30 }}>
+        <BackButton navigation={navigation} />
+        <View style={styles.container}>
+          <View style={styles.topContainer}>
+            <View style={styles.wordContainer}>
+              {words[currentIndex] ? (
                 <>
-                  <Text style={styles.tahminText}>
-                    Sanırım “{words[currentIndex]?.transcribedText || "..."}”
-                    dediniz.
+                  <Text style={styles.wordText}>{words[currentIndex].word}</Text>
+                  <Text style={styles.phoneticText}>
+                    {words[currentIndex].definition}
                   </Text>
-                  <Text style={styles.instructionText}>
-                    {words[currentIndex]?.isCorrect
-                      ? "✅ Doğru söylediniz!"
-                      : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
-                  </Text>
-                  <Text style={styles.kelimeText}>
-                    {words[currentIndex].kelime.split("").map((char, index) => {
-                      const isRed =
-                        (words[currentIndex].word === "Kamuflaj" &&
-                          char === "u") ||
-                        (words[currentIndex].word === "Ağabey" &&
-                          char === "i") ||
-                        (words[currentIndex].word === "Sahi" && char === ":");
-                      return (
-                        <Text
-                          key={index}
-                          style={isRed ? styles.redText : styles.blackText}
-                        >
-                          {char}
-                        </Text>
-                      );
-                    })}
-                  </Text>
-
-                  {words[currentIndex].ipucu !== "" && (
-                    <Text style={styles.ipucuText}>
-                      <Text style={styles.ipucuBold}>İpucu: </Text>
-                      {words[currentIndex].ipucu}
-                    </Text>
-                  )}
                 </>
               ) : (
-                <Text>Yükleniyor...</Text>
+                <Text style={styles.wordText}>Yükleniyor...</Text>
               )}
+              <TouchableOpacity
+                onPress={playOriginalAudio}
+                style={styles.speakerIconWrapper}
+              >
+                <Image
+                  source={require("../assets/icons/speaker.png")}
+                  style={styles.speakerIcon}
+                />
+              </TouchableOpacity>
+            </View>
 
-              <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-                <Text style={styles.listenButtonText}>Dinle</Text>
+            <View style={styles.navigationContainer}>
+              <TouchableOpacity
+                style={styles.prevButton}
+                onPress={handlePreviousWord}
+              >
+                <FontAwesome name="arrow-left" size={50} color="#FF3B30" />
               </TouchableOpacity>
 
+              <View style={{ alignItems: "center" }}>
+                <TouchableOpacity onPress={handleMicrophonePress}>
+                  <FontAwesome
+                    name="microphone"
+                    size={100}
+                    color={isRecording ? "black" : "#FF3B30"}
+                  />
+                </TouchableOpacity>
+                <Text style={styles.micInfoText}>
+                  {isRecording
+                    ? "Bitirmek için tekrar basın"
+                    : "Kaydetmek için mikrofona basın"}
+                </Text>
+              </View>
+
               <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setShowFeedback(false)}
+                style={styles.nextButton}
+                onPress={handleNextWord}
               >
-                <Text style={styles.closeButtonText}>Kapat</Text>
+                <FontAwesome name="arrow-right" size={50} color="#FF3B30" />
               </TouchableOpacity>
             </View>
           </View>
-        </Modal>
-      </View>
+
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showFeedback}
+            onRequestClose={() => setShowFeedback(false)}
+          >
+            <View style={styles.feedbackContainer}>
+              <View style={styles.feedbackContent}>
+                <TouchableOpacity
+                  onPress={() => setShowFeedback(false)}
+                  style={styles.modalCloseIcon}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <FontAwesome name="close" size={26} color="#FF3B30" />
+                </TouchableOpacity>
+
+                <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
+                {words.length > 0 && words[currentIndex] ? (
+                  <>
+                    <Text style={styles.tahminText}>
+                      Sanırım "{words[currentIndex]?.transcribedText || "..."}"
+                      dediniz.
+                    </Text>
+                    <Text style={styles.instructionText}>
+                      {words[currentIndex]?.isCorrect
+                        ? "✅ Doğru söylediniz!"
+                        : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
+                    </Text>
+                    <Text style={styles.kelimeText}>
+                      {words[currentIndex].kelime.split("").map((char, index) => {
+                        const isRed =
+                          (words[currentIndex].word === "Kamuflaj" &&
+                            char === "u") ||
+                          (words[currentIndex].word === "Ağabey" &&
+                            char === "i") ||
+                          (words[currentIndex].word === "Sahi" && char === ":");
+                        return (
+                          <Text
+                            key={index}
+                            style={isRed ? styles.redText : styles.blackText}
+                          >
+                            {char}
+                          </Text>
+                        );
+                      })}
+                    </Text>
+
+                    {words[currentIndex].ipucu !== "" && (
+                      <Text style={styles.ipucuText}>
+                        <Text style={styles.ipucuBold}>İpucu: </Text>
+                        {words[currentIndex].ipucu}
+                      </Text>
+                    )}
+                  </>
+                ) : (
+                  <Text>Yükleniyor...</Text>
+                )}
+
+                <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
+                  <Text style={styles.listenButtonText}>Dinle</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+        </View>
+      </SafeAreaView>
       <BottomNavBar navigation={navigation} />
     </ImageBackground>
   );
@@ -394,18 +394,8 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
-  backButton: {
-    position: "absolute",
-    top: 20,
-    left: 10,
-    zIndex: 10,
-  },
-  backIcon: {
-    width: 40,
-    height: 40,
-  },
   topContainer: {
-    marginTop: 30,
+    marginTop: 10,
     height: "100%",
     alignItems: "center",
   },
@@ -424,14 +414,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "80%",
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 40,
   },
   prevButton: {
-    padding: 10,
+    padding: 5,
   },
   nextButton: {
-    padding: 10,
+    padding: 5,
   },
   wordText: {
     fontSize: 40,
@@ -443,16 +433,18 @@ const styles = StyleSheet.create({
     color: "#FF8754",
     marginTop: 10,
   },
-  listenButton: {
-    backgroundColor: "#FF3B30",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 10,
+  speakerIcon: {
+    marginTop: 20,
+    width: 60,
+    height: 60,
+    tintColor: "#FF3B30",
   },
-  listenButtonText: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
+  micInfoText: {
+    fontSize: 14,
+    color: "#6CA3AD",
+    marginTop: 10,
+    fontStyle: "italic",
+    textAlign: "center",
   },
   feedbackContainer: {
     flex: 1,
@@ -468,24 +460,33 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     justifyContent: "space-between",
   },
-  navBar: {
+  modalCloseIcon: {
     position: "absolute",
-    bottom: 0,
-    width: "100%",
-    height: 70,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-    borderTopWidth: 1,
-    borderTopColor: "#E0E0E0",
+    top: 10,
+    right: 15,
+    zIndex: 10,
   },
-  navItem: {
-    alignItems: "center",
+  feedbackTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
   },
-  navIcon: {
-    width: 30,
-    height: 30,
+  tahminText: {
+    fontSize: 18,
+    color: "#666",
+    marginBottom: 15,
+  },
+  instructionText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 15,
+  },
+  kelimeText: {
+    fontSize: 23,
+    fontWeight: "bold",
+    marginBottom: 15,
   },
   redText: {
     color: "red",
@@ -497,10 +498,27 @@ const styles = StyleSheet.create({
     fontSize: 23,
     fontWeight: "bold",
   },
-  speakerIcon: {
+  ipucuText: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 20,
+  },
+  ipucuBold: {
+    fontWeight: "bold",
+  },
+  listenButton: {
+    backgroundColor: "#FF3B30",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    alignSelf: "center",
+  },
+  listenButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  speakerIconWrapper: {
     marginTop: 20,
-    width: 60,
-    height: 60,
-    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
   },
 });

@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   Alert,
+  ImageBackground,
 } from "react-native";
 import axios from "axios";
 import { useNavigation } from "@react-navigation/native";
@@ -22,6 +23,7 @@ import {
 } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons";
 import BackButton from "./BackButton";
+import { LinearGradient } from "expo-linear-gradient";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
@@ -64,7 +66,10 @@ const Hesap = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require("../assets/images/green.png")}
+      style={styles.imageBackground}
+    >
       <SafeAreaView style={{ flex: 1 }}>
         {/* Top Section */}
         <View style={styles.topContainer}>
@@ -78,84 +83,116 @@ const Hesap = () => {
             style={styles.card}
             onPress={() => navigation.navigate("ChangePassword")}
           >
-            <View style={styles.cardContent}>
-              <Icon name="key" size={30} color="#333" style={styles.icon} />
-              <View>
-                <Text style={styles.cardTitle}>Şifreyi Değiştir</Text>
-                <Text style={styles.cardSubtitle}>
-                  Hesap şifrenizi güncelleyin
-                </Text>
+            <LinearGradient
+              colors={["#d6d5b3", "#FFFFFF"]}
+              start={{ x: 4, y: 0 }}
+              end={{ x: 0, y: 0.2 }}
+              style={styles.cardGradient}
+            >
+              <View style={styles.cardContent}>
+                <Icon name="key" size={30} color="#333" style={styles.icon} />
+                <View style={styles.textContainer}>
+                  <Text style={styles.cardTitle}>Şifreyi Değiştir</Text>
+                  <Text style={styles.cardSubtitle}>
+                    Hesap şifrenizi güncelleyin
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
               </View>
-            </View>
+            </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.card}
             onPress={() => navigation.navigate("ChangeEmail")}
           >
-            <View style={styles.cardContent}>
-              <Icon
-                name="envelope"
-                size={30}
-                color="#333"
-                style={styles.icon}
-              />
-              <View>
-                <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
-                <Text style={styles.cardSubtitle}>
-                  E-posta adresinizi güncelleyin
-                </Text>
+            <LinearGradient
+              colors={["#d6d5b3", "#FFFFFF"]}
+              start={{ x: 4, y: 0 }}
+              end={{ x: 0, y: 0.2 }}
+              style={styles.cardGradient}
+            >
+              <View style={styles.cardContent}>
+                <Icon
+                  name="envelope"
+                  size={30}
+                  color="#333"
+                  style={styles.icon}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
+                  <Text style={styles.cardSubtitle}>
+                    E-posta adresinizi güncelleyin
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
               </View>
-            </View>
+            </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.card}
             onPress={() => navigation.navigate("ChangeName")}
           >
-            <View style={styles.cardContent}>
-              <Icon
-                name="user-edit"
-                size={30}
-                color="#333"
-                style={styles.icon}
-              />
-              <View>
-                <Text style={styles.cardTitle}>Ad Soyad Değiştir</Text>
-                <Text style={styles.cardSubtitle}>İsminizi güncelleyin</Text>
+            <LinearGradient
+              colors={["#d6d5b3", "#FFFFFF"]}
+              start={{ x: 4, y: 0 }}
+              end={{ x: 0, y: 0.2 }}
+              style={styles.cardGradient}
+            >
+              <View style={styles.cardContent}>
+                <Icon
+                  name="user-edit"
+                  size={30}
+                  color="#333"
+                  style={styles.icon}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.cardTitle}>Ad Soyad Değiştir</Text>
+                  <Text style={styles.cardSubtitle}>İsminizi güncelleyin</Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
               </View>
-            </View>
+            </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.card} onPress={handleDeleteAccount}>
-            <View style={styles.cardContent}>
-              <Icon
-                name="trash-alt"
-                size={30}
-                color="#FF3B30"
-                style={styles.icon}
-              />
-              <View>
-                <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>
-                  Hesabımı Sil
-                </Text>
-                <Text style={styles.cardSubtitle}>
-                  Hesabınızı kalıcı olarak silin
-                </Text>
+            <LinearGradient
+              colors={["#d6d5b3", "#FFFFFF"]}
+              start={{ x: 4, y: 0 }}
+              end={{ x: 0, y: 0.2 }}
+              style={styles.cardGradient}
+            >
+              <View style={styles.cardContent}>
+                <Icon
+                  name="trash-alt"
+                  size={30}
+                  color="#FF3B30"
+                  style={styles.icon}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>
+                    Hesabımı Sil
+                  </Text>
+                  <Text style={styles.cardSubtitle}>
+                    Hesabınızı kalıcı olarak silin
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
               </View>
-            </View>
+            </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
-        <BottomNavBar navigation={navigation} />
       </SafeAreaView>
-    </View>
+      <BottomNavBar navigation={navigation} />
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  imageBackground: {
     flex: 1,
-    backgroundColor: "white",
+    resizeMode: "cover",
   },
   topContainer: {
     alignItems: "center",
@@ -164,36 +201,45 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     position: "relative",
   },
-
   title: {
     fontSize: 34,
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
   },
-
   scrollContainer: {
     flexGrow: 1,
     padding: 20,
   },
   card: {
     width: "100%",
-    backgroundColor: "white",
-    borderRadius: 15,
-    padding: 15,
+    height: 80,
     marginBottom: 15,
+    borderRadius: 35,
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: -3, height: -3 },
     shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.5,
+    elevation: 6,
+  },
+  cardGradient: {
+    flex: 1,
+    padding: 15,
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardContent: {
+    flex: 1,
+    padding:10,
     flexDirection: "row",
     alignItems: "center",
   },
   icon: {
     marginRight: 15,
+  },
+  textContainer: {
+    flex: 1,
   },
   cardTitle: {
     fontSize: 18,
@@ -204,6 +250,9 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     fontSize: 14,
     color: "#666",
+  },
+  chevron: {
+    marginLeft: 10,
   },
 });
 

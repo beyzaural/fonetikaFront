@@ -8,6 +8,7 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
+  ImageBackground,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { logout } from "./utils/auth";
@@ -113,12 +114,11 @@ const ChangePassword = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ImageBackground
+      source={require("../assets/images/green.png")}
+      style={styles.imageBackground}
+    >
       <SafeAreaView style={{ flex: 1 }}>
-        <LinearGradient
-          colors={["#f8f8f8", "#ffffff"]}
-          style={styles.backgroundGradient}
-        />
         {/* Top Section */}
         <View style={styles.topContainer}>
           <BackButton navigation={navigation} />
@@ -130,8 +130,15 @@ const ChangePassword = ({ navigation }) => {
           {step === 1 && (
             <>
               <Text style={styles.label}>E-posta:</Text>
-              <View style={styles.emailContainer}>
-                <Text style={styles.emailText}>{email}</Text>
+              <View style={styles.card}>
+                <LinearGradient
+                  colors={["#d6d5b3", "#FFFFFF"]}
+                  start={{ x: 4, y: 0 }}
+                  end={{ x: 0, y: 0.2 }}
+                  style={styles.cardGradient}
+                >
+                  <Text style={styles.emailText}>{email}</Text>
+                </LinearGradient>
               </View>
               <TouchableOpacity
                 style={styles.buttonContainer}
@@ -157,15 +164,22 @@ const ChangePassword = ({ navigation }) => {
           {step === 2 && (
             <>
               <Text style={styles.label}>Kodu Girin</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={otp}
-                  onChangeText={setOtp}
-                  keyboardType="numeric"
-                  placeholder="Mailinize gönderilen kodu giriniz"
-                  placeholderTextColor="#666"
-                />
+              <View style={styles.card}>
+                <LinearGradient
+                  colors={["#d6d5b3", "#FFFFFF"]}
+                  start={{ x: 4, y: 0 }}
+                  end={{ x: 0, y: 0.2 }}
+                  style={styles.cardGradient}
+                >
+                  <TextInput
+                    style={styles.input}
+                    value={otp}
+                    onChangeText={setOtp}
+                    keyboardType="numeric"
+                    placeholder="Mailinize gönderilen kodu giriniz"
+                    placeholderTextColor="#666"
+                  />
+                </LinearGradient>
               </View>
               <TouchableOpacity
                 style={styles.buttonContainer}
@@ -191,26 +205,40 @@ const ChangePassword = ({ navigation }) => {
           {step === 3 && (
             <>
               <Text style={styles.label}>Yeni Şifrenizi Girin</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={newPassword}
-                  onChangeText={setNewPassword}
-                  secureTextEntry
-                  placeholder="Yeni şifrenizi giriniz"
-                  placeholderTextColor="#666"
-                />
+              <View style={styles.card}>
+                <LinearGradient
+                  colors={["#d6d5b3", "#FFFFFF"]}
+                  start={{ x: 4, y: 0 }}
+                  end={{ x: 0, y: 0.2 }}
+                  style={styles.cardGradient}
+                >
+                  <TextInput
+                    style={styles.input}
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    secureTextEntry
+                    placeholder="Yeni şifrenizi giriniz"
+                    placeholderTextColor="#666"
+                  />
+                </LinearGradient>
               </View>
               <Text style={styles.label}>Yeni Şifre (Tekrar)</Text>
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={confirmPassword}
-                  onChangeText={setConfirmPassword}
-                  secureTextEntry
-                  placeholder="Yeni şifrenizi tekrar giriniz"
-                  placeholderTextColor="#666"
-                />
+              <View style={styles.card}>
+                <LinearGradient
+                  colors={["#d6d5b3", "#FFFFFF"]}
+                  start={{ x: 4, y: 0 }}
+                  end={{ x: 0, y: 0.2 }}
+                  style={styles.cardGradient}
+                >
+                  <TextInput
+                    style={styles.input}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                    placeholder="Yeni şifrenizi tekrar giriniz"
+                    placeholderTextColor="#666"
+                  />
+                </LinearGradient>
               </View>
               <TouchableOpacity
                 style={styles.buttonContainer}
@@ -235,21 +263,14 @@ const ChangePassword = ({ navigation }) => {
         </View>
       </SafeAreaView>
       <BottomNavBar navigation={navigation} />
-    </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  imageBackground: {
     flex: 1,
-    backgroundColor: "white",
-  },
-  backgroundGradient: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
+    resizeMode: "cover",
   },
   topContainer: {
     alignItems: "center",
@@ -258,7 +279,6 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     position: "relative",
   },
-
   title: {
     fontSize: 34,
     fontWeight: "bold",
@@ -268,7 +288,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     flex: 1,
     padding: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    paddingTop: 40,
   },
   label: {
     fontSize: 16,
@@ -276,51 +296,41 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontWeight: "500",
   },
-  emailContainer: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 20,
+  card: {
+    width: "100%",
+    height: 60,
+    marginBottom: 30,
+    borderRadius: 35,
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOffset: { width: -3, height: -3 },
     shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "rgba(214, 213, 179, 0.3)",
+    shadowOpacity: 0.5,
+    elevation: 6,
+  },
+  cardGradient: {
+    flex: 1,
+    padding: 15,
+    justifyContent: "center",
   },
   emailText: {
     fontSize: 16,
     color: "#333",
   },
-  inputContainer: {
-    marginBottom: 20,
-  },
   input: {
-    backgroundColor: "white",
-    borderRadius: 12,
-    padding: 15,
     fontSize: 16,
     color: "#333",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: "rgba(214, 213, 179, 0.3)",
+    width: "100%",
   },
   buttonContainer: {
     marginTop: 10,
-    borderRadius: 12,
+    borderRadius: 35,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     elevation: 5,
-    borderWidth: 1,
-    borderColor: "#0a7ea4",
   },
   buttonGradient: {
     padding: 15,
