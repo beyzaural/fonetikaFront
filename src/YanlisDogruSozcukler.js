@@ -22,7 +22,7 @@ const YanlisDogruSozcukler = ({ navigation }) => {
       <SafeAreaView style={{ flex: 1 }}>
         {/* Top Section */}
         <View style={styles.topContainer}>
-          <BackButton navigation={navigation} />
+          <BackButton navigation={navigation} style={{ left: 5 }} />
           <Text style={styles.title}>Doğru Bilinen </Text>
           <Text style={styles.title}>Yanlışlar</Text>
         </View>
@@ -47,22 +47,21 @@ const YanlisDogruSozcukler = ({ navigation }) => {
             </View>
           ))}
         </ScrollView>
-
       </SafeAreaView>
 
-        {/* 🎓 Sabit Fonetik Notu Kutusu */}
-        <View style={styles.persistentNote}>
-          <Text style={styles.notifTitle}>Fonetik Notu</Text>
-          <Text style={styles.notifText}>
-            é : kapalı e, ağız çok açılmadan söylenir.
-          </Text>
-          <Text style={styles.notifText}>
-            e: açık e'dir. Ses daha net çıkar ve ağız daha fazla açılır.
-          </Text>
-          <Text style={styles.notifText}>
-            ":": işareti, harfin uzatılarak okunması gerektiğini belirtir.
-          </Text>
-        </View>
+      {/* 🎓 Sabit Fonetik Notu Kutusu */}
+      <View style={styles.persistentNote}>
+        <Text style={styles.notifTitle}>Fonetik Notu</Text>
+        <Text style={styles.notifText}>
+          é : kapalı e, ağız çok açılmadan söylenir.
+        </Text>
+        <Text style={styles.notifText}>
+          e: açık e'dir. Ses daha net çıkar ve ağız daha fazla açılır.
+        </Text>
+        <Text style={styles.notifText}>
+          ":": işareti, harfin uzatılarak okunması gerektiğini belirtir.
+        </Text>
+      </View>
       <BottomNavBar navigation={navigation} />
     </View>
   );

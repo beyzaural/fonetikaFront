@@ -21,10 +21,7 @@ import BackButton from "./BackButton";
 const Ayarlar = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   return (
-    <ImageBackground
-      source={require("../assets/images/green.png")}
-      style={styles.imageBackground}
-    >
+    <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         {/* Top Section */}
         <View style={styles.topContainer}>
@@ -57,14 +54,21 @@ const Ayarlar = ({ navigation }) => {
                     Profil bilgilerinizi yönetin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Record", { fromSettings: true })}
+            onPress={() =>
+              navigation.navigate("Record", { fromSettings: true })
+            }
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -85,7 +89,12 @@ const Ayarlar = ({ navigation }) => {
                     Ses profilinizi oluşturun veya güncelleyin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -105,7 +114,12 @@ const Ayarlar = ({ navigation }) => {
                     Uygulama ayarlarınızı özelleştirin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -131,7 +145,12 @@ const Ayarlar = ({ navigation }) => {
                   <Text style={styles.cardTitle}>Destek</Text>
                   <Text style={styles.cardSubtitle}>Yardım ve destek alın</Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -167,14 +186,19 @@ const Ayarlar = ({ navigation }) => {
                     Hesabınızdan çıkış yapın
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
       <BottomNavBar navigation={navigation} />
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -183,6 +207,11 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
+  container: {
+    flex: 1,
+    backgroundColor: "#E3EFF0", // 🍃 huzurlu açık mavi-yeşil tonu
+  },
+
   topContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -220,7 +249,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding:10,
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -246,4 +275,3 @@ const styles = StyleSheet.create({
 });
 
 export default Ayarlar;
-

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+
 import {
   View,
   Text,
@@ -187,10 +188,7 @@ const Sohbet = ({ navigation }) => {
   );
 
   return (
-    <ImageBackground
-      source={require("../assets/images/green.png")}
-      style={styles.imageBackground}
-    >
+    <View style={styles.background}>
       <SafeAreaView style={{ flex: 1 }}>
         {/* Üst Başlık */}
         <View style={styles.topContainer}>
@@ -275,7 +273,7 @@ const Sohbet = ({ navigation }) => {
 
         <BottomNavBar navigation={navigation} />
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -286,6 +284,11 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
+  background: {
+    flex: 1,
+    backgroundColor: "#E3EFF0",
+  },
+
   topContainer: {
     paddingVertical: 20,
     flexDirection: "row",

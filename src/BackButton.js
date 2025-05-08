@@ -1,10 +1,11 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 
 const BackButton = ({
   navigation,
-  size = 40,
+  size = 60,
   color = "#FF3B30",
   style = {},
 }) => {
@@ -13,7 +14,7 @@ const BackButton = ({
       style={[styles.backButton, style]}
       onPress={() => navigation.goBack()}
     >
-      <FontAwesome name="arrow-left" size={size} color={color} />
+      <Ionicons name="arrow-back" size={40} color={color} />
     </TouchableOpacity>
   );
 };
