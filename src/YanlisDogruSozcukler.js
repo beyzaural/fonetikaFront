@@ -22,7 +22,7 @@ const YanlisDogruSozcukler = ({ navigation }) => {
       <SafeAreaView style={{ flex: 1 }}>
         {/* Top Section */}
         <View style={styles.topContainer}>
-          <BackButton navigation={navigation} style={{ left: 5 }} />
+          <BackButton navigation={navigation} style={{ left: 4, top: 35 }} />
           <Text style={styles.title}>Doğru Bilinen </Text>
           <Text style={styles.title}>Yanlışlar</Text>
         </View>
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   title: {
-    fontSize: 34,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
