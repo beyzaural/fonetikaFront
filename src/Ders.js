@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
 import BottomNavBar from "./BottomNavBar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "./BackButton";
-
+import { checkVowelProfileCompleted } from "./utils/auth";
 const Ders = ({ navigation, route }) => {
   const { courseId, phoneme } = route?.params || {};
   const videoMap = {
@@ -31,7 +32,17 @@ const Ders = ({ navigation, route }) => {
 
   const videoKey =
     phonemeKeyMap[phoneme?.toLowerCase()] || phoneme?.toLowerCase();
-
+  const handleRestrictedNavigation = async (targetPage) => {
+    const isCompleted = await checkVowelProfileCompleted();
+    if (!isCompleted) {
+      Alert.alert(
+        "Ses Profili Eksik",
+        "Diksiyon alıştırmalarına başlamak için ses profilinizi tamamlamanız gerekiyor. Lütfen gerekli kelimeleri kaydederek ses profilinizi oluşturun.\n\nBunu yapmak için Ayarlar > Ses Profili bölümüne gidebilirsiniz."
+      );
+      return;
+    }
+    navigation.navigate(targetPage);
+  };
   return (
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -62,7 +73,7 @@ const Ders = ({ navigation, route }) => {
             <TouchableOpacity
               style={styles.button}
               onPress={() =>
-                navigation.navigate("KursKelime", {
+                handleRestrictedNavigation("KursKelime", {
                   courseId: courseId,
                   phoneme: phoneme,
                 })
@@ -74,7 +85,7 @@ const Ders = ({ navigation, route }) => {
             <TouchableOpacity
               style={styles.button}
               onPress={() =>
-                navigation.navigate("KursTekrar", {
+                handleRestrictedNavigation("KursTekrar", {
                   courseId: courseId,
                   phoneme: phoneme,
                 })

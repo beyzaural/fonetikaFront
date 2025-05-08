@@ -66,10 +66,7 @@ const Hesap = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("../assets/images/green.png")}
-      style={styles.imageBackground}
-    >
+    <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
         {/* Top Section */}
         <View style={styles.topContainer}>
@@ -97,7 +94,12 @@ const Hesap = () => {
                     Hesap şifrenizi güncelleyin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -120,12 +122,19 @@ const Hesap = () => {
                   style={styles.icon}
                 />
                 <View style={styles.textContainer}>
-                  <Text style={styles.cardTitle}>E-posta Adresini Değiştir</Text>
+                  <Text style={styles.cardTitle}>
+                    E-posta Adresini Değiştir
+                  </Text>
                   <Text style={styles.cardSubtitle}>
                     E-posta adresinizi güncelleyin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -151,7 +160,12 @@ const Hesap = () => {
                   <Text style={styles.cardTitle}>Ad Soyad Değiştir</Text>
                   <Text style={styles.cardSubtitle}>İsminizi güncelleyin</Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -178,14 +192,19 @@ const Hesap = () => {
                     Hesabınızı kalıcı olarak silin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
         </ScrollView>
       </SafeAreaView>
       <BottomNavBar navigation={navigation} />
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -194,6 +213,11 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
+  container: {
+    flex: 1,
+    backgroundColor: "#E3EFF0", // 🍃 huzurlu açık mavi-yeşil tonu
+  },
+
   topContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -231,7 +255,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding:10,
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
   },

@@ -73,3 +73,14 @@ export const getUserProfile = async () => {
     return null;
   }
 };
+export const checkVowelProfileCompleted = async () => {
+  try {
+    const savedProgress = await AsyncStorage.getItem("voiceRecordingProgress");
+    if (!savedProgress) return true; // profile is complete
+    const { recordedWords } = JSON.parse(savedProgress);
+    return recordedWords.length >= 45; // all 45 words done?
+  } catch (error) {
+    console.error("Error checking profile status:", error);
+    return false; // default to not completed
+  }
+};
