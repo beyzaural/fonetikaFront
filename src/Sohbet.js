@@ -233,7 +233,11 @@ const Sohbet = ({ navigation }) => {
         <ActivityIndicator
           size="large"
           color="#FF3B30"
-          style={{ margin: 10 }}
+          style={{
+            position: "absolute",
+            bottom: 100,
+            alignSelf: "center",
+          }}
         />
       )}
 
@@ -324,6 +328,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     padding: 12,
     justifyContent: "center",
+    color: "#E3EFF0",
   },
   chatContainer: {
     flexGrow: 1,
