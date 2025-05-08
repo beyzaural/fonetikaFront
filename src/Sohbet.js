@@ -200,6 +200,7 @@ const Sohbet = ({ navigation }) => {
 
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 35 : 0}
           style={{ flex: 1 }}
         >
           <FlatList
@@ -210,6 +211,23 @@ const Sohbet = ({ navigation }) => {
             style={styles.chatList}
             contentContainerStyle={styles.chatContainer}
           />
+          {showInput && (
+            <View style={styles.inputArea}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Cevabını yaz..."
+                value={textInputValue}
+                onChangeText={setTextInputValue}
+                multiline
+              />
+              <TouchableOpacity
+                style={styles.sendButton}
+                onPress={handleTextSubmit}
+              >
+                <FontAwesome name="send" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
 
@@ -221,58 +239,42 @@ const Sohbet = ({ navigation }) => {
         />
       )}
 
-      {showInput && (
-        <View style={styles.inputArea}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Cevabını yaz..."
-            value={textInputValue}
-            onChangeText={setTextInputValue}
-            multiline
-          />
-          <TouchableOpacity
-            style={styles.sendButton}
-            onPress={handleTextSubmit}
-          >
-            <FontAwesome name="send" size={24} color="white" />
-          </TouchableOpacity>
-        </View>
-      )}
-
       {/* Alt Iconlar */}
-      <View style={styles.microphoneContainer}>
-        <View style={styles.iconButtonWithText}>
-          <TouchableOpacity onPress={() => setShowInput(true)}>
+      <View style={styles.bottomSection}>
+        <View style={styles.microphoneContainer}>
+          <View style={styles.iconButtonWithText}>
+            <TouchableOpacity onPress={() => setShowInput(true)}>
+              <FontAwesome
+                name="keyboard-o"
+                size={40}
+                style={{ paddingTop: 20 }}
+                color="#FF3B30"
+              />
+            </TouchableOpacity>
+            <Text style={styles.iconText}>Yazılı</Text>
+          </View>
+          <TouchableOpacity onPress={handleMicPress} style={{ paddingTop: 20 }}>
             <FontAwesome
-              name="keyboard-o"
-              size={40}
-              style={{ paddingTop: 20 }}
-              color="#FF3B30"
+              name="microphone"
+              size={85}
+              color={isRecording ? "black" : "#FF3B30"}
             />
           </TouchableOpacity>
-          <Text style={styles.iconText}>Yazılı</Text>
+          <View style={styles.iconButtonWithText}>
+            <TouchableOpacity onPress={handleEndConversation}>
+              <FontAwesome
+                name="times"
+                size={50}
+                style={{ paddingTop: 20 }}
+                color="#FF3B30"
+              />
+            </TouchableOpacity>
+            <Text style={styles.iconText}>Bitir</Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={handleMicPress} style={{ paddingTop: 20 }}>
-          <FontAwesome
-            name="microphone"
-            size={85}
-            color={isRecording ? "black" : "#FF3B30"}
-          />
-        </TouchableOpacity>
-        <View style={styles.iconButtonWithText}>
-          <TouchableOpacity onPress={handleEndConversation}>
-            <FontAwesome
-              name="times"
-              size={50}
-              style={{ paddingTop: 20 }}
-              color="#FF3B30"
-            />
-          </TouchableOpacity>
-          <Text style={styles.iconText}>Bitir</Text>
-        </View>
-      </View>
 
-      <BottomNavBar navigation={navigation} />
+        <BottomNavBar navigation={navigation} />
+      </View>
     </ImageBackground>
   );
 };
@@ -300,6 +302,9 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
   },
+  bottomSection: {
+    width: "100%",
+  },
 
   headerText: {
     paddingTop: 25,
@@ -320,7 +325,6 @@ const styles = StyleSheet.create({
   chatContainer: {
     flexGrow: 1,
     padding: 12,
-    paddingBottom: 130,
   },
 
   message: {
@@ -347,17 +351,13 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   microphoneContainer: {
-    //flex: 1,
-    bottom: 0,
     flexDirection: "row",
     justifyContent: "space-around",
-    width: "100%",
-    paddingHorizontal: 10,
-    backgroundColor: "#FFFFFF",
     alignItems: "center",
-    zIndex: 10,
-    paddingBottom: 20, // Prevent overlap with SafeArea
-    shadowColor: "#000", // Optional: Shadow for better aesthetics
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    backgroundColor: "white",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 6,
@@ -410,17 +410,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   chatList: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   inputArea: {
     flexDirection: "row",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "#FFF",
+    backgroundColor: "white",
     borderTopWidth: 1,
     borderColor: "#ccc",
+    marginBottom: -35,
   },
-
   textInput: {
     flex: 1,
     height: 50,
