@@ -40,7 +40,9 @@ import YanlisDogruSozcukler from "./src/YanlisDogruSozcukler";
 import CategoryWordCard from "./src/CategoryWordCard";
 import CategoryWordList from "./src/CategoryWordList";
 import CategoryRandomStudy from "./src/CategoryRandomStudy";
+import VoiceProfilePrompt from "./src/VoiceProfilePrompt";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+
 const Stack = createStackNavigator();
 
 export default function App() {
@@ -227,6 +229,11 @@ export default function App() {
           <Stack.Screen
             name="Geneltekrar"
             component={Geneltekrar}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="VoiceProfilePrompt"
+            component={VoiceProfilePrompt}
             options={{ headerShown: false }}
           />
         </Stack.Navigator>

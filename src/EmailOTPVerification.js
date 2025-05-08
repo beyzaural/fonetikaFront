@@ -84,7 +84,8 @@ const EmailOTPVerification = ({ navigation, route }) => {
             finalizeData.data.refreshToken
           );
 
-          navigation.navigate("Record");
+          // Navigate to VoiceProfilePrompt instead of Record
+          navigation.navigate("VoiceProfilePrompt");
         } else {
           Alert.alert("Error", finalizeData.message || "Hata.");
         }

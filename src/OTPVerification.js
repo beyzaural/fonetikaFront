@@ -180,6 +180,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: "center",
+    marginBottom: 15,
   },
   resendButton: {
     backgroundColor: "#000",

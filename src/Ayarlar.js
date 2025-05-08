@@ -62,6 +62,34 @@ const Ayarlar = ({ navigation }) => {
             </LinearGradient>
           </TouchableOpacity>
 
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate("Record", { fromSettings: true })}
+          >
+            <LinearGradient
+              colors={["#d6d5b3", "#FFFFFF"]}
+              start={{ x: 4, y: 0 }}
+              end={{ x: 0, y: 0.2 }}
+              style={styles.cardGradient}
+            >
+              <View style={styles.cardContent}>
+                <Icon
+                  name="microphone"
+                  size={30}
+                  color="#333"
+                  style={styles.icon}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={styles.cardTitle}>Ses Profili</Text>
+                  <Text style={styles.cardSubtitle}>
+                    Ses profilinizi oluşturun veya güncelleyin
+                  </Text>
+                </View>
+                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.card}>
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}

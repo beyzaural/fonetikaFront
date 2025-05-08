@@ -13,12 +13,13 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import BackButton from "./BackButton";
 import { Alert } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Constants from "expo-constants";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 const occupations = [
@@ -70,6 +71,19 @@ const Register = ({ navigation }) => {
   const [occupationDropdownVisible, setOccupationDropdownVisible] =
     useState(false);
   const [searchText, setSearchText] = useState("");
+
+  useEffect(() => {
+    // Clear any existing registration data when starting a new registration
+    const clearRegistrationData = async () => {
+      try {
+        await AsyncStorage.removeItem('voiceRecordingProgress');
+        await AsyncStorage.removeItem('tempToken');
+      } catch (error) {
+        console.error('Error clearing registration data:', error);
+      }
+    };
+    clearRegistrationData();
+  }, []);
 
   const handleRegister = async () => {
     console.log(API_URL);
@@ -124,6 +138,10 @@ const Register = ({ navigation }) => {
       const data = await response.json();
 
       if (response.ok) {
+        // Clear any existing registration data before proceeding
+        await AsyncStorage.removeItem('voiceRecordingProgress');
+        await AsyncStorage.removeItem('tempToken');
+        
         console.log(
           "Navigating to OTPVerification with Token:",
           data.data.tempToken
