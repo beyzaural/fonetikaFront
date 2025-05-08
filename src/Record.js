@@ -54,6 +54,15 @@ const targetWords = [
   "omuz",
   "yumurcak",
   "kurulu",
+  "şelale",
+  "selanik",
+  "muallak",
+  "bilardo", //burdan itibaren denemek için
+  "derhal",
+  "dublaj",
+  "ender",
+  "enerji",
+  "envanter",
 ];
 
 const Record = () => {
