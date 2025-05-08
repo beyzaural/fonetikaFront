@@ -14,6 +14,7 @@ import {
   View,
   ImageBackground,
   Image,
+  Alert,
   TouchableOpacity,
   ScrollView,
 } from "react-native";
@@ -23,7 +24,8 @@ import BottomNavBar from "./BottomNavBar";
 import ProgressBar from "./ProgressBar";
 import GoalRing from "./GoalRing";
 import Icon from "react-native-vector-icons/FontAwesome5"; // flame is available here
-import BackButton from "./BackButton";
+
+import { checkVowelProfileCompleted } from "./utils/auth"; // 👈 import
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl || "http://localhost:8080";
 
@@ -146,6 +148,18 @@ const Home = ({ navigation, route }) => {
     if (streak > 0) return "#FFA500"; // Orange
     return "#9E9E9E"; // Gray
   };
+  const handleRestrictedNavigation = async (targetPage) => {
+    const isCompleted = await checkVowelProfileCompleted();
+    if (!isCompleted) {
+      Alert.alert(
+        "Ses Profili Eksik",
+        "Diksiyon alıştırmalarına başlamak için ses profilinizi tamamlamanız gerekiyor. Lütfen gerekli kelimeleri kaydederek ses profilinizi oluşturun.\n\nBunu yapmak için Ayarlar > Ses Profili bölümüne gidebilirsiniz."
+      );
+
+      return;
+    }
+    navigation.navigate(targetPage);
+  };
 
   return (
     <ImageBackground
@@ -219,7 +233,7 @@ const Home = ({ navigation, route }) => {
             {/* Kelime Card (Clickable) */}
             <TouchableOpacity
               style={styles.card}
-              onPress={() => navigation.navigate("Kelime")}
+              onPress={() => handleRestrictedNavigation("Kelime")}
             >
               <LinearGradient
                 colors={["#d6d5b3", "#FFFFFF"]}
@@ -238,7 +252,7 @@ const Home = ({ navigation, route }) => {
 
             <TouchableOpacity
               style={styles.card}
-              onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
+              onPress={() => handleRestrictedNavigation("Geneltekrar")} // Navigate to Tekrar.js
             >
               <LinearGradient
                 colors={["#d6d5b3", "#FFFFFF"]}
@@ -256,7 +270,7 @@ const Home = ({ navigation, route }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.card}
-              onPress={() => navigation.navigate("WordCategory")} // Navigate to Paragraf.js
+              onPress={() => handleRestrictedNavigation("WordCategory")} // Navigate to Paragraf.js
             >
               <LinearGradient
                 colors={["#d6d5b3", "#FFFFFF"]}

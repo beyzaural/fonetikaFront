@@ -8,8 +8,12 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  Alert,
 } from "react-native";
 import { logout } from "./utils/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import { getUserIdFromToken } from "./utils/auth";
 import Icon from "react-native-vector-icons/FontAwesome5";
 import {
   SafeAreaView,
@@ -17,9 +21,27 @@ import {
 } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "./BackButton";
+import Constants from "expo-constants";
+const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
+const API_URL = extra.apiUrl || "http://localhost:8080";
 
 const Ayarlar = ({ navigation }) => {
   const insets = useSafeAreaInsets();
+  const handleResetProfile = async () => {
+    try {
+      const userId = await getUserIdFromToken();
+      await axios.delete(`${API_URL}/api/speech/delete-profile/${userId}`);
+      await AsyncStorage.removeItem("voiceRecordingProgress");
+
+      Alert.alert(
+        "Profil Sıfırlandı",
+        "Ses profiliniz başarıyla sıfırlandı.\nUygulamayı kullanmaya devam etmeden ses profilinizi yeniden oluşturmayı unutmayın."
+      );
+    } catch (err) {
+      console.error("Reset failed:", err);
+      Alert.alert("Hata", "Profil sıfırlanırken bir hata oluştu, yeniden deneyin.");
+    }
+  };
   return (
     <ImageBackground
       source={require("../assets/images/green.png")}
@@ -57,14 +79,21 @@ const Ayarlar = ({ navigation }) => {
                     Profil bilgilerinizi yönetin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("Record", { fromSettings: true })}
+            onPress={() =>
+              navigation.navigate("Record", { fromSettings: true })
+            }
           >
             <LinearGradient
               colors={["#d6d5b3", "#FFFFFF"]}
@@ -82,10 +111,49 @@ const Ayarlar = ({ navigation }) => {
                 <View style={styles.textContainer}>
                   <Text style={styles.cardTitle}>Ses Profili</Text>
                   <Text style={styles.cardSubtitle}>
-                    Ses profilinizi oluşturun veya güncelleyin
+                    Ses profilinizi oluşturun.
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.card, { backgroundColor: "#fff1f0" }]}
+            onPress={handleResetProfile}
+          >
+            <LinearGradient
+              colors={["#ffe5e0", "#ffffff"]}
+              start={{ x: 1, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.cardGradient}
+            >
+              <View style={styles.cardContent}>
+                <Icon
+                  name="trash"
+                  size={30}
+                  color="#FF3B30"
+                  style={styles.icon}
+                />
+                <View style={styles.textContainer}>
+                  <Text style={[styles.cardTitle, { color: "#FF3B30" }]}>
+                    Profili Sıfırla
+                  </Text>
+                  <Text style={styles.cardSubtitle}>
+                    Ses profilinizi silin.
+                  </Text>
+                </View>
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#FF3B30"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -105,7 +173,12 @@ const Ayarlar = ({ navigation }) => {
                     Uygulama ayarlarınızı özelleştirin
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -131,7 +204,12 @@ const Ayarlar = ({ navigation }) => {
                   <Text style={styles.cardTitle}>Destek</Text>
                   <Text style={styles.cardSubtitle}>Yardım ve destek alın</Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -167,7 +245,12 @@ const Ayarlar = ({ navigation }) => {
                     Hesabınızdan çıkış yapın
                   </Text>
                 </View>
-                <Icon name="chevron-right" size={20} color="#666" style={styles.chevron} />
+                <Icon
+                  name="chevron-right"
+                  size={20}
+                  color="#666"
+                  style={styles.chevron}
+                />
               </View>
             </LinearGradient>
           </TouchableOpacity>
@@ -220,7 +303,7 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
-    padding:10,
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -246,4 +329,3 @@ const styles = StyleSheet.create({
 });
 
 export default Ayarlar;
-
