@@ -9,7 +9,7 @@ const Startup = ({ navigation }) => {
       const token = await AsyncStorage.getItem("token");
 
       if (!token) {
-        navigation.replace("Home");
+        navigation.replace("Login");
         return;
       }
 
@@ -19,7 +19,7 @@ const Startup = ({ navigation }) => {
 
         if (decoded.exp && decoded.exp < now) {
           await AsyncStorage.removeItem("token");
-          navigation.replace("Home");
+          navigation.replace("Login");
         } else {
           navigation.replace("Home");
         }
