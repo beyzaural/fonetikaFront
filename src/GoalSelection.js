@@ -48,6 +48,17 @@ const GoalSelection = ({ navigation, route }) => {
 
       const data = await response.json();
       if (response.ok && data.success) {
+        // 🟢 Progress initialization
+        const decoded = JSON.parse(atob(tempToken.split(".")[1]));
+        const userId = decoded.sub || decoded.userId;
+
+        await fetch(`${API_URL}/api/progress/add?userId=${userId}&count=0`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${tempToken}`,
+          },
+        });
+
         navigation.navigate("Home", { dailyGoal: selectedGoal });
       } else {
         Alert.alert("Hata", data.message || "Günlük hedef kaydedilemedi.");
