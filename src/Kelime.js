@@ -179,6 +179,19 @@ const Kelime = ({ navigation }) => {
       .replace(/[^a-z0-9]/g, "");
   };
 
+  function generatePhonemeMistakeMap(subwordFeedbackList) {
+    const phonemeCounts = {};
+    if (!Array.isArray(subwordFeedbackList)) return phonemeCounts;
+
+    for (const feedback of subwordFeedbackList) {
+      if (feedback.feedbackMessage?.includes("yanlış telaffuz")) {
+        const key = feedback.vowelIpa;
+        phonemeCounts[key] = (phonemeCounts[key] || 0) + 1;
+      }
+    }
+    return phonemeCounts;
+  }
+
   // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
@@ -283,7 +296,9 @@ const Kelime = ({ navigation }) => {
         await axios.post(`${API_URL}/api/mispronounced-words/record`, {
           userId,
           wordId: currentWord.id,
+          phonemesMistaken: generatePhonemeMistakeMap(responseJson.subwordFeedbackList),
         });
+        
         console.log("❌ MispronouncedWord recorded.");
       }
 

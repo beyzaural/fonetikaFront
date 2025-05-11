@@ -233,7 +233,7 @@ const Home = ({ navigation, route }) => {
             {/* Kelime Card (Clickable) */}
             <TouchableOpacity
               style={styles.card}
-              onPress={() => handleRestrictedNavigation("Kelime")}
+              onPress={() => navigation.navigate("Kelime")}
             >
               <LinearGradient
                 colors={["#d6d5b3", "#FFFFFF"]}
@@ -252,7 +252,7 @@ const Home = ({ navigation, route }) => {
 
             <TouchableOpacity
               style={styles.card}
-              onPress={() => handleRestrictedNavigation("Geneltekrar")} // Navigate to Tekrar.js
+              onPress={() => navigation.navigate("Geneltekrar")} // Navigate to Tekrar.js
             >
               <LinearGradient
                 colors={["#d6d5b3", "#FFFFFF"]}
@@ -270,7 +270,7 @@ const Home = ({ navigation, route }) => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.card}
-              onPress={() => handleRestrictedNavigation("WordCategory")} // Navigate to Paragraf.js
+              onPress={() => navigation.navigate("WordCategory")} // Navigate to Paragraf.js
             >
               <LinearGradient
                 colors={["#d6d5b3", "#FFFFFF"]}

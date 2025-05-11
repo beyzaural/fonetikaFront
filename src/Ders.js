@@ -73,7 +73,7 @@ const Ders = ({ navigation, route }) => {
             <TouchableOpacity
               style={styles.button}
               onPress={() =>
-                handleRestrictedNavigation("KursKelime", {
+                navigation.navigate("KursKelime", {
                   courseId: courseId,
                   phoneme: phoneme,
                 })
@@ -85,7 +85,7 @@ const Ders = ({ navigation, route }) => {
             <TouchableOpacity
               style={styles.button}
               onPress={() =>
-                handleRestrictedNavigation("KursTekrar", {
+                navigation.navigate("KursTekrar", {
                   courseId: courseId,
                   phoneme: phoneme,
                 })
