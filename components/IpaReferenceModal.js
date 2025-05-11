@@ -32,32 +32,40 @@ const IpaReferenceModal = ({ visible, onClose }) => {
             {/* Section 1: Harf Temelli */}
             <Text style={styles.sectionTitle}>Harf Temelli Semboller</Text>
             <View style={styles.header}>
-              <Text style={styles.headerText}>Fonetik Sembol</Text>
-              <Text style={styles.headerText}>Harf</Text>
-              <Text style={styles.headerText}>Açıklama</Text>
+              <Text style={[styles.headerText, { width: "20%" }]}>Fonetik</Text>
+              <Text style={[styles.headerText, { width: "20%" }]}>Harf</Text>
+              <Text style={[styles.headerText, { width: "60%" }]}>
+                Açıklama
+              </Text>
             </View>
 
             {letterRows.map((item, index) => (
               <View key={index} style={styles.row}>
-                <Text style={styles.cell}>{item.IPA}</Text>
-                <Text style={styles.cell}>{item["Türkçe Harf"]}</Text>
-                <Text style={styles.cell}>{item.Açıklama}</Text>
+                <Text style={[styles.cell, { width: "20%" }]}>{item.IPA}</Text>
+                <Text style={[styles.cell, { width: "20%" }]}>
+                  {item["Türkçe Harf"]}
+                </Text>
+                <Text style={[styles.cell, { width: "60%" }]}>
+                  {item.Açıklama}
+                </Text>
               </View>
             ))}
 
             {/* Section 2: Diğer Semboller */}
             <Text style={styles.sectionTitle}>Diğer Fonetik Semboller</Text>
             <View style={styles.header}>
-              <Text style={styles.headerText}>Fonetik Sembol</Text>
-              <Text style={[styles.headerText, { width: "70%" }]}>
+              <Text style={[styles.headerText, { width: "20%" }]}>Fonetik</Text>
+              <Text style={[styles.headerText, { width: "80%" }]}>
                 Açıklama
               </Text>
             </View>
 
             {symbolRows.map((item, index) => (
               <View key={index} style={styles.row}>
-                <Text style={styles.cell}>{item.IPA}</Text>
-                <Text style={[styles.cell, { width: "70%" }]}>
+                <Text style={[styles.cell, { width: "20%" }]}>{item.IPA}</Text>
+                <Text
+                  style={[styles.cell, { width: "80%", textAlign: "left" }]}
+                >
                   {item.Açıklama}
                 </Text>
               </View>
@@ -70,6 +78,18 @@ const IpaReferenceModal = ({ visible, onClose }) => {
 };
 
 const styles = StyleSheet.create({
+  headerText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333",
+    textAlign: "center",
+  },
+  cell: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
+  },
+
   container: {
     flex: 1,
     backgroundColor: "#ffffff",
@@ -108,13 +128,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: "#ccc",
     marginBottom: 10,
+    textAlign: "center",
   },
-  headerText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    width: "30%",
-  },
+
   list: {
     paddingBottom: 150,
   },
@@ -122,11 +138,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
-  },
-  cell: {
-    width: "30%",
-    fontSize: 14,
-    color: "#333",
   },
 });
 
