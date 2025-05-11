@@ -45,6 +45,24 @@ const Ayarlar = ({ navigation }) => {
       );
     }
   };
+  const confirmResetProfile = () => {
+    Alert.alert(
+      "Emin misiniz?",
+      "Ses profilinizi sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+      [
+        {
+          text: "İptal",
+          style: "cancel",
+        },
+        {
+          text: "Evet, Sıfırla",
+          style: "destructive",
+          onPress: handleResetProfile,
+        },
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <SafeAreaView style={{ flex: 1 }}>
@@ -125,7 +143,7 @@ const Ayarlar = ({ navigation }) => {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.card, { backgroundColor: "#fff1f0" }]}
-            onPress={handleResetProfile}
+            onPress={confirmResetProfile}
           >
             <LinearGradient
               colors={["#ffe5e0", "#ffffff"]}
