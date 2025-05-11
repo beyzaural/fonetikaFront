@@ -372,7 +372,7 @@ const Kelime = ({ navigation }) => {
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
-      <SafeAreaView style={{ flex: 1, marginTop: 20, paddingTop: 20 }}>
+      <SafeAreaView style={{ flex: 1, marginTop: 20 }}>
         <BackButton navigation={navigation} />
         <View style={styles.container}>
           <View style={styles.topContainer}>
