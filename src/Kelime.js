@@ -299,7 +299,11 @@ const Kelime = ({ navigation }) => {
           phonemesMistaken: generatePhonemeMistakeMap(
             responseJson.subwordFeedbackList
           ),
+          phonemesMistaken: generatePhonemeMistakeMap(
+            responseJson.subwordFeedbackList
+          ),
         });
+
 
         console.log("❌ MispronouncedWord recorded.");
       }
@@ -440,6 +444,7 @@ const Kelime = ({ navigation }) => {
           >
             <View style={styles.feedbackContainer}>
               <View style={styles.feedbackContent}>
+                
                 {/* Fixed top-right close button */}
                 <TouchableOpacity
                   onPress={() => setShowModal(false)}
