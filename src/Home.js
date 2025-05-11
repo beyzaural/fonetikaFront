@@ -522,8 +522,8 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   closeText: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 22,
+    fontWeight: "1000",
     color: "#FF3B30", // Turuncu renk
   },
 

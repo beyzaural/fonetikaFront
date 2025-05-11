@@ -146,7 +146,7 @@ const KursKelime = ({ navigation, route }) => {
         setRecording(newRecording);
         setIsRecording(true);
       } catch (error) {
-        console.error("Failed to start recording:", error);
+        console.log("Failed to start recording:", error);
       }
     }
   };
