@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
-const GoalRing = ({ progress = 0, goal = 10 }) => {
+const GoalRing = ({ progress = 0, goal = 10, worked = 0 }) => {
   const size = 120;
   const strokeWidth = 14;
   const radius = (size - strokeWidth) / 2;
@@ -52,11 +52,11 @@ const GoalRing = ({ progress = 0, goal = 10 }) => {
       {/* Ortadaki yazılar */}
       <View style={styles.labelContainer}>
         <Text style={styles.mainLabel}>
-          {`${Math.min(Math.round(progress * 100), 999)}%`}
+          {`${Math.round(Math.min(progress, 1) * 100)}%`}
         </Text>
-        <Text style={styles.subLabel}>{`Çalışıldı: ${Math.floor(
-          progress * goal
-        )}`}</Text>
+
+        <Text style={styles.subLabel}>{`Çalışıldı: ${worked}`}</Text>
+
         <Text style={styles.subLabel}>{`Hedef: ${goal}`}</Text>
       </View>
     </View>

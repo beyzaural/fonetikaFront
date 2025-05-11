@@ -137,7 +137,10 @@ const Home = ({ navigation, route }) => {
 
   const today = Number(userProgress?.todayCount);
   const goal = Number(userDailyGoal);
-  const progress = !isNaN(today) && !isNaN(goal) && goal > 0 ? today / goal : 0;
+  const rawProgress =
+    !isNaN(today) && !isNaN(goal) && goal > 0 ? today / goal : 0;
+  const cappedProgress = Math.min(rawProgress, 1);
+
   console.log("🎯 dailyGoal:", Number(userDailyGoal));
   console.log(
     "📊 progress:",
@@ -191,7 +194,9 @@ const Home = ({ navigation, route }) => {
           <Text style={styles.nameText}>{userName ? userName + "!" : "!"}</Text>
 
           <View style={styles.progressInfoContainer}>
-            {userProgress && <GoalRing progress={progress} goal={goal} />}
+            {userProgress && (
+              <GoalRing progress={cappedProgress} goal={goal} worked={today} />
+            )}
 
             <View style={styles.streakCard}>
               <Icon

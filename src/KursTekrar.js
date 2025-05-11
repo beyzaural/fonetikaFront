@@ -8,6 +8,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Modal,
+  ScrollView,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
@@ -24,6 +25,10 @@ const KursTekrar = ({ navigation, route }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
   const [audioUri, setAudioUri] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
+  const [sttPreview, setSttPreview] = useState(null);
+  const [alternativesMap, setAlternativesMap] = useState({});
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [mistakes, setMistakes] = useState([]);
@@ -113,6 +118,40 @@ const KursTekrar = ({ navigation, route }) => {
 
   const sendAudioToBackend = async (uri) => {
     try {
+      setIsFeedbackLoading(true);
+      setShowModal(true);
+
+      // Google STT preview
+      const sttForm = new FormData();
+      sttForm.append("file", {
+        uri: uri,
+        type: "audio/wav",
+        name: "preview.wav",
+      });
+
+      fetch(`${API_URL}/api/speech/detailed-transcribe`, {
+        method: "POST",
+        headers: { "Content-Type": "multipart/form-data" },
+        body: sttForm,
+      })
+        .then((res) => res.json())
+        .then((json) => {
+          if (json) {
+            setSttPreview(json.bestTranscription);
+            if (json.alternativeTranscriptions?.length > 0) {
+              setAlternativesMap(
+                Object.fromEntries(
+                  json.alternativeTranscriptions.map((alt) => [
+                    alt.transcript,
+                    alt.confidence,
+                  ])
+                )
+              );
+            }
+          }
+        })
+        .catch((err) => console.warn("🌀 Google STT failed", err));
+
       const userId = await getUserIdFromToken();
       const currentWord = enrichedMistakes[currentIndex];
 
@@ -128,43 +167,65 @@ const KursTekrar = ({ navigation, route }) => {
 
       const response = await fetch(`${API_URL}/api/speech/evaluate`, {
         method: "POST",
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
         body: formData,
       });
 
       const responseJson = await response.json();
-      console.log("✅ KursTekrar backend response:", responseJson);
+      setSttPreview(null);
 
-      await axios.post(`${API_URL}/api/progress/add`, null, {
-        params: { phoneme: normalizePhoneme(phoneme), userId },
-      });
+      const formattedFeedback =
+        responseJson.subwordFeedbackList?.length > 0
+          ? responseJson.subwordFeedbackList
+              .map(
+                (f) => `🔸 "${f.subword}" (${f.vowelIpa}): ${f.feedbackMessage}`
+              )
+              .join("\n")
+          : "";
 
-      setFeedback(responseJson.feedback);
-
-      if (responseJson.correct) {
-        await axios.post(
-          `${API_URL}/api/mispronounced-words/record-pronunciation`,
-          {
-            userId,
-            wordId: currentWord.wordId,
-            correct: true,
-          }
-        );
-      }
+      setFeedback(formattedFeedback);
+      setIsFeedbackLoading(false);
 
       setEnrichedMistakes((prev) => {
         const updated = [...prev];
         updated[currentIndex] = {
           ...updated[currentIndex],
-          transcribedText: responseJson.transcribedText,
-          isCorrect: responseJson.correct,
+          transcribedText: responseJson.recognizedWord,
+          isCorrect:
+            responseJson.wordCorrect === true ||
+            responseJson.wordCorrect === "true",
+          feedbackList: responseJson.subwordFeedbackList,
+          highlightIndices: responseJson.highlightIndices,
+          ipucu: currentWord.ipucu,
         };
         return updated;
       });
 
-      setShowFeedback(true);
+      await axios.post(`${API_URL}/api/progress/add`, null, {
+        params: { userId, count: 1 },
+      });
+
+      if (
+        responseJson.wordCorrect === false ||
+        responseJson.wordCorrect === "false"
+      ) {
+        await axios.post(`${API_URL}/api/mispronounced-words/record`, {
+          userId,
+          wordId: currentWord.wordId,
+          phonemesMistaken: generatePhonemeMistakeMap(
+            responseJson.subwordFeedbackList
+          ),
+        });
+      }
+
+      setShowModal(true);
     } catch (error) {
-      console.error("❌ Feedback alınırken hata oluştu:", error);
+      console.error("❌ Error sending audio:", error);
+      Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
+    } finally {
+      setIsFeedbackLoading(false);
     }
   };
 
@@ -301,69 +362,177 @@ const KursTekrar = ({ navigation, route }) => {
           <Modal
             animationType="slide"
             transparent={true}
-            visible={showFeedback}
-            onRequestClose={() => setShowFeedback(false)}
+            visible={showModal}
+            onRequestClose={() => setShowModal(false)}
           >
             <View style={styles.feedbackContainer}>
               <View style={styles.feedbackContent}>
                 <TouchableOpacity
-                  onPress={() => setShowFeedback(false)}
+                  onPress={() => setShowModal(false)}
                   style={styles.modalCloseIcon}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <FontAwesome name="close" size={26} color="#FF3B30" />
                 </TouchableOpacity>
 
-                <Text style={styles.feedbackTitle}>Geri Bildirim</Text>
-
-                {enrichedMistakes[currentIndex] ? (
-                  <>
-                    <Text style={styles.tahminText}>
-                      Sanırım "{enrichedMistakes[currentIndex]?.transcribedText || "..."}"
-                      dediniz.
-                    </Text>
-                    <Text style={styles.instructionText}>
-                      {enrichedMistakes[currentIndex]?.isCorrect
-                        ? "✅ Doğru söylediniz!"
-                        : "❌ Yanlış söylediniz. Bir kez daha deneyin."}
-                    </Text>
-                    <Text style={styles.kelimeText}>
-                      {enrichedMistakes[currentIndex].phonetic
-                        .split("")
-                        .map((char, index) => {
-                          const isRed =
-                            (enrichedMistakes[currentIndex].word === "Kamuflaj" &&
-                              char === "u") ||
-                            (enrichedMistakes[currentIndex].word === "Ağabey" &&
-                              char === "i") ||
-                            (enrichedMistakes[currentIndex].word === "Sahi" &&
-                              char === ":");
-
-                          return (
-                            <Text
-                              key={index}
-                              style={isRed ? styles.redText : styles.blackText}
-                            >
-                              {char}
-                            </Text>
-                          );
-                        })}
-                    </Text>
-
-                    {enrichedMistakes[currentIndex].ipucu && (
-                      <Text style={styles.ipucuText}>
-                        <Text style={styles.ipucuBold}>İpucu: </Text>
-                        {enrichedMistakes[currentIndex].ipucu}
+                <ScrollView contentContainerStyle={styles.scrollContainer}>
+                  {isFeedbackLoading || !enrichedMistakes[currentIndex] ? (
+                    <>
+                      <Text style={{ textAlign: "center", fontSize: 16 }}>
+                        Geri bildirim hazırlanıyor...
                       </Text>
-                    )}
-                  </>
-                ) : (
-                  <Text>Yükleniyor...</Text>
-                )}
 
-                <TouchableOpacity onPress={playAudio} style={styles.listenButton}>
-                  <Text style={styles.listenButtonText}>Dinle</Text>
-                </TouchableOpacity>
+                      {sttPreview && (
+                        <Text
+                          style={{
+                            textAlign: "center",
+                            fontSize: 14,
+                            marginTop: 10,
+                            color: "#666",
+                          }}
+                        >
+                          Google STT tahmini: " {sttPreview} "
+                        </Text>
+                      )}
+                      {Object.keys(alternativesMap).length > 0 && (
+                        <View style={{ marginTop: 20, alignItems: "center" }}>
+                          <Text
+                            style={{
+                              fontSize: 18,
+                              fontWeight: "bold",
+                              marginBottom: 10,
+                              color: "#FF3B30",
+                            }}
+                          >
+                            Diğer STT Tahminleri
+                          </Text>
+                          {Object.entries(alternativesMap).map(
+                            ([transcript, confidence], index) => (
+                              <View
+                                key={index}
+                                style={{
+                                  backgroundColor: "#F0F0F0",
+                                  borderRadius: 10,
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 16,
+                                  marginBottom: 8,
+                                  alignItems: "center",
+                                  width: "90%",
+                                }}
+                              >
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontWeight: "600",
+                                    color: "#333",
+                                  }}
+                                >
+                                  {transcript}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 13,
+                                    color: "#888",
+                                    marginTop: 2,
+                                  }}
+                                >
+                                  Güven: {(confidence * 100).toFixed(1)}%
+                                </Text>
+                              </View>
+                            )
+                          )}
+                        </View>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      <Text
+                        style={[styles.feedbackTitle, { marginBottom: 10 }]}
+                      >
+                        Geri Bildirim
+                      </Text>
+                      <Text style={[styles.tahminText, { marginBottom: 10 }]}>
+                        Sanırım "
+                        {enrichedMistakes[currentIndex].transcribedText}"
+                        dediniz.
+                      </Text>
+                      <Text
+                        style={[styles.instructionText, { marginBottom: 10 }]}
+                      >
+                        {enrichedMistakes[currentIndex].isCorrect
+                          ? "Analizin sonuçları:"
+                          : "Lütfen tekrar deneyin, bazı hatalar algılandı!"}
+                      </Text>
+                      {feedback !== "" && (
+                        <View style={{ marginTop: 10 }}>
+                          {feedback.split("\n").map((line, index) => {
+                            const match = line.match(
+                              /🔸 "(.*?)" \((.*?)\): (.*)/
+                            );
+                            if (match) {
+                              const [, subword, vowelIpa, message] = match;
+                              return (
+                                <Text
+                                  key={index}
+                                  style={{
+                                    marginBottom: 10,
+                                    marginTop: 5,
+                                    fontSize: 14,
+                                    color: "#333",
+                                    lineHeight: 20,
+                                  }}
+                                >
+                                  🔸{" "}
+                                  <Text
+                                    style={{
+                                      fontWeight: "bold",
+                                      color: "#FF3B30",
+                                    }}
+                                  >{`"${subword}"`}</Text>{" "}
+                                  (
+                                  <Text
+                                    style={{
+                                      fontWeight: "bold",
+                                      color: "#007AFF",
+                                    }}
+                                  >
+                                    {vowelIpa}
+                                  </Text>
+                                  ): <Text>{message}</Text>
+                                </Text>
+                              );
+                            } else {
+                              return (
+                                <Text
+                                  key={index}
+                                  style={{
+                                    fontSize: 14,
+                                    color: "#333",
+                                    lineHeight: 20,
+                                  }}
+                                >
+                                  {line}
+                                </Text>
+                              );
+                            }
+                          })}
+                        </View>
+                      )}
+                      {enrichedMistakes[currentIndex].ipucu !== "" && (
+                        <Text style={styles.ipucuText}>
+                          <Text style={styles.ipucuBold}>İpucu: </Text>
+                          {enrichedMistakes[currentIndex].ipucu}
+                        </Text>
+                      )}
+                      <TouchableOpacity
+                        onPress={playAudio}
+                        style={[styles.listenButton, { marginTop: 20 }]}
+                      >
+                        <Text style={styles.listenButtonText}>Dinle</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </ScrollView>
               </View>
             </View>
           </Modal>

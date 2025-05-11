@@ -20,11 +20,13 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { FontAwesome } from "@expo/vector-icons";
 
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const Login = ({ navigation }) => {
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [deliveryMethod, setDeliveryMethod] = useState("phone"); // Default to phone
@@ -117,10 +119,20 @@ const Login = ({ navigation }) => {
                     placeholder="Şifrenizi girin."
                     style={styles.textInputStyle}
                     placeholderTextColor="#888"
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
                     onChangeText={setPassword}
                     value={password}
                   />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <FontAwesome
+                      name={showPassword ? "eye" : "eye-slash"}
+                      size={25}
+                      color="gray"
+                    />
+                  </TouchableOpacity>
                   <Text
                     style={styles.forgotPasswordLink}
                     onPress={() => navigation.navigate("ForgotPasswordScreen")}
@@ -217,6 +229,15 @@ const styles = StyleSheet.create({
     marginBottom: 35,
     textAlign: "center",
   },
+  passwordBottomRow: {
+    position: "absolute",
+    bottom: 6,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10, // or use marginRight in children if gap not supported
+  },
+
   subtitleText: {
     fontSize: 18,
     color: "black",
@@ -250,6 +271,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 14, // Placeholder starts 10 padding from the left
     fontSize: 16,
+  },
+
+  eyeIcon: {
+    position: "absolute",
+    right: 15,
+    top: 5,
   },
 
   inputContainer: {

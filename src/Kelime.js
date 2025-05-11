@@ -296,9 +296,11 @@ const Kelime = ({ navigation }) => {
         await axios.post(`${API_URL}/api/mispronounced-words/record`, {
           userId,
           wordId: currentWord.id,
-          phonemesMistaken: generatePhonemeMistakeMap(responseJson.subwordFeedbackList),
+          phonemesMistaken: generatePhonemeMistakeMap(
+            responseJson.subwordFeedbackList
+          ),
         });
-        
+
         console.log("❌ MispronouncedWord recorded.");
       }
 
@@ -370,7 +372,7 @@ const Kelime = ({ navigation }) => {
       source={require("../assets/images/bluedalga.png")}
       style={styles.imageBackground}
     >
-      <SafeAreaView style={{ flex: 1, marginTop: 50, paddingTop: 30 }}>
+      <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
         <BackButton navigation={navigation} />
         <View style={styles.container}>
           <View style={styles.topContainer}>
@@ -438,6 +440,7 @@ const Kelime = ({ navigation }) => {
           >
             <View style={styles.feedbackContainer}>
               <View style={styles.feedbackContent}>
+                
                 {/* Fixed top-right close button */}
                 <TouchableOpacity
                   onPress={() => setShowModal(false)}
@@ -657,7 +660,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 10,
     marginTop: 40,
-    marginBottom: 40,
+    marginBottom: 30,
   },
   navigationContainer: {
     flexDirection: "row",
