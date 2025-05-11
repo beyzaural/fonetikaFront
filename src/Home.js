@@ -172,8 +172,15 @@ const Home = ({ navigation, route }) => {
       {showTip && dictionTip && (
         <View style={styles.tipPopup}>
           <Text style={styles.tipText}>{dictionTip}</Text>
+          <TouchableOpacity
+            onPress={() => setShowTip(false)}
+            style={styles.closeButton}
+          >
+            <Text style={styles.closeText}>✕</Text>
+          </TouchableOpacity>
         </View>
       )}
+
       {/* 💬 Info Icon - sağ üstte sabit */}
       {!showTip && dictionTip && (
         <TouchableOpacity
@@ -513,6 +520,11 @@ const styles = StyleSheet.create({
   streakCardIcon: {
     fontSize: 28,
     marginRight: 12,
+  },
+  closeText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FF3B30", // Turuncu renk
   },
 
   streakCardText: {
