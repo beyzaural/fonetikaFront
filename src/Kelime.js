@@ -116,7 +116,7 @@ const Kelime = ({ navigation }) => {
         setIsRecording(false);
         sendAudioToBackend(uri); // Send m4a file to backend
       } catch (error) {
-        console.error("Error stopping recording:", error);
+        console.log("Error stopping recording:", error);
       }
     } else {
       try {

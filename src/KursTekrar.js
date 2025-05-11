@@ -95,7 +95,7 @@ const KursTekrar = ({ navigation, route }) => {
 
         setEnrichedMistakes(enriched.filter((e) => e !== null));
       } catch (error) {
-        console.error("❌ Hatalar alınamadı:", error);
+        console.log("❌ Hatalar alınamadı:", error);
       }
     };
 
@@ -114,7 +114,7 @@ const KursTekrar = ({ navigation, route }) => {
         { shouldPlay: true }
       );
     } catch (error) {
-      console.error("Error playing original audio:", error);
+      console.log("Error playing original audio:", error);
     }
   };
 

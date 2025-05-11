@@ -85,9 +85,7 @@ const Geneltekrar = ({ navigation }) => {
         );
 
         setEnrichedMistakes(enriched.filter((e) => e !== null));
-      } catch (error) {
-        console.error("❌ Hatalar alınamadı:", error);
-      }
+      } catch (error) {}
     };
 
     fetchMistakes();
@@ -241,7 +239,7 @@ const Geneltekrar = ({ navigation }) => {
         setIsRecording(false);
         await sendAudioToBackend(uri);
       } catch (error) {
-        console.error("Error stopping recording:", error);
+        console.log("Error stopping recording:", error);
       }
     } else {
       try {
@@ -260,7 +258,7 @@ const Geneltekrar = ({ navigation }) => {
         setRecording(recording);
         setIsRecording(true);
       } catch (error) {
-        console.error("Failed to start recording:", error);
+        console.log("Failed to start recording:", error);
       }
     }
   };
@@ -276,7 +274,7 @@ const Geneltekrar = ({ navigation }) => {
         { shouldPlay: true }
       );
     } catch (error) {
-      console.error("Error playing audio:", error);
+      console.log("Error playing audio:", error);
     }
   };
 
