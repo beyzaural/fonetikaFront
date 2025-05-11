@@ -33,7 +33,7 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "http://172.20.10.2:8080"
+      "apiUrl": "http://172.20.10.8:8080"
     }
   }
 }

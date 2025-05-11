@@ -21,6 +21,7 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import BackButton from "./BackButton";
+import IpaReferenceModal from "../components/IpaReferenceModal";
 
 /* import { checkDailyGoalAchieved } from "./CheckIfGoalAchieved";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -44,6 +45,7 @@ const Kelime = ({ navigation }) => {
   const [alternativesMap, setAlternativesMap] = useState({});
   const [loadingStep, setLoadingStep] = useState(0);
   const [loadingMessages, setLoadingMessages] = useState([]);
+  const [showIpaInfo, setShowIpaInfo] = useState(false);
 
   // Fetch random word from backend
   useEffect(() => {
@@ -374,6 +376,38 @@ const Kelime = ({ navigation }) => {
     >
       <SafeAreaView style={{ flex: 1, marginTop: 30 }}>
         <BackButton navigation={navigation} />
+
+        <View style={{ position: "absolute", top: 50, right: 20, zIndex: 10 }}>
+          <TouchableOpacity
+            onPress={() => setShowIpaInfo(true)}
+            style={{
+              backgroundColor: "#FFEBE6",
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <FontAwesome
+              name="info-circle"
+              size={16}
+              color="#FF3B30"
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={{ color: "#FF3B30", fontWeight: "bold", fontSize: 13 }}
+            >
+              Fonetik Sembollerin Okunuşu
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.container}>
           <View style={styles.topContainer}>
             <View style={styles.wordContainer}>
@@ -440,7 +474,6 @@ const Kelime = ({ navigation }) => {
           >
             <View style={styles.feedbackContainer}>
               <View style={styles.feedbackContent}>
-                
                 {/* Fixed top-right close button */}
                 <TouchableOpacity
                   onPress={() => setShowModal(false)}
@@ -629,6 +662,10 @@ const Kelime = ({ navigation }) => {
               </View>
             </View>
           </Modal>
+          <IpaReferenceModal
+            visible={showIpaInfo}
+            onClose={() => setShowIpaInfo(false)}
+          />
         </View>
       </SafeAreaView>
       <BottomNavBar navigation={navigation} />

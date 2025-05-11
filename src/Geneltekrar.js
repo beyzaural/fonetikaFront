@@ -20,6 +20,7 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import IpaReferenceModal from "../components/IpaReferenceModal";
 
 import BackButton from "./BackButton";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
@@ -35,7 +36,8 @@ const Geneltekrar = ({ navigation }) => {
   const [showModal, setShowModal] = useState(false);
   const [enrichedMistakes, setEnrichedMistakes] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const currentWord = enrichedMistakes[currentIndex]; // ✅ CORRECT!
+  const currentWord = enrichedMistakes[currentIndex];
+  const [showIpaInfo, setShowIpaInfo] = useState(false);
 
   const [sttPreview, setSttPreview] = useState(null);
   const [alternativesMap, setAlternativesMap] = useState({});
@@ -299,6 +301,36 @@ const Geneltekrar = ({ navigation }) => {
     >
       <SafeAreaView style={{ flex: 1, marginTop: 20, paddingTop: 20 }}>
         <BackButton navigation={navigation} />
+        <View style={{ position: "absolute", top: 50, right: 20, zIndex: 10 }}>
+          <TouchableOpacity
+            onPress={() => setShowIpaInfo(true)}
+            style={{
+              backgroundColor: "#FFEBE6",
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <FontAwesome
+              name="info-circle"
+              size={16}
+              color="#FF3B30"
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={{ color: "#FF3B30", fontWeight: "bold", fontSize: 13 }}
+            >
+              Fonetik Sembollerin Okunuşu
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.container}>
           {/* Back Arrow */}
 
@@ -558,6 +590,10 @@ const Geneltekrar = ({ navigation }) => {
               </View>
             </View>
           </Modal>
+          <IpaReferenceModal
+            visible={showIpaInfo}
+            onClose={() => setShowIpaInfo(false)}
+          />
         </View>
       </SafeAreaView>
       <BottomNavBar navigation={navigation} />

@@ -19,6 +19,7 @@ import BackButton from "./BackButton";
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 import { getUserIdFromToken } from "./utils/auth";
+import IpaReferenceModal from "../components/IpaReferenceModal";
 
 const KursTekrar = ({ navigation, route }) => {
   const { courseId, phoneme } = route?.params || {};
@@ -34,6 +35,7 @@ const KursTekrar = ({ navigation, route }) => {
   const [mistakes, setMistakes] = useState([]);
   const [enrichedMistakes, setEnrichedMistakes] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showIpaInfo, setShowIpaInfo] = useState(false);
 
   const sanitizeWord = (word) => {
     return word
@@ -301,6 +303,66 @@ const KursTekrar = ({ navigation, route }) => {
     >
       <SafeAreaView style={{ flex: 1, marginTop: 50, paddingTop: 30 }}>
         <BackButton navigation={navigation} />
+        <View style={{ position: "absolute", top: 50, right: 20, zIndex: 10 }}>
+          <TouchableOpacity
+            onPress={() => setShowIpaInfo(true)}
+            style={{
+              backgroundColor: "#FFEBE6",
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <FontAwesome
+              name="info-circle"
+              size={16}
+              color="#FF3B30"
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={{ color: "#FF3B30", fontWeight: "bold", fontSize: 13 }}
+            >
+              Fonetik Sembollerin Okunuşu
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={{ position: "absolute", top: 50, right: 20, zIndex: 10 }}>
+          <TouchableOpacity
+            onPress={() => setShowIpaInfo(true)}
+            style={{
+              backgroundColor: "#FFEBE6",
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 12,
+              flexDirection: "row",
+              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
+            }}
+          >
+            <FontAwesome
+              name="info-circle"
+              size={16}
+              color="#FF3B30"
+              style={{ marginRight: 6 }}
+            />
+            <Text
+              style={{ color: "#FF3B30", fontWeight: "bold", fontSize: 13 }}
+            >
+              Fonetik Sembollerin Okunuşu
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View style={styles.container}>
           <View style={styles.topContainer}>
             <View style={styles.wordContainer}>
@@ -536,6 +598,10 @@ const KursTekrar = ({ navigation, route }) => {
               </View>
             </View>
           </Modal>
+          <IpaReferenceModal
+            visible={showIpaInfo}
+            onClose={() => setShowIpaInfo(false)}
+          />
         </View>
       </SafeAreaView>
       <BottomNavBar navigation={navigation} />
