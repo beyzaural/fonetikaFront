@@ -36,10 +36,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
-App.js
-package-lock.json
 app/_layout.js
 app/_layout.js
-App.js
 app/_layout.js
-app.json

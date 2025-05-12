@@ -2,18 +2,22 @@
   "expo": {
     "name": "fonetika",
     "slug": "fonetika",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "icon": "./assets/images/logo.png",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fonetikapp.fonetika",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -23,7 +27,6 @@
     },
     "web": {
       "bundler": "metro",
-  
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
@@ -33,7 +36,11 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "http://172.20.10.8:8080"
-    }
+      "apiUrl": "https://fonetika-backend-491435503049.us-central1.run.app",
+      "eas": {
+        "projectId": "53c32da9-993f-4308-b70c-b8a390ac76d8"
+      }
+    },
+    "owner": "fonetikapp"
   }
 }

@@ -1,40 +1,55 @@
-// WordCard.js
 import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { Alert } from "react-native";
 import {
-  View,
-  Text,
-  TouchableOpacity,
   StyleSheet,
+  Text,
+  View,
   Image,
   ImageBackground,
-  ActivityIndicator,
-  Alert,
+  TouchableOpacity,
   Modal,
   ScrollView,
 } from "react-native";
-import axios from "axios";
-import Constants from "expo-constants";
+import { FontAwesome } from "@expo/vector-icons";
 import { Audio } from "expo-av";
 import BottomNavBar from "./BottomNavBar";
-import { FontAwesome } from "@expo/vector-icons";
 import { getUserIdFromToken } from "./utils/auth";
-import { SafeAreaView } from "react-native-safe-area-context";
+import Constants from "expo-constants";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import BackButton from "./BackButton";
 
+/* import { checkDailyGoalAchieved } from "./CheckIfGoalAchieved";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+ */
 const extra = Constants.expoConfig?.extra || Constants.manifest?.extra || {};
 const API_URL = extra.apiUrl;
 
 const CategoryWordCard = ({ navigation, route }) => {
+
+  const insets = useSafeAreaInsets();
   const { wordText, field } = route.params;
   const [wordData, setWordData] = useState(null);
+  const [transcribedText, setTranscribedText] = useState(null);
+  const [isCorrect, setIsCorrect] = useState(null);
+  
+  // const [words, setWords] = useState([]);
+  // const [currentIndex, setCurrentIndex] = useState(0);
+  const [isRecording, setIsRecording] = useState(false);
   const [recording, setRecording] = useState(null);
-  const [recordedUri, setRecordedUri] = useState(null);
-  const [feedback, setFeedback] = useState(null);
+  const [audioUri, setAudioUri] = useState(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [sttPreview, setSttPreview] = useState(null);
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); // replaces showFeedback
+  const [sttPreview, setSttPreview] = useState(null); // for Google STT preview
   const [alternativesMap, setAlternativesMap] = useState({});
+  const [loadingStep, setLoadingStep] = useState(0);
+  const [loadingMessages, setLoadingMessages] = useState([]);
 
   useEffect(() => {
     const fetchWordData = async () => {
@@ -55,36 +70,7 @@ const CategoryWordCard = ({ navigation, route }) => {
     fetchWordData();
   }, [wordText, field]);
 
-  const startRecording = async () => {
-    try {
-      const { granted } = await Audio.requestPermissionsAsync();
-      if (!granted) return;
 
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
-      );
-      setRecording(recording);
-    } catch (err) {
-      console.error("Kayıt başlatılamadı:", err);
-    }
-  };
-
-  const stopRecording = async () => {
-    try {
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
-      setRecordedUri(uri);
-      setRecording(null);
-      sendAudioToBackend(uri);
-    } catch (err) {
-      console.error("Kayıt durdurulamadı:", err);
-    }
-  };
 
   const playOriginalAudio = async () => {
     if (!wordData?.audioPath) {
@@ -103,24 +89,75 @@ const CategoryWordCard = ({ navigation, route }) => {
     }
   };
 
-  const playAudio = async () => {
-    if (!recordedUri) {
-      alert("Henüz bir kayıt yapılmadı!");
-      return;
-    }
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: recordedUri },
-        { shouldPlay: true }
-      );
-    } catch (error) {
-      console.error("Error playing audio:", error);
+
+  const handleMicrophonePress = async () => {
+    if (recording) {
+      try {
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        console.log("Recording saved at:", uri);
+        setAudioUri(uri);
+        setRecording(null);
+        setIsRecording(false);
+        sendAudioToBackend(uri); // Send m4a file to backend
+      } catch (error) {
+        console.error("Error stopping recording:", error);
+      }
+    } else {
+      try {
+        if (recording !== null) {
+          await recording.stopAndUnloadAsync();
+          setRecording(null);
+        }
+
+        const { granted } = await Audio.requestPermissionsAsync();
+        if (!granted) {
+          alert("Microphone permission is required to record audio.");
+          return;
+        }
+
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+
+        const { recording: newRecording } = await Audio.Recording.createAsync(
+          Audio.RecordingOptionsPresets.HIGH_QUALITY
+        );
+
+        setRecording(newRecording);
+        setIsRecording(true);
+      } catch (error) {
+        console.error("Failed to start recording:", error);
+      }
     }
   };
 
+  // Utility: Convert a blob URL into a temporary File object with m4a name/type.
+  const createTemporaryFile = async (blobUri) => {
+    const response = await fetch(blobUri);
+    const blob = await response.blob();
+    // This File object only renames the file and sets the MIME type; it doesn't convert audio format.
+    return new File([blob], "recording.m4a", { type: "audio/m4a" });
+  };
+
+  const sanitizeWord = (word) => {
+    return word
+      .toLowerCase()
+      .replace(/ç/g, "c")
+      .replace(/ğ/g, "g")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ş/g, "s")
+      .replace(/ü/g, "u")
+      .replace(/\s+/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  };
+
+  // Send the audio file to the backend. The backend should perform any necessary conversion.
   const sendAudioToBackend = async (uri) => {
     try {
-      setIsSubmitting(true);
+      setIsFeedbackLoading(true); // Start loading
       setShowModal(true);
 
       // PREVIEW: Fetch Google STT while feedback is loading
@@ -131,7 +168,7 @@ const CategoryWordCard = ({ navigation, route }) => {
         name: "preview.wav",
       });
 
-      // Make transcribe-detailed request
+      // 👇 Make transcribe-detailed request
       fetch(`${API_URL}/api/speech/detailed-transcribe`, {
         method: "POST",
         headers: { "Content-Type": "multipart/form-data" },
@@ -157,27 +194,44 @@ const CategoryWordCard = ({ navigation, route }) => {
         .catch((err) => console.warn("🌀 Google STT failed", err));
 
       const userId = await getUserIdFromToken();
+
       const formData = new FormData();
       formData.append("file", {
         uri: uri,
-        name: "audio.wav",
         type: "audio/wav",
+        name: sanitizeWord(wordData.word || "audio") + ".wav",
       });
-      formData.append("expectedWord", wordData.word);
-      formData.append("userId", userId);
+      
+      
+      formData.append("expected_word", wordData.word);
+      formData.append("user_id", userId);
       formData.append("word_id", wordData.id);
+      formData.append("category", field.toLowerCase());
 
-      const res = await axios.post(`${API_URL}/api/speech/evaluate`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
+      if (!wordData?.id || !wordData?.word) {
+        Alert.alert("Hata", "Kelime bilgisi alınamadı, lütfen tekrar deneyin.");
+        return;
+      }
+      
+      const response = await fetch(`${API_URL}/api/speech/evaluate-category`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
       });
+      console.log("✅ category:", formData.category);
 
+      const responseJson = await response.json();
       setSttPreview(null);
-      console.log("✅ Full backend response:", res.data);
-
-      // Format feedback from subwordFeedbackList
+      console.log("✅ Full backend response:", responseJson);
+      setTranscribedText(responseJson.recognizedWord);
+      setIsCorrect(responseJson.wordCorrect === true || responseJson.wordCorrect === "true");
+      
+      // ✅ Format feedback from subwordFeedbackList
       const formattedFeedback =
-        res.data.subwordFeedbackList?.length > 0
-          ? res.data.subwordFeedbackList
+        responseJson.subwordFeedbackList?.length > 0
+          ? responseJson.subwordFeedbackList
               .map(
                 (f) => `🔸 "${f.subword}" (${f.vowelIpa}): ${f.feedbackMessage}`
               )
@@ -185,9 +239,20 @@ const CategoryWordCard = ({ navigation, route }) => {
           : "";
 
       setFeedback(formattedFeedback);
+      setIsFeedbackLoading(false);
+      // ✅ Save response data to current word
 
-      // Save mispronunciation if needed
-      if (res.data.wordCorrect === false || res.data.wordCorrect === "false") {
+
+      // ✅ Progress update
+      await axios.post(`${API_URL}/api/progress/add`, null, {
+        params: { userId, count: 1 },
+      });
+
+      // ✅ Save mispronunciation if needed
+      if (
+        responseJson.wordCorrect === false ||
+        responseJson.wordCorrect === "false"
+      ) {
         await axios.post(`${API_URL}/api/mispronounced-words/record`, {
           userId,
           wordId: wordData.id,
@@ -195,21 +260,30 @@ const CategoryWordCard = ({ navigation, route }) => {
         console.log("❌ MispronouncedWord recorded.");
       }
 
-    } catch (err) {
-      console.error("❌ Error sending audio:", err);
+      setShowFeedback(true);
+    } catch (error) {
+      console.error("❌ Error sending audio:", error);
       Alert.alert("Hata", "Ses işlenirken bir hata oluştu.");
     } finally {
-      setIsSubmitting(false);
+      setIsFeedbackLoading(false); // Stop loading regardless of success/failure
     }
   };
 
-  if (isLoading || !wordData) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#FF3B30" />
-      </View>
-    );
-  }
+  const playAudio = async () => {
+    if (!audioUri) {
+      alert("Henüz bir kayıt yapılmadı!");
+      return;
+    }
+    try {
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: audioUri },
+        { shouldPlay: true }
+      );
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
+  };
+
 
   return (
     <ImageBackground
@@ -220,10 +294,17 @@ const CategoryWordCard = ({ navigation, route }) => {
         <BackButton navigation={navigation} />
         <View style={styles.container}>
           <View style={styles.topContainer}>
-            <View style={styles.wordContainer}>
-              <Text style={styles.wordText}>{wordData.word}</Text>
-              <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
-              <Text style={styles.meaningText}>{wordData.meaning}</Text>
+          <View style={styles.wordContainer}>
+            {wordData ? (
+              <>
+                <Text style={styles.wordText}>{wordData.word}</Text>
+                <Text style={styles.phoneticText}>{wordData.phoneticWriting}</Text>
+                <Text style={styles.meaningText}>{wordData.meaning}</Text>
+              </>
+            ) : (
+              <Text style={styles.wordText}>Yükleniyor...</Text>
+            )}
+
               <TouchableOpacity
                 onPress={playOriginalAudio}
                 style={styles.speakerIconWrapper}
@@ -236,20 +317,26 @@ const CategoryWordCard = ({ navigation, route }) => {
             </View>
 
             <View style={styles.navigationContainer}>
-              <View style={{ alignItems: "center" }}>
-                <TouchableOpacity onPress={recording ? stopRecording : startRecording}>
+
+              <View   style={{
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  }}>
+                <TouchableOpacity onPress={handleMicrophonePress}>
                   <FontAwesome
                     name="microphone"
                     size={100}
-                    color={recording ? "black" : "#FF3B30"}
+                    color={isRecording ? "black" : "#FF3B30"}
                   />
                 </TouchableOpacity>
                 <Text style={styles.micInfoText}>
-                  {recording
+                  {isRecording
                     ? "Bitirmek için tekrar basın"
                     : "Kaydetmek için mikrofona basın"}
                 </Text>
               </View>
+
             </View>
           </View>
 
@@ -261,6 +348,7 @@ const CategoryWordCard = ({ navigation, route }) => {
           >
             <View style={styles.feedbackContainer}>
               <View style={styles.feedbackContent}>
+                {/* Fixed top-right close button */}
                 <TouchableOpacity
                   onPress={() => setShowModal(false)}
                   style={styles.modalCloseIcon}
@@ -270,7 +358,7 @@ const CategoryWordCard = ({ navigation, route }) => {
                 </TouchableOpacity>
 
                 <ScrollView contentContainerStyle={styles.scrollContainer}>
-                  {isSubmitting ? (
+                  {isFeedbackLoading ? (
                     <>
                       <Text style={{ textAlign: "center", fontSize: 16 }}>
                         Geri bildirim hazırlanıyor...
@@ -340,63 +428,72 @@ const CategoryWordCard = ({ navigation, route }) => {
                     </>
                   ) : (
                     <>
-                      <Text style={[styles.feedbackTitle, { marginBottom: 10 }]}>
+                      <Text
+                        style={[styles.feedbackTitle, { marginBottom: 10 }]}
+                      >
                         Geri Bildirim
                       </Text>
 
-                      {feedback && (
-                        <View style={{ marginTop: 10 }}>
-                          {feedback.split("\n").map((line, index) => {
-                            const match = line.match(/🔸 "(.*?)" \((.*?)\): (.*)/);
-                            if (match) {
-                              const [, subword, vowelIpa, message] = match;
-                              return (
-                                <Text
-                                  key={index}
-                                  style={{
-                                    marginBottom: 10,
-                                    marginTop: 5,
-                                    fontSize: 14,
-                                    color: "#333",
-                                    lineHeight: 20,
-                                  }}
-                                >
-                                  🔸{" "}
+                      {transcribedText ? (
+                      <>
+                        <Text style={styles.tahminText}>
+                          Sanırım "{transcribedText}" dediniz.
+                        </Text>
+
+                        <Text style={styles.instructionText}>
+                          {isCorrect
+                            ? "Analizin sonuçları:"
+                            : "Lütfen tekrar deneyin, bazı hatalar algılandı!"}
+                        </Text>
+
+                        {feedback !== "" && (
+                          <View style={{ marginTop: 10 }}>
+                            {feedback.split("\n").map((line, index) => {
+                              const match = line.match(/🔸 "(.*?)" \((.*?)\): (.*)/);
+                              if (match) {
+                                const [, subword, vowelIpa, message] = match;
+                                return (
                                   <Text
+                                    key={index}
                                     style={{
-                                      fontWeight: "bold",
-                                      color: "#FF3B30",
-                                    }}
-                                  >{`"${subword}"`}</Text>{" "}
-                                  (
-                                  <Text
-                                    style={{
-                                      fontWeight: "bold",
-                                      color: "#007AFF",
+                                      marginBottom: 10,
+                                      marginTop: 5,
+                                      fontSize: 14,
+                                      color: "#333",
+                                      lineHeight: 20,
                                     }}
                                   >
-                                    {vowelIpa}
+                                    🔸{" "}
+                                    <Text style={{ fontWeight: "bold", color: "#FF3B30" }}>
+                                      "{subword}"
+                                    </Text>{" "}
+                                    (
+                                    <Text style={{ fontWeight: "bold", color: "#007AFF" }}>
+                                      {vowelIpa}
+                                    </Text>
+                                    ): <Text>{message}</Text>
                                   </Text>
-                                  ): <Text>{message}</Text>
-                                </Text>
-                              );
-                            } else {
-                              return (
-                                <Text
-                                  key={index}
-                                  style={{
-                                    fontSize: 14,
-                                    color: "#333",
-                                    lineHeight: 20,
-                                  }}
-                                >
-                                  {line}
-                                </Text>
-                              );
-                            }
-                          })}
-                        </View>
-                      )}
+                                );
+                              } else {
+                                return (
+                                  <Text
+                                    key={index}
+                                    style={{ fontSize: 14, color: "#333", lineHeight: 20 }}
+                                  >
+                                    {line}
+                                  </Text>
+                                );
+                              }
+                            })}
+                          </View>
+                        )}
+                      </>
+                    ) : (
+                      <Text style={styles.tahminText}>
+                        Lütfen tekrar kaydedin, ses net bir şekilde algılanamadı...
+                      </Text>
+                    )}
+
 
                       <TouchableOpacity
                         onPress={playAudio}
@@ -427,6 +524,7 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: "cover",
   },
+
   topContainer: {
     marginTop: 10,
     height: "100%",
@@ -444,7 +542,7 @@ const styles = StyleSheet.create({
   },
   navigationContainer: {
     flexDirection: "row",
-    justifyContent: "center",
+    justifyContent: "space-between",
     alignItems: "center",
     width: "80%",
     marginTop: 10,
@@ -460,30 +558,13 @@ const styles = StyleSheet.create({
     color: "#FF8754",
     marginTop: 10,
   },
-  meaningText: {
-    fontSize: 16,
-    color: "#6CA3AD",
-    marginTop: 10,
-    textAlign: "center",
-    fontStyle: "italic",
-    paddingHorizontal: 20,
-  },
   speakerIcon: {
     marginTop: 20,
     width: 60,
     height: 60,
-    tintColor: "#FF3B30",
+    tintColor: "#FF3B30", // opsiyonel, beyaz renkte olsun istersen
   },
-  speakerIconWrapper: {
-    marginTop: 20,
-  },
-  micInfoText: {
-    fontSize: 14,
-    color: "#6CA3AD",
-    marginTop: 10,
-    fontStyle: "italic",
-    textAlign: "center",
-  },
+
   listenButton: {
     backgroundColor: "#FF3B30",
     paddingVertical: 10,
@@ -499,6 +580,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "flex-end",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    //padding:20,
   },
   feedbackContent: {
     height: "50%",
@@ -509,26 +591,65 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     justifyContent: "space-between",
   },
-  feedbackTitle: {
-    fontSize: 24,
+  ipucuText: {
+    marginTop: 15,
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+  },
+  navBar: {
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+    height: 70,
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+  },
+  navItem: {
+    alignItems: "center",
+  },
+  navIcon: {
+    width: 30,
+    height: 30,
+  },
+  redText: {
+    color: "red",
+    fontSize: 23,
     fontWeight: "bold",
-    color: "#333",
-    marginBottom: 20,
+  },
+  blackText: {
+    color: "black",
+    fontSize: 23,
+    fontWeight: "bold",
+  },
+  micInfoText: {
+    fontSize: 14,
+    color: "#6CA3AD",
+    marginTop: 10,
+    fontStyle: "italic",
+    textAlign: "center",
   },
   scrollContainer: {
-    paddingBottom: 10,
+    paddingBottom: 10, // prevents content from touching the bottom
     paddingHorizontal: 15,
-    paddingVertical: 10,
+    paddingVertical: 10, // adds horizontal space
+  },
+  meaningText: {
+    fontSize: 16,
+    color: "#6CA3AD",
+    marginTop: 10,
+    textAlign: "center",
+    fontStyle: "italic",
+    paddingHorizontal: 20,
   },
   modalCloseIcon: {
     position: "absolute",
     top: 10,
     right: 15,
     zIndex: 10,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

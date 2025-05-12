@@ -25,7 +25,8 @@ const ChangePassword = ({ navigation }) => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
-
+  const API_BASE = Constants.expoConfig?.extra?.apiUrl || "http://localhost:8080";
+  
   useEffect(() => {
     const loadEmail = async () => {
       const token = await AsyncStorage.getItem("token");
@@ -41,7 +42,7 @@ const ChangePassword = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:8080/auth/password/forgot",
+        `${API_BASE}/auth/password/forgot`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -64,7 +65,7 @@ const ChangePassword = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:8080/auth/password/validate-reset-otp",
+        `${API_BASE}/auth/password/validate-reset-otp`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -93,7 +94,7 @@ const ChangePassword = ({ navigation }) => {
     try {
       setLoading(true);
       const response = await fetch(
-        "http://localhost:8080/auth/password/reset",
+        `${API_BASE}/auth/password/reset`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
