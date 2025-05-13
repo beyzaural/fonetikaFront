@@ -1,4 +1,5 @@
 faiss-cpu
 sentence-transformers
 requests
+pandas 
 google-generativeai
